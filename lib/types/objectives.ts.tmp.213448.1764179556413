@@ -1,0 +1,84 @@
+/**
+ * Types for Learning Objectives AI generation and management
+ */
+
+import { BloomLevel } from '@prisma/client';
+
+/**
+ * Valid Bloom's Taxonomy levels as string literals
+ */
+export type BloomLevelString = 'REMEMBER' | 'UNDERSTAND' | 'APPLY' | 'ANALYZE' | 'EVALUATE' | 'CREATE';
+
+/**
+ * A generated objective from AI (not yet saved)
+ */
+export interface GeneratedObjective {
+  /** The objective statement (maps to Objective.title) */
+  title: string;
+
+  /** Extended description or context (maps to Objective.description) */
+  description: string;
+
+  /** Bloom's Taxonomy level */
+  bloomLevel: BloomLevelString;
+
+  /** AI's rationale for choosing this level */
+  rationale?: string;
+
+  /** Optional tags for categorization */
+  tags?: string[];
+}
+
+/**
+ * Input for generating objectives via AI
+ */
+export interface GenerateObjectivesInput {
+  /** The project to generate objectives for */
+  projectId: string;
+
+  /** Optional additional context from the user */
+  context?: string;
+
+  /** Optional needs analysis summary to incorporate */
+  needsSummary?: string;
+}
+
+/**
+ * Input for creating objectives in the database
+ */
+export interface CreateObjectiveInput {
+  /** The objective statement */
+  title: string;
+
+  /** Extended description */
+  description: string;
+
+  /** Bloom's Taxonomy level */
+  bloomLevel: BloomLevelString;
+
+  /** Optional tags */
+  tags?: string[];
+}
+
+/**
+ * Map string bloom level to Prisma enum
+ */
+export function toBloomLevel(level: string): BloomLevel {
+  const normalized = level.toUpperCase() as BloomLevelString;
+  const validLevels: BloomLevelString[] = ['REMEMBER', 'UNDERSTAND', 'APPLY', 'ANALYZE', 'EVALUATE', 'CREATE'];
+
+  if (validLevels.includes(normalized)) {
+    return normalized as BloomLevel;
+  }
+
+  // Default to APPLY if invalid
+  return BloomLevel.APPLY;
+}
+
+/**
+ * Validate that a string is a valid Bloom level
+ */
+export function isValidBloomLevel(level: string): level is BloomLevelString {
+  const validLevels: BloomLevelString[] = ['REMEMBER', 'UNDERSTAND', 'APPLY', 'ANALYZE', 'EVALUATE', 'CREATE'];
+  return validLevels.includes(level.toUpperCase() as BloomLevelString);
+}

@@ -1,0 +1,384 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User and Authentication Models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  workspaces    WorkspaceMember[]
+  createdPages  Page[]
+  createdTasks  Task[]
+  assignedTasks Task[]    @relation("TaskAssignee")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Core EduTex Models
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members  WorkspaceMember[]
+  projects Project[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  role        WorkspaceRole @default(DESIGNER)
+  workspaceId String
+  userId      String
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+enum WorkspaceRole {
+  ADMINISTRATOR
+  MANAGER
+  DESIGNER
+  FACILITATOR
+  SME
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("draft")
+  clientName  String?
+  projectType String?
+  phase       String   @default("intake")
+  priority    String   @default("medium")
+  targetGoLive DateTime?
+  workspaceId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  pages       Page[]
+  tasks       Task[]
+  objectives  Objective[]
+  deliverables Deliverable[]
+  blueprints  LearningBlueprint[]
+
+  @@map("projects")
+}
+
+model Page {
+  id          String   @id @default(cuid())
+  title       String
+  type        PageType @default(CUSTOM)
+  projectId   String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Int      @default(0)
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id])
+  blocks    Block[]
+
+  @@map("pages")
+}
+
+enum PageType {
+  CUSTOM
+  NEEDS_ANALYSIS
+  TASK_ANALYSIS
+  AUDIENCE_PROFILE
+  LEARNING_OBJECTIVES
+  ASSESSMENT_PLAN
+  STORYBOARD
+  CURRICULUM_MAP
+}
+
+model Block {
+  id        String    @id @default(cuid())
+  type      BlockType
+  content   Json
+  pageId    String
+  order     Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@map("blocks")
+}
+
+enum BlockType {
+  PARAGRAPH
+  HEADING_1
+  HEADING_2
+  HEADING_3
+  BULLETED_LIST
+  NUMBERED_LIST
+  CALLOUT
+  PERFORMANCE_PROBLEM
+  INSTRUCTIONAL_GOAL
+  TASK_STEP
+  LEARNING_OBJECTIVE
+  ASSESSMENT_IDEA
+}
+
+model Task {
+  id            String     @id @default(cuid())
+  title         String
+  description   String?
+  status        TaskStatus @default(TODO)
+  priority      Priority   @default(MEDIUM)
+  projectId     String
+  createdById   String
+  assignedToId  String?
+  dueDate       DateTime?
+  deliverableId String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id])
+  assignedTo   User?        @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  deliverable  Deliverable? @relation(fields: [deliverableId], references: [id])
+
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Objective {
+  id          String     @id @default(cuid())
+  title       String
+  description String     @db.Text
+  bloomLevel  BloomLevel
+  projectId   String
+  tags        String[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("objectives")
+}
+
+enum BloomLevel {
+  REMEMBER
+  UNDERSTAND
+  APPLY
+  ANALYZE
+  EVALUATE
+  CREATE
+}
+
+model Deliverable {
+  id          String             @id @default(cuid())
+  title       String
+  description String?
+  type        DeliverableType
+  status      DeliverableStatus  @default(PLANNED)
+  projectId   String
+  dueDate     DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@map("deliverables")
+}
+
+enum DeliverableType {
+  COURSE
+  MODULE
+  JOB_AID
+  REFERENCE_GUIDE
+  FACILITATOR_GUIDE
+  PARTICIPANT_GUIDE
+  NARRATION_SCRIPT
+  ASSESSMENT
+  STORYBOARD
+  OTHER
+}
+
+enum DeliverableStatus {
+  PLANNED
+  IN_PROGRESS
+  REVIEW
+  APPROVED
+  DELIVERED
+}
+
+// LearningBlueprint Models
+model LearningBlueprint {
+  id              String   @id @default(uuid())
+  projectId       String
+  title           String
+  audience        String
+  deliveryMode    String
+  timeBudgetMinutes Int
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  performanceNeeds PerformanceNeed[]
+  objectives       BlueprintObjective[]
+  constraints      Constraint[]
+  activityInstances ActivityInstance[]
+
+  @@map("learning_blueprints")
+}
+
+model PerformanceNeed {
+  id              String   @id @default(uuid())
+  blueprintId     String
+  problemStatement String  @db.Text
+  desiredBehavior String   @db.Text
+  consequences    String   @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  blueprint LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+
+  @@map("performance_needs")
+}
+
+// Blueprint-level Objective (separate from Project-level Objective)
+model BlueprintObjective {
+  id                String   @id @default(uuid())
+  blueprintId       String
+  text              String   @db.Text
+  bloomLevel        String
+  priority          String
+  requiresAssessment Boolean
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  blueprint         LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  activityInstances ActivityInstance[]
+
+  @@map("blueprint_objectives")
+}
+
+model Constraint {
+  id          String   @id @default(uuid())
+  blueprintId String
+  type        String
+  description String   @db.Text
+  value       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  blueprint LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+
+  @@map("constraints")
+}
+
+model ActivityPattern {
+  id                   String   @id @default(uuid())
+  name                 String
+  description          String   @db.Text
+  bestForBloomLevels   String
+  references           String?  @db.Text
+  typicalDurationMinutes Int?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  activityInstances ActivityInstance[]
+
+  @@map("activity_patterns")
+}
+
+model ActivityInstance {
+  id            String   @id @default(uuid())
+  blueprintId   String
+  objectiveId   String
+  patternId     String
+  positionIndex Int
+  notes         String?  @db.Text
+  learnerDeliverable String? @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  blueprint LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  objective BlueprintObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  pattern   ActivityPattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+
+  @@map("activity_instances")
+}
