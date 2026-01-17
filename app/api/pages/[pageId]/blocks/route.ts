@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertPageAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
@@ -18,6 +18,7 @@ interface RouteParams {
 
 // Valid block types for validation
 const VALID_BLOCK_TYPES: BlockType[] = [
+  // M1: Basic blocks
   'PARAGRAPH',
   'HEADING_1',
   'HEADING_2',
@@ -25,11 +26,21 @@ const VALID_BLOCK_TYPES: BlockType[] = [
   'BULLETED_LIST',
   'NUMBERED_LIST',
   'CALLOUT',
+  // M1: Needs analysis blocks
   'PERFORMANCE_PROBLEM',
   'INSTRUCTIONAL_GOAL',
   'TASK_STEP',
   'LEARNING_OBJECTIVE',
   'ASSESSMENT_IDEA',
+  'STORYBOARD_FRAME',
+  // M2: Storyboard blocks
+  'STORYBOARD_METADATA',
+  'CONTENT_SCREEN',
+  'LEARNING_OBJECTIVES_IMPORT',
+  'CHECKLIST',
+  'TABLE',
+  'FACILITATOR_NOTES',
+  'MATERIALS_LIST',
 ];
 
 /**
@@ -41,6 +52,7 @@ async function verifyPageAccess(pageId: string, userId: string, allowedRoles?: W
     select: {
       id: true,
       projectId: true,
+      curriculumId: true,
     },
   });
 
@@ -48,7 +60,7 @@ async function verifyPageAccess(pageId: string, userId: string, allowedRoles?: W
     throw new NotFoundError('Page not found');
   }
 
-  await assertProjectAccess(page.projectId, userId, allowedRoles);
+  await assertPageAccess(pageId, userId, allowedRoles);
 
   return page;
 }

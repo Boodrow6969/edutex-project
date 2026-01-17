@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertPageAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
@@ -17,7 +17,7 @@ interface RouteParams {
 }
 
 /**
- * Helper to get a page and verify user has access through the project's workspace.
+ * Helper to get a page and verify user has access through project or curriculum workspace.
  */
 async function getPageWithAccess(pageId: string, userId: string, allowedRoles?: WorkspaceRole[]) {
   const page = await prisma.page.findUnique({
@@ -28,10 +28,17 @@ async function getPageWithAccess(pageId: string, userId: string, allowedRoles?: 
       type: true,
       order: true,
       projectId: true,
+      curriculumId: true,
       createdById: true,
       createdAt: true,
       updatedAt: true,
       project: {
+        select: {
+          id: true,
+          workspaceId: true,
+        },
+      },
+      curriculum: {
         select: {
           id: true,
           workspaceId: true,
@@ -44,10 +51,10 @@ async function getPageWithAccess(pageId: string, userId: string, allowedRoles?: 
     throw new NotFoundError('Page not found');
   }
 
-  // Verify workspace membership
-  const { membership } = await assertProjectAccess(page.projectId, userId, allowedRoles);
+  // Verify workspace membership through page's parent (project or curriculum)
+  const access = await assertPageAccess(pageId, userId, allowedRoles);
 
-  return { page, membership };
+  return { page, membership: access.membership, workspaceId: access.workspaceId };
 }
 
 /**
@@ -59,7 +66,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const user = await getCurrentUserOrThrow();
     const { pageId } = await params;
 
-    const { page, membership } = await getPageWithAccess(pageId, user.id);
+    const { page, membership, workspaceId } = await getPageWithAccess(pageId, user.id);
 
     // Fetch blocks separately for cleaner query
     const blocks = await prisma.block.findMany({
@@ -81,7 +88,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       type: page.type,
       order: page.order,
       projectId: page.projectId,
-      workspaceId: page.project.workspaceId,
+      curriculumId: page.curriculumId,
+      workspaceId,
       createdById: page.createdById,
       createdAt: page.createdAt,
       updatedAt: page.updatedAt,

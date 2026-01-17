@@ -97,3 +97,5 @@ export async function recommendActivityPatternIds(
   return patterns.map((p) => p.id);
 }
 
+
+

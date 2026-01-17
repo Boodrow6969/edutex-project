@@ -1,12 +1,17 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import BlockEditor from '@/components/editor/BlockEditor';
 import NeedsAnalysisView from '@/components/pages/NeedsAnalysisView';
+import TaskAnalysisView from '@/components/pages/TaskAnalysisView';
 import LearningObjectivesView from '@/components/pages/LearningObjectivesView';
+import StoryboardEditor from '@/components/tiptap/StoryboardEditor';
 import { PageType } from '@prisma/client';
+import { NeedsAnalysisFormData } from '@/lib/types/needsAnalysis';
+import { TaskAnalysisFormData } from '@/lib/types/taskAnalysis';
+// StoryboardEditor handles its own data fetching internally
 
 interface PageMetadata {
   id: string;
@@ -31,6 +36,8 @@ export default function PageEditorPage() {
   const [pageMetadata, setPageMetadata] = useState<PageMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [needsAnalysisData, setNeedsAnalysisData] = useState<Partial<NeedsAnalysisFormData> | null>(null);
+  const [taskAnalysisData, setTaskAnalysisData] = useState<Partial<TaskAnalysisFormData> | null>(null);
 
   useEffect(() => {
     if (!pageId) return;
@@ -61,6 +68,26 @@ export default function PageEditorPage() {
           projectId: data.projectId,
           workspaceId: data.workspaceId,
         });
+
+        // If this is a needs analysis page, fetch the saved data
+        if (data.type === 'NEEDS_ANALYSIS') {
+          const naResponse = await fetch(`/api/pages/${pageId}/needs-analysis`);
+          if (naResponse.ok) {
+            const naData = await naResponse.json();
+            setNeedsAnalysisData(naData);
+          }
+        }
+
+        // If this is a task analysis page, fetch the saved data
+        if (data.type === 'TASK_ANALYSIS') {
+          const taResponse = await fetch(`/api/pages/${pageId}/task-analysis`);
+          if (taResponse.ok) {
+            const taData = await taResponse.json();
+            setTaskAnalysisData(taData);
+          }
+        }
+
+        // STORYBOARD pages: StoryboardEditor handles its own data fetching
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load page';
         setError(message);
@@ -70,6 +97,42 @@ export default function PageEditorPage() {
     };
 
     fetchPageMetadata();
+  }, [pageId]);
+
+  // Save handler for needs analysis
+  const handleSaveNeedsAnalysis = useCallback(async (data: NeedsAnalysisFormData) => {
+    const response = await fetch(`/api/pages/${pageId}/needs-analysis`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to save');
+    }
+
+    // Update local state with saved data
+    const savedData = await response.json();
+    setNeedsAnalysisData(savedData);
+  }, [pageId]);
+
+  // Save handler for task analysis
+  const handleSaveTaskAnalysis = useCallback(async (data: TaskAnalysisFormData) => {
+    const response = await fetch(`/api/pages/${pageId}/task-analysis`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to save');
+    }
+
+    // Update local state with saved data
+    const savedData = await response.json();
+    setTaskAnalysisData(savedData);
   }, [pageId]);
 
   if (!pageId) {
@@ -111,15 +174,23 @@ export default function PageEditorPage() {
 
   // Determine which view to render based on page type
   const isNeedsAnalysis = pageMetadata?.type === 'NEEDS_ANALYSIS';
+  const isTaskAnalysis = pageMetadata?.type === 'TASK_ANALYSIS';
   const isLearningObjectives = pageMetadata?.type === 'LEARNING_OBJECTIVES';
+  const isStoryboard = pageMetadata?.type === 'STORYBOARD';
 
   // Get badge info based on page type
   const getPageTypeBadge = () => {
     if (isNeedsAnalysis) {
       return { label: 'Needs Analysis', color: 'bg-purple-100 text-purple-700' };
     }
+    if (isTaskAnalysis) {
+      return { label: 'Task Analysis', color: 'bg-orange-100 text-orange-700' };
+    }
     if (isLearningObjectives) {
       return { label: 'Learning Objectives', color: 'bg-blue-100 text-blue-700' };
+    }
+    if (isStoryboard) {
+      return { label: 'Storyboard', color: 'bg-pink-100 text-pink-700' };
     }
     return null;
   };
@@ -129,10 +200,36 @@ export default function PageEditorPage() {
   // Render the appropriate view component
   const renderPageContent = () => {
     if (isNeedsAnalysis) {
-      return <NeedsAnalysisView pageId={pageId} projectId={projectId} />;
+      return (
+        <NeedsAnalysisView
+          pageId={pageId}
+          projectId={projectId}
+          initialData={needsAnalysisData ?? undefined}
+          onSave={handleSaveNeedsAnalysis}
+        />
+      );
+    }
+    if (isTaskAnalysis) {
+      return (
+        <TaskAnalysisView
+          pageId={pageId}
+          projectId={projectId}
+          initialData={taskAnalysisData ?? undefined}
+          onSave={handleSaveTaskAnalysis}
+        />
+      );
     }
     if (isLearningObjectives) {
       return <LearningObjectivesView pageId={pageId} projectId={projectId} />;
+    }
+    if (isStoryboard) {
+      return (
+        <StoryboardEditor
+          pageId={pageId}
+          projectId={projectId}
+          workspaceId={workspaceId}
+        />
+      );
     }
     return <BlockEditor pageId={pageId} />;
   };

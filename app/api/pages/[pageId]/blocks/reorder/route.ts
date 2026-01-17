@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertPageAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
@@ -30,6 +30,7 @@ async function verifyPageAccess(pageId: string, userId: string, allowedRoles?: W
     select: {
       id: true,
       projectId: true,
+      curriculumId: true,
     },
   });
 
@@ -37,7 +38,7 @@ async function verifyPageAccess(pageId: string, userId: string, allowedRoles?: W
     throw new NotFoundError('Page not found');
   }
 
-  await assertProjectAccess(page.projectId, userId, allowedRoles);
+  await assertPageAccess(pageId, userId, allowedRoles);
 
   return page;
 }

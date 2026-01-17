@@ -10,6 +10,12 @@ import {
 } from '@/lib/auth-helpers';
 import { generateLearningObjectives } from '@/lib/ai/instructional-design';
 import { WorkspaceRole } from '@prisma/client';
+import {
+  isMockAiEnabled,
+  logMockMode,
+  simulateApiDelay,
+  mockGeneratedObjectives,
+} from '@/lib/ai/mock-data';
 
 /**
  * POST /api/ai/generateObjectives
@@ -25,6 +31,13 @@ import { WorkspaceRole } from '@prisma/client';
  * Returns: { objectives: GeneratedObjective[] }
  */
 export async function POST(request: NextRequest) {
+  // Check for mock mode first
+  if (isMockAiEnabled()) {
+    logMockMode('generateObjectives');
+    await simulateApiDelay();
+    return Response.json({ objectives: mockGeneratedObjectives });
+  }
+
   try {
     const user = await getCurrentUserOrThrow();
     const body = await request.json();

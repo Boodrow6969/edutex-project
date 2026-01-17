@@ -1,5 +1,6 @@
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
+import AIAssistantButton from '@/components/ui/AIAssistantButton';
 
 export default function WorkspaceLayout({
   children,
@@ -7,12 +8,23 @@ export default function WorkspaceLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      {/* Sidebar */}
       <Sidebar />
+
+      {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar */}
         <TopBar />
-        <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
+
+        {/* Page content */}
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
       </div>
+
+      {/* Floating AI Assistant Button */}
+      <AIAssistantButton />
     </div>
   );
 }

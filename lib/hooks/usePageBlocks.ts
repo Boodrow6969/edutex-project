@@ -105,9 +105,12 @@ export function usePageBlocks(pageId: string): UsePageBlocksReturn {
   useEffect(() => {
     fetchPage();
 
+    // Copy ref to local variable for cleanup
+    const timers = debounceTimers.current;
+
     // Cleanup debounce timers on unmount
     return () => {
-      debounceTimers.current.forEach((timer) => clearTimeout(timer));
+      timers.forEach((timer) => clearTimeout(timer));
     };
   }, [fetchPage]);
 

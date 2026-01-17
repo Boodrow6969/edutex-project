@@ -372,7 +372,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
         <div>Loading objectives...</div>
       ) : objectives.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          No objectives yet. Click "Add Objective" to get started.
+          No objectives yet. Click &quot;Add Objective&quot; to get started.
         </div>
       ) : (
         <div className="space-y-4">

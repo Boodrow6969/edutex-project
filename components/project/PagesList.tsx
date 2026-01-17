@@ -27,6 +27,10 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
   ASSESSMENT_PLAN: 'Assessment Plan',
   STORYBOARD: 'Storyboard',
   CURRICULUM_MAP: 'Curriculum Map',
+  PROGRAM_NEEDS_ANALYSIS: 'Program Needs Analysis',
+  PROGRAM_MAP: 'Program Map',
+  PROGRAM_ASSESSMENT_STRATEGY: 'Program Assessment Strategy',
+  PROGRAM_EVALUATION: 'Program Evaluation',
 };
 
 const PAGE_TYPE_COLORS: Record<PageType, string> = {
@@ -38,6 +42,10 @@ const PAGE_TYPE_COLORS: Record<PageType, string> = {
   ASSESSMENT_PLAN: 'bg-orange-100 text-orange-700',
   STORYBOARD: 'bg-green-100 text-green-700',
   CURRICULUM_MAP: 'bg-teal-100 text-teal-700',
+  PROGRAM_NEEDS_ANALYSIS: 'bg-purple-100 text-purple-700',
+  PROGRAM_MAP: 'bg-teal-100 text-teal-700',
+  PROGRAM_ASSESSMENT_STRATEGY: 'bg-orange-100 text-orange-700',
+  PROGRAM_EVALUATION: 'bg-cyan-100 text-cyan-700',
 };
 
 /**

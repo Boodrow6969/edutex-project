@@ -58,7 +58,8 @@ This will install all required packages including:
 - Prisma and @prisma/client
 - NextAuth.js and auth adapters
 - OpenAI and Anthropic SDKs
-- Tailwind CSS
+- Tailwind CSS and @tailwindcss/typography
+- TipTap editor (@tiptap/react, @tiptap/starter-kit, @tiptap/extension-placeholder, @tiptap/pm)
 
 ### 2. Configure Environment Variables
 
@@ -222,16 +223,25 @@ app/
 ├── components/                   # React components
 │   ├── Sidebar.tsx              # Left navigation sidebar
 │   ├── TopBar.tsx               # Top navigation bar
-│   └── editor/
-│       └── BlockEditor.tsx      # Block-based page editor
+│   ├── editor/
+│   │   └── BlockEditor.tsx      # Block-based page editor
+│   └── tiptap/
+│       └── StoryboardEditor.tsx # TipTap storyboard editor
 ├── lib/                         # Utilities and services
 │   ├── prisma.ts                # Prisma client singleton
-│   └── ai/                      # AI abstraction layer
-│       ├── index.ts             # Main AI service
-│       ├── types.ts             # TypeScript interfaces
-│       ├── openai-provider.ts   # OpenAI implementation
-│       ├── anthropic-provider.ts # Anthropic implementation
-│       └── instructional-design.ts # ID-specific AI functions
+│   ├── ai/                      # AI abstraction layer
+│   │   ├── index.ts             # Main AI service
+│   │   ├── types.ts             # TypeScript interfaces
+│   │   ├── openai-provider.ts   # OpenAI implementation
+│   │   ├── anthropic-provider.ts # Anthropic implementation
+│   │   └── instructional-design.ts # ID-specific AI functions
+│   ├── tiptap/                  # TipTap editor utilities
+│   │   ├── extensions/          # TipTap extension config
+│   │   └── sync.ts              # Block <-> TipTap conversion
+│   ├── hooks/                   # React hooks
+│   │   └── useStoryboardEditor.ts # Storyboard editor hook
+│   └── types/                   # TypeScript types
+│       └── blocks.ts            # Block content interfaces
 ├── prisma/
 │   └── schema.prisma            # Database schema
 ├── auth.ts                      # NextAuth configuration

@@ -51,12 +51,25 @@ export async function getCurrentUserOrThrow(): Promise<AuthUser> {
   // Development-only auth bypass
   if (process.env.SKIP_AUTH === 'true') {
     console.warn('⚠️  AUTH BYPASS ENABLED: Authentication is skipped (SKIP_AUTH=true). This should only be used in development.');
-    return {
-      id: 'dev-user',
-      email: 'dev@example.com',
-      name: 'Dev User',
-      image: null,
-    };
+
+    // Upsert the dev user to ensure it exists in the database
+    const devUser = await prisma.user.upsert({
+      where: { id: 'dev-user-id' },
+      update: {},
+      create: {
+        id: 'dev-user-id',
+        email: 'dev@edutex.local',
+        name: 'Dev User',
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+      },
+    });
+
+    return devUser;
   }
 
   const session = await auth();
@@ -243,6 +256,133 @@ export async function assertProjectAccess(
     workspaceId: project.workspaceId,
     membership,
   };
+}
+
+/**
+ * Asserts that a user has access to a curriculum through workspace membership.
+ *
+ * @param curriculumId - The curriculum to check access for
+ * @param userId - The user ID to check
+ * @param allowedRoles - Optional array of roles that are permitted
+ * @returns The curriculum with workspace membership info
+ * @throws NotFoundError if the curriculum doesn't exist
+ * @throws AuthorizationError if user doesn't have access
+ */
+export async function assertCurriculumAccess(
+  curriculumId: string,
+  userId: string,
+  allowedRoles?: WorkspaceRole[]
+): Promise<{ curriculumId: string; workspaceId: string; membership: WorkspaceMembershipResult }> {
+  // Development-only auth bypass
+  if (process.env.SKIP_AUTH === 'true') {
+    console.warn(`⚠️  CURRICULUM ACCESS BYPASS: Skipping workspace checks for curriculum ${curriculumId} (SKIP_AUTH=true). This should only be used in development.`);
+
+    const curriculum = await prisma.curriculum.findUnique({
+      where: { id: curriculumId },
+      select: {
+        id: true,
+        workspaceId: true,
+      },
+    });
+
+    if (!curriculum) {
+      throw new NotFoundError('Curriculum not found');
+    }
+
+    return {
+      curriculumId: curriculum.id,
+      workspaceId: curriculum.workspaceId,
+      membership: {
+        workspaceId: curriculum.workspaceId,
+        userId,
+        role: WorkspaceRole.ADMINISTRATOR,
+        membershipId: 'dev-membership',
+      },
+    };
+  }
+
+  const curriculum = await prisma.curriculum.findUnique({
+    where: { id: curriculumId },
+    select: {
+      id: true,
+      workspaceId: true,
+    },
+  });
+
+  if (!curriculum) {
+    throw new NotFoundError('Curriculum not found');
+  }
+
+  const membership = await assertWorkspaceMember(
+    curriculum.workspaceId,
+    userId,
+    allowedRoles
+  );
+
+  return {
+    curriculumId: curriculum.id,
+    workspaceId: curriculum.workspaceId,
+    membership,
+  };
+}
+
+/**
+ * Asserts that a user has access to a page through its parent (project or curriculum).
+ *
+ * @param pageId - The page to check access for
+ * @param userId - The user ID to check
+ * @param allowedRoles - Optional array of roles that are permitted
+ * @returns Access info including the parent type
+ * @throws NotFoundError if the page doesn't exist
+ * @throws AuthorizationError if user doesn't have access
+ */
+export async function assertPageAccess(
+  pageId: string,
+  userId: string,
+  allowedRoles?: WorkspaceRole[]
+): Promise<{
+  pageId: string;
+  projectId: string | null;
+  curriculumId: string | null;
+  workspaceId: string;
+  membership: WorkspaceMembershipResult;
+}> {
+  const page = await prisma.page.findUnique({
+    where: { id: pageId },
+    select: {
+      id: true,
+      projectId: true,
+      curriculumId: true,
+    },
+  });
+
+  if (!page) {
+    throw new NotFoundError('Page not found');
+  }
+
+  if (page.projectId) {
+    const access = await assertProjectAccess(page.projectId, userId, allowedRoles);
+    return {
+      pageId: page.id,
+      projectId: page.projectId,
+      curriculumId: null,
+      workspaceId: access.workspaceId,
+      membership: access.membership,
+    };
+  }
+
+  if (page.curriculumId) {
+    const access = await assertCurriculumAccess(page.curriculumId, userId, allowedRoles);
+    return {
+      pageId: page.id,
+      projectId: null,
+      curriculumId: page.curriculumId,
+      workspaceId: access.workspaceId,
+      membership: access.membership,
+    };
+  }
+
+  throw new AuthorizationError('Page does not belong to a project or curriculum');
 }
 
 /**

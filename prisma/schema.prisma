@@ -77,8 +77,9 @@ model Workspace {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members  WorkspaceMember[]
-  projects Project[]
+  members   WorkspaceMember[]
+  projects  Project[]
+  curricula Curriculum[]
 
   @@map("workspaces")
 }
@@ -125,28 +126,146 @@ model Project {
   objectives  Objective[]
   deliverables Deliverable[]
   blueprints  LearningBlueprint[]
+  curricula   CurriculumCourse[]
 
   @@map("projects")
+}
+
+model Curriculum {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+
+  // Program metadata
+  status              String  @default("draft") // draft, in_progress, published
+  programDuration     String? // e.g., "12 weeks", "6 months"
+  totalHours          Int?
+  certificationName   String?
+  audienceProgression String? @db.Text // e.g., "Beginner → Intermediate → Advanced"
+
+  // Workspace relationship
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  // Curriculum has its own pages (program-level analysis)
+  pages Page[]
+
+  // Many-to-many with Courses via join table
+  courses CurriculumCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("curricula")
+}
+
+model CurriculumCourse {
+  id           String     @id @default(cuid())
+  curriculumId String
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  projectId    String     // Course is stored as Project
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  order Int @default(0) // Sequence within curriculum
+
+  createdAt DateTime @default(now())
+
+  @@unique([curriculumId, projectId]) // Prevent duplicate links
+  @@map("curriculum_courses")
 }
 
 model Page {
   id          String   @id @default(cuid())
   title       String
   type        PageType @default(CUSTOM)
-  projectId   String
+  projectId   String?  // Optional: page belongs to either Project OR Curriculum
+  curriculumId String? // Optional: page belongs to either Project OR Curriculum
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   order       Int      @default(0)
 
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdBy User    @relation(fields: [createdById], references: [id])
-  blocks    Block[]
+  project       Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  curriculum    Curriculum?    @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  createdBy     User           @relation(fields: [createdById], references: [id])
+  blocks        Block[]
+  needsAnalysis NeedsAnalysis?
+  taskAnalysis  TaskAnalysis?
+  storyboard    Storyboard?
 
   @@map("pages")
 }
 
+model NeedsAnalysis {
+  id        String @id @default(cuid())
+  pageId    String @unique
+  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Problem tab
+  problemStatement String   @default("")
+  businessNeed     String   @default("")
+  department       String   @default("")
+  constraints      String[] @default([])
+  assumptions      String[] @default([])
+
+  // Stakeholders tab
+  learnerPersonas String[] @default([])
+  stakeholders    String[] @default([])
+  smes            String[] @default([])
+
+  // Performance tab
+  currentState String @default("")
+  desiredState String @default("")
+
+  // Success Metrics tab
+  level1Reaction String @default("")
+  level2Learning String @default("")
+  level3Behavior String @default("")
+  level4Results  String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("needs_analyses")
+}
+
+model TaskAnalysis {
+  id        String @id @default(cuid())
+  pageId    String @unique
+  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Job/Role Context
+  jobTitle        String @default("")
+  roleDescription String @default("") @db.Text
+
+  // Tasks stored as JSON (array of TaskItem objects)
+  tasks Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("task_analyses")
+}
+
+model Storyboard {
+  id     String @id @default(cuid())
+  pageId String @unique
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Page-level metadata
+  targetAudience     String   @default("")
+  status             String   @default("draft") // draft | review | approved
+  linkedObjectiveIds String[] @default([])
+  version            Int      @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("storyboards")
+}
+
 enum PageType {
+  // Course-level pages
   CUSTOM
   NEEDS_ANALYSIS
   TASK_ANALYSIS
@@ -155,6 +274,11 @@ enum PageType {
   ASSESSMENT_PLAN
   STORYBOARD
   CURRICULUM_MAP
+  // Program/Curriculum-level pages
+  PROGRAM_NEEDS_ANALYSIS
+  PROGRAM_MAP
+  PROGRAM_ASSESSMENT_STRATEGY
+  PROGRAM_EVALUATION
 }
 
 model Block {
@@ -172,6 +296,7 @@ model Block {
 }
 
 enum BlockType {
+  // Basic text blocks
   PARAGRAPH
   HEADING_1
   HEADING_2
@@ -179,11 +304,27 @@ enum BlockType {
   BULLETED_LIST
   NUMBERED_LIST
   CALLOUT
+
+  // Instructional design blocks (existing)
   PERFORMANCE_PROBLEM
   INSTRUCTIONAL_GOAL
   TASK_STEP
   LEARNING_OBJECTIVE
   ASSESSMENT_IDEA
+
+  // Legacy storyboard (to be migrated in M4)
+  STORYBOARD_FRAME
+
+  // Storyboard blocks (Milestone 2)
+  STORYBOARD_METADATA
+  CONTENT_SCREEN
+
+  // Storyboard blocks (Milestone 3)
+  LEARNING_OBJECTIVES_IMPORT
+  CHECKLIST
+  TABLE
+  FACILITATOR_NOTES
+  MATERIALS_LIST
 }
 
 model Task {

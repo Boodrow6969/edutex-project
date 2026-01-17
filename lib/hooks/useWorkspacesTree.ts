@@ -15,6 +15,17 @@ export interface Project {
 }
 
 /**
+ * Curriculum data structure from the API
+ */
+export interface Curriculum {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
  * Workspace data structure from the API
  */
 export interface Workspace {
@@ -25,6 +36,7 @@ export interface Workspace {
   updatedAt: string;
   role: WorkspaceRole | null;
   projects: Project[];
+  curricula?: Curriculum[];
 }
 
 /**
@@ -37,6 +49,7 @@ export interface UseWorkspacesTreeReturn {
   refetch: () => Promise<void>;
   createWorkspace: (name: string, description?: string) => Promise<Workspace | null>;
   createProject: (workspaceId: string, name: string, description?: string) => Promise<Project | null>;
+  createCurriculum: (workspaceId: string, name: string, description?: string) => Promise<Curriculum | null>;
 }
 
 /**
@@ -156,6 +169,51 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
     []
   );
 
+  const createCurriculum = useCallback(
+    async (workspaceId: string, name: string, description?: string): Promise<Curriculum | null> => {
+      try {
+        setError(null);
+        const response = await fetch(`/api/workspaces/${workspaceId}/curricula`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, description }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to create curriculum');
+        }
+
+        const newCurriculum = await response.json();
+
+        // Add the new curriculum to the appropriate workspace
+        setWorkspaces((prev) =>
+          prev.map((workspace) => {
+            if (workspace.id === workspaceId) {
+              return {
+                ...workspace,
+                curricula: [...(workspace.curricula || []), newCurriculum].sort((a, b) =>
+                  a.name.localeCompare(b.name)
+                ),
+              };
+            }
+            return workspace;
+          })
+        );
+
+        return newCurriculum;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create curriculum';
+        setError(message);
+        console.error('Error creating curriculum:', err);
+        return null;
+      }
+    },
+    []
+  );
+
   return {
     workspaces,
     isLoading,
@@ -163,5 +221,6 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
     refetch: fetchWorkspaces,
     createWorkspace,
     createProject,
+    createCurriculum,
   };
 }

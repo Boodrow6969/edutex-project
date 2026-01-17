@@ -6,11 +6,17 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertPageAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { analyzeNeedsAnalysis } from '@/lib/ai/instructional-design';
+import {
+  isMockAiEnabled,
+  logMockMode,
+  simulateApiDelay,
+  mockNeedsAnalysisResult,
+} from '@/lib/ai/mock-data';
 
 /**
  * POST /api/ai/analyzeNeeds
@@ -23,6 +29,13 @@ import { analyzeNeedsAnalysis } from '@/lib/ai/instructional-design';
  * Returns: { result: NeedsAnalysisResult }
  */
 export async function POST(request: NextRequest) {
+  // Check for mock mode first
+  if (isMockAiEnabled()) {
+    logMockMode('analyzeNeeds');
+    await simulateApiDelay();
+    return Response.json({ result: mockNeedsAnalysisResult });
+  }
+
   try {
     const user = await getCurrentUserOrThrow();
     const body = await request.json();
@@ -50,8 +63,8 @@ export async function POST(request: NextRequest) {
         throw new NotFoundError('Page not found');
       }
 
-      // Verify user has access to this project
-      await assertProjectAccess(page.projectId, user.id);
+      // Verify user has access to this page (through project or curriculum)
+      await assertPageAccess(body.pageId, user.id);
 
       // Extract text content from blocks
       const textParts: string[] = [];

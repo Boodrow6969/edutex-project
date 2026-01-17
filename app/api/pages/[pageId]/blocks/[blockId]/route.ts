@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertPageAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
@@ -50,6 +50,7 @@ async function verifyBlockAccess(
         select: {
           id: true,
           projectId: true,
+          curriculumId: true,
         },
       },
     },
@@ -64,8 +65,8 @@ async function verifyBlockAccess(
     throw new NotFoundError('Block not found on this page');
   }
 
-  // Verify workspace membership
-  await assertProjectAccess(block.page.projectId, userId, allowedRoles);
+  // Verify workspace membership through page's parent (project or curriculum)
+  await assertPageAccess(pageId, userId, allowedRoles);
 
   return block;
 }

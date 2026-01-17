@@ -43,9 +43,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             name: 'asc',
           },
         },
+        curricula: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: {
+            name: 'asc',
+          },
+        },
         _count: {
           select: {
             members: true,
+            projects: true,
+            curricula: true,
           },
         },
       },
@@ -63,7 +78,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       updatedAt: workspace.updatedAt,
       role: membership.role,
       memberCount: workspace._count.members,
+      projectCount: workspace._count.projects,
+      curriculumCount: workspace._count.curricula,
       projects: workspace.projects,
+      curricula: workspace.curricula,
     });
   } catch (error) {
     return errorResponse(error, 'Failed to fetch workspace');

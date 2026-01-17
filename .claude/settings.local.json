@@ -9,7 +9,18 @@
       "Bash(npx prisma generate:*)",
       "Bash(cat:*)",
       "Bash(docker-compose up:*)",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(curl:*)",
+      "Bash(npm run seed:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=Yes && npx prisma migrate reset --force\")",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"Yes\" npx prisma migrate:*)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout:*)",
+      "Bash(ls -la \"D:\\\\Dropbox\\\\Dropbox\\\\EduTex\\\\app\\\\lib\\\\tiptap\\\\extensions\"\" 2>/dev/null || echo \"Directory may not exist or is empty \")",
+      "Bash(npx prisma db push:*)"
     ],
     "deny": [],
     "ask": []

@@ -15,6 +15,10 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
   ASSESSMENT_PLAN: 'Assessment Plan',
   STORYBOARD: 'Storyboard',
   CURRICULUM_MAP: 'Curriculum Map',
+  PROGRAM_NEEDS_ANALYSIS: 'Program Needs Analysis',
+  PROGRAM_MAP: 'Program Map',
+  PROGRAM_ASSESSMENT_STRATEGY: 'Program Assessment Strategy',
+  PROGRAM_EVALUATION: 'Program Evaluation',
 };
 
 /**

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-4">
@@ -8,20 +10,20 @@ export default function Home() {
 
       <div className="mt-6 grid gap-4 w-full max-w-2xl">
         <a
-          href="/auth/sign-in"
+          href="/auth/signin"
           className="border rounded-xl p-4 hover:bg-gray-100 transition"
         >
           <h2 className="font-semibold">Sign in</h2>
           <p>Go to the authentication flow.</p>
         </a>
 
-        <a
-          href="/dashboard"
+        <Link
+          href="/workspace"
           className="border rounded-xl p-4 hover:bg-gray-100 transition"
         >
           <h2 className="font-semibold">Dashboard</h2>
           <p>Placeholder for the main EduTex workspace.</p>
-        </a>
+        </Link>
       </div>
     </main>
   );

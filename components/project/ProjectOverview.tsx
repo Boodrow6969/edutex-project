@@ -5,6 +5,7 @@ import { PageType, BloomLevel, TaskStatus } from '@prisma/client';
 import PagesList from './PagesList';
 import ObjectivesSummary from './ObjectivesSummary';
 import TasksSummary from './TasksSummary';
+import CurriculaSelector from '@/components/ui/CurriculaSelector';
 
 interface PageSummary {
   id: string;
@@ -65,6 +66,10 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
   ASSESSMENT_PLAN: 'Assessment Plan',
   STORYBOARD: 'Storyboard',
   CURRICULUM_MAP: 'Curriculum Map',
+  PROGRAM_NEEDS_ANALYSIS: 'Program Needs Analysis',
+  PROGRAM_MAP: 'Program Map',
+  PROGRAM_ASSESSMENT_STRATEGY: 'Program Assessment Strategy',
+  PROGRAM_EVALUATION: 'Program Evaluation',
 };
 
 /**
@@ -188,6 +193,16 @@ export default function ProjectOverview({
               <div className="text-xs text-gray-500">Tasks</div>
             </div>
           </div>
+        </div>
+
+        {/* Part of Curricula */}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <label className="text-sm font-medium text-gray-700 block mb-1">Part of Curricula</label>
+          <p className="text-xs text-gray-500 mb-2">This course is included in the following curricula</p>
+          <CurriculaSelector
+            projectId={projectId}
+            workspaceId={workspaceId}
+          />
         </div>
       </div>
 

@@ -1,11 +1,108 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import 'dotenv/config';
+import { PageType, WorkspaceRole } from '@prisma/client';
+import prisma from '../lib/prisma';
 
 async function main() {
-  console.log('Seeding ActivityPattern data...');
+  console.log('Seeding database...');
 
-  // Seed ActivityPattern data
+  // 1. Create Dev User
+  console.log('Creating dev user...');
+  const devUser = await prisma.user.upsert({
+    where: { id: 'dev-user-id' },
+    update: {},
+    create: {
+      id: 'dev-user-id',
+      email: 'dev@edutex.local',
+      name: 'Dev User',
+    },
+  });
+  console.log(`Dev user created: ${devUser.email}`);
+
+  // 2. Create Demo Workspace
+  console.log('Creating demo workspace...');
+  const workspace = await prisma.workspace.upsert({
+    where: { id: 'demo-workspace-id' },
+    update: {},
+    create: {
+      id: 'demo-workspace-id',
+      name: 'Demo Workspace',
+      description: 'A demo workspace for development and testing',
+    },
+  });
+  console.log(`Workspace created: ${workspace.name}`);
+
+  // 3. Add Dev User as ADMINISTRATOR (owner) of workspace
+  console.log('Adding dev user to workspace...');
+  await prisma.workspaceMember.upsert({
+    where: {
+      workspaceId_userId: {
+        workspaceId: workspace.id,
+        userId: devUser.id,
+      },
+    },
+    update: { role: WorkspaceRole.ADMINISTRATOR },
+    create: {
+      workspaceId: workspace.id,
+      userId: devUser.id,
+      role: WorkspaceRole.ADMINISTRATOR,
+    },
+  });
+  console.log('Dev user added as ADMINISTRATOR');
+
+  // 4. Create Project
+  console.log('Creating demo project...');
+  const project = await prisma.project.upsert({
+    where: { id: 'demo-project-id' },
+    update: {},
+    create: {
+      id: 'demo-project-id',
+      name: 'Sales Onboarding Program',
+      description: 'A comprehensive onboarding program for new sales representatives',
+      status: 'IN_PROGRESS',
+      workspaceId: workspace.id,
+      clientName: 'Acme Corp',
+      projectType: 'onboarding',
+      phase: 'design',
+      priority: 'high',
+    },
+  });
+  console.log(`Project created: ${project.name}`);
+
+  // 5. Create Pages for each course tab type
+  // Note: Using available PageType enum values
+  // QUIZ_BUILDER, JOB_AIDS, EVALUATION_PLAN don't exist in schema
+  // Using closest alternatives: ASSESSMENT_PLAN, CUSTOM, CURRICULUM_MAP
+  console.log('Creating pages...');
+  const pageTypes: { type: PageType; title: string }[] = [
+    { type: PageType.NEEDS_ANALYSIS, title: 'Needs Analysis' },
+    { type: PageType.TASK_ANALYSIS, title: 'Task Analysis' },
+    { type: PageType.STORYBOARD, title: 'Storyboard' },
+    { type: PageType.ASSESSMENT_PLAN, title: 'Quiz Builder' },
+    { type: PageType.CUSTOM, title: 'Job Aids' },
+    { type: PageType.CURRICULUM_MAP, title: 'Evaluation Plan' },
+  ];
+
+  for (let i = 0; i < pageTypes.length; i++) {
+    const { type, title } = pageTypes[i];
+    const pageId = `demo-page-${type.toLowerCase()}`;
+
+    await prisma.page.upsert({
+      where: { id: pageId },
+      update: {},
+      create: {
+        id: pageId,
+        title,
+        type,
+        projectId: project.id,
+        createdById: devUser.id,
+        order: i,
+      },
+    });
+    console.log(`  Created page: ${title} (${type})`);
+  }
+
+  // 6. Seed ActivityPattern data
+  console.log('Seeding ActivityPattern data...');
   const patterns = [
     {
       name: 'Worked example plus guided practice',
@@ -43,12 +140,12 @@ async function main() {
     });
 
     if (existing) {
-      console.log(`Pattern "${pattern.name}" already exists, skipping...`);
+      console.log(`  Pattern "${pattern.name}" already exists, skipping...`);
     } else {
       const created = await prisma.activityPattern.create({
         data: pattern,
       });
-      console.log(`Created pattern: ${created.name}`);
+      console.log(`  Created pattern: ${created.name}`);
     }
   }
 
@@ -63,4 +160,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

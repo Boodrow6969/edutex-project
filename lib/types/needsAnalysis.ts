@@ -1,5 +1,5 @@
 /**
- * Types for Needs Analysis AI results
+ * Types for Needs Analysis AI results and form data
  */
 
 /**
@@ -30,3 +30,60 @@ export interface NeedsAnalysisResult {
   /** Recommended tasks for the instructional design project */
   recommendedTasks: RecommendedTask[];
 }
+
+/**
+ * Form data structure for the Needs Analysis form
+ */
+export interface NeedsAnalysisFormData {
+  // Problem tab
+  problemStatement: string;
+  businessNeed: string;
+  department: string;
+  constraints: string[];
+  assumptions: string[];
+
+  // Stakeholders tab
+  learnerPersonas: string[];
+  stakeholders: string[];
+  smes: string[];
+
+  // Performance tab
+  currentState: string;
+  desiredState: string;
+
+  // Success Metrics tab (Kirkpatrick)
+  level1Reaction: string;
+  level2Learning: string;
+  level3Behavior: string;
+  level4Results: string;
+}
+
+/**
+ * Props for the NeedsAnalysisView component
+ */
+export interface NeedsAnalysisProps {
+  projectId: string;
+  pageId?: string;
+  initialData?: Partial<NeedsAnalysisFormData>;
+  onSave?: (data: NeedsAnalysisFormData) => Promise<void>;
+}
+
+/**
+ * Default empty form data
+ */
+export const defaultNeedsAnalysisFormData: NeedsAnalysisFormData = {
+  problemStatement: '',
+  businessNeed: '',
+  department: '',
+  constraints: [],
+  assumptions: [],
+  learnerPersonas: [],
+  stakeholders: [],
+  smes: [],
+  currentState: '',
+  desiredState: '',
+  level1Reaction: '',
+  level2Learning: '',
+  level3Behavior: '',
+  level4Results: '',
+};
