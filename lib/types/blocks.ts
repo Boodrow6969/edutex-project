@@ -117,6 +117,23 @@ export interface MaterialsListContent {
   }>;
 }
 
+export interface ImageContent {
+  src: string;
+  alt: string;
+  title: string;
+  width?: number;
+  height?: number;
+  caption?: string;
+}
+
+export interface VideoContent {
+  src: string;
+  videoType: 'youtube' | 'vimeo' | 'file';
+  title: string;
+  poster?: string;
+  caption?: string;
+}
+
 // =============================================================================
 // Legacy Block Content Type (for migration)
 // =============================================================================
@@ -148,6 +165,8 @@ export type BlockContent =
   | TableContent
   | FacilitatorNotesContent
   | MaterialsListContent
+  | ImageContent
+  | VideoContent
   | StoryboardFrameContent
   | Record<string, unknown>; // Fallback for unknown content
 
@@ -186,7 +205,9 @@ export const TIPTAP_NODE_TO_BLOCK_TYPE: Record<string, BlockType> = {
   facilitatorNotes: 'FACILITATOR_NOTES',
   materialsList: 'MATERIALS_LIST',
 
-  // M3: Future blocks (placeholder for extensibility)
+  // M2.5: Media blocks
+  image: 'IMAGE',
+  video: 'VIDEO',
 };
 
 export const BLOCK_TYPE_TO_TIPTAP_NODE: Record<string, string> = {
@@ -208,7 +229,9 @@ export const BLOCK_TYPE_TO_TIPTAP_NODE: Record<string, string> = {
   FACILITATOR_NOTES: 'facilitatorNotes',
   MATERIALS_LIST: 'materialsList',
 
-  // M3: Future blocks (placeholder for extensibility)
+  // M2.5: Media blocks
+  IMAGE: 'image',
+  VIDEO: 'video',
 };
 
 // =============================================================================
@@ -270,5 +293,21 @@ export function createDefaultTableContent(): TableContent {
       { id: 'col2', header: 'Column 2', type: 'text' },
     ],
     rows: [],
+  };
+}
+
+export function createDefaultImageContent(): ImageContent {
+  return {
+    src: '',
+    alt: '',
+    title: '',
+  };
+}
+
+export function createDefaultVideoContent(): VideoContent {
+  return {
+    src: '',
+    videoType: 'youtube',
+    title: '',
   };
 }

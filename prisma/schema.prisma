@@ -325,6 +325,10 @@ enum BlockType {
   TABLE
   FACILITATOR_NOTES
   MATERIALS_LIST
+
+  // Media blocks
+  IMAGE
+  VIDEO
 }
 
 model Task {

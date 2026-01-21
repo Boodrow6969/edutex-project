@@ -12,6 +12,8 @@ import {
   ListOrdered,
   Quote,
   Target,
+  Image as ImageIcon,
+  Film,
 } from 'lucide-react';
 
 // =============================================================================
@@ -57,6 +59,27 @@ const blockOptions: BlockOption[] = [
     icon: <Target className="w-4 h-4" />,
     action: (editor, context) => {
       editor.chain().focus().insertLearningObjectivesImport({ projectId: context?.projectId }).run();
+    },
+  },
+  {
+    id: 'image',
+    label: 'Image',
+    description: 'Insert an image from URL',
+    icon: <ImageIcon className="w-4 h-4" />,
+    action: (editor) => {
+      const url = window.prompt('Enter image URL:');
+      if (url) {
+        editor.chain().focus().setImage({ src: url, alt: '', title: '' }).run();
+      }
+    },
+  },
+  {
+    id: 'video',
+    label: 'Video',
+    description: 'Embed YouTube, Vimeo, or video file',
+    icon: <Film className="w-4 h-4" />,
+    action: (editor) => {
+      editor.chain().focus().setVideo({ src: '', videoType: 'youtube', title: '' }).run();
     },
   },
   {

@@ -214,6 +214,33 @@ function blockToNode(block: Block): JSONContent | null {
       };
     }
 
+    // M2.5: Media blocks
+    case 'IMAGE': {
+      return {
+        type: 'image',
+        attrs: {
+          blockId: block.id,
+          src: getString(blockContent, 'src'),
+          alt: getString(blockContent, 'alt'),
+          title: getString(blockContent, 'title'),
+        },
+      };
+    }
+
+    case 'VIDEO': {
+      return {
+        type: 'video',
+        attrs: {
+          blockId: block.id,
+          src: getString(blockContent, 'src'),
+          videoType: getString(blockContent, 'videoType') || 'youtube',
+          title: getString(blockContent, 'title'),
+          poster: getString(blockContent, 'poster'),
+          caption: getString(blockContent, 'caption'),
+        },
+      };
+    }
+
     // Legacy storyboard frame - convert to paragraph for now (full migration in Milestone 4)
     case 'STORYBOARD_FRAME': {
       const text = getString(blockContent, 'sceneTitle') || getString(blockContent, 'script') || '';
@@ -389,6 +416,33 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
           objectives: Array.isArray(objectives) ? objectives : [],
           displayMode: (node.attrs?.displayMode as string) || 'detailed',
           projectId: (node.attrs?.projectId as string) || '',
+        },
+      };
+    }
+
+    // M2.5: Media blocks
+    case 'image': {
+      return {
+        type: 'IMAGE',
+        content: {
+          src: (node.attrs?.src as string) || '',
+          alt: (node.attrs?.alt as string) || '',
+          title: (node.attrs?.title as string) || '',
+          width: node.attrs?.width || null,
+          height: node.attrs?.height || null,
+        },
+      };
+    }
+
+    case 'video': {
+      return {
+        type: 'VIDEO',
+        content: {
+          src: (node.attrs?.src as string) || '',
+          videoType: (node.attrs?.videoType as string) || 'youtube',
+          title: (node.attrs?.title as string) || '',
+          poster: (node.attrs?.poster as string) || '',
+          caption: (node.attrs?.caption as string) || '',
         },
       };
     }

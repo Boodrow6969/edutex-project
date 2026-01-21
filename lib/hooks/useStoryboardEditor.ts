@@ -65,6 +65,9 @@ export function useStoryboardEditor({
   const lastContentRef = useRef<JSONContent | null>(null);
   const blocksRef = useRef<Block[]>([]);
   const editorRef = useRef<Editor | null>(null);
+  const isSyncingBlockIdsRef = useRef(false);
+  const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
 
   // Keep blocksRef in sync
   useEffect(() => {
@@ -255,9 +258,21 @@ export function useStoryboardEditor({
   /**
    * Save current editor content to API
    */
-  const save = useCallback(async (): Promise<void> => {
+  const save = useCallback(async () => {
     const currentEditor = editorRef.current;
     if (!currentEditor || currentEditor.isDestroyed || readOnly) {
+      return;
+    }
+
+    // If already saving, mark that we need another save after this one completes
+    if (isSavingRef.current) {
+      pendingSaveRef.current = true;
+      return;
+    }
+
+    // Don't save while we're syncing blockIds back to editor
+    if (isSyncingBlockIdsRef.current) {
+      pendingSaveRef.current = true;
       return;
     }
 
@@ -287,6 +302,8 @@ export function useStoryboardEditor({
       return;
     }
 
+    // Acquire the save lock
+    isSavingRef.current = true;
     setIsSaving(true);
     setSaveStatus('saving');
     setError(null);
@@ -331,34 +348,40 @@ export function useStoryboardEditor({
         blocksRef.current = newBlocks;
 
         // Update TipTap nodes with new blockIds for created blocks
-        // This prevents duplicate creation on next save
-        if (result.createdBlocks.length > 0 && currentContent.content) {
-          const updatedContent = { ...currentContent };
-          updatedContent.content = currentContent.content.map((node, index) => {
-            // Check if this node position matches a created block
-            const createdBlock = result.createdBlocks.find(b => b.order === index);
-            if (createdBlock && (!node.attrs?.blockId)) {
-              return {
-                ...node,
-                attrs: {
-                  ...node.attrs,
-                  blockId: createdBlock.id,
-                },
-              };
-            }
-            return node;
-          });
+        // CRITICAL: Get fresh content from editor, not the stale snapshot
+        if (result.createdBlocks.length > 0) {
+          isSyncingBlockIdsRef.current = true;
 
-          // Set the updated content back to editor without triggering another save
-          // Use queueMicrotask to defer DOM update and avoid flushSync conflict
-          lastContentRef.current = updatedContent;
-          queueMicrotask(() => {
-            if (!currentEditor.isDestroyed) {
-              currentEditor.commands.setContent(updatedContent, { emitUpdate: false });
-            }
-          });
+          const freshContent = currentEditor.getJSON();
+          if (freshContent.content) {
+            const updatedContent = { ...freshContent };
+            updatedContent.content = freshContent.content.map((node, index) => {
+              // Find created block by matching type and checking if node lacks blockId
+              const createdBlock = result.createdBlocks.find(b => {
+                // Match by order AND verify this node doesn't already have a blockId
+                return b.order === index && !node.attrs?.blockId;
+              });
+
+              if (createdBlock) {
+                return {
+                  ...node,
+                  attrs: {
+                    ...node.attrs,
+                    blockId: createdBlock.id,
+                  },
+                };
+              }
+              return node;
+            });
+
+            // Update editor content
+            currentEditor.commands.setContent(updatedContent, { emitUpdate: false });
+            lastContentRef.current = updatedContent;
+          }
+
+          isSyncingBlockIdsRef.current = false;
         } else {
-          lastContentRef.current = currentContent;
+          lastContentRef.current = currentEditor.getJSON();
         }
 
         setLastSaved(new Date());
@@ -373,6 +396,14 @@ export function useStoryboardEditor({
       console.error('Error saving:', err);
     } finally {
       setIsSaving(false);
+      isSavingRef.current = false;
+
+      // If a save was requested while we were saving, do it now
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
+        // Use setTimeout to avoid stack overflow and let React state settle
+        setTimeout(() => save(), 50);
+      }
     }
   }, [readOnly, persistChanges, pageId]);
 
