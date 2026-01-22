@@ -16,6 +16,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.8.0] - 2026-01-21
+
+### Added
+- **Storyboard Export to Word (.docx)**
+  - Export button in storyboard editor header
+  - API endpoint: GET /api/pages/[pageId]/export
+  - Converts blocks to professional Word document format
+  - Uses `docx` library
+
+### Changed
+- **ELEARNING_SCREEN → CONTENT_SCREEN refactor**
+  - Renamed block type and all references
+  - Added expanded fields: screenType, onScreenText, voiceoverScript, interactionType, interactionDetails, designerNotes, developerNotes
+  - Updated Prisma schema, sync layer, extensions, components
+
+### Fixed
+- BUG-003: Blocks overwriting each other on insert (used ProseMirror transactions)
+
+---
+
+## [0.7.0] - 2026-01-17
+
+### Added
+- **TipTap Storyboard Editor (Milestone 2.5) - Media Support**
+  - IMAGE block using @tiptap/extension-image with custom blockId attribute
+  - VIDEO block (custom node) supporting YouTube, Vimeo, and file URLs
+  - VideoComponent.tsx with embed preview and URL input
+  - Block Picker dropdown replacing test buttons
+  - LEARNING_OBJECTIVES_IMPORT block with project objectives auto-fetch
+
+### New Files
+- `lib/tiptap/extensions/VideoNode.ts`
+- `components/tiptap/nodes/VideoComponent.tsx`
+- `components/tiptap/nodes/LearningObjectivesImportComponent.tsx`
+- `components/tiptap/BlockPicker.tsx`
+- `lib/export/storyboard-to-docx.ts`
+- `components/storyboard/ExportButton.tsx`
+- `app/api/pages/[pageId]/export/route.ts`
+
+---
+
 ## [0.6.0] - 2026-01-15
 
 ### Added
@@ -183,6 +224,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 | Version | Date | Focus |
 |---------|------|-------|
+| 0.8.0 | Jan 2026 | Storyboard Export + CONTENT_SCREEN refactor |
+| 0.7.0 | Jan 2026 | TipTap Storyboard Editor (Milestone 2.5) - Media Support |
 | 0.6.0 | Jan 2026 | TipTap Storyboard Editor (Milestone 2) - Custom Blocks |
 | 0.5.0 | Jan 2026 | TipTap Storyboard Editor (Milestone 1) |
 | 0.4.0 | Jan 2026 | Curriculum management |

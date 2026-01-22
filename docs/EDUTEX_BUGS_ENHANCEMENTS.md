@@ -14,19 +14,6 @@
 - **Fix:** Replace with custom modal component matching app design patterns
 - **Priority:** Medium (UX friction)
 
-### BUG-003: Custom blocks overwrite each other when inserted
-- **Location:** lib/tiptap/extensions/*.ts (all custom node extensions)
-- **Steps to reproduce:**
-  1. Open a storyboard page
-  2. Add any custom block (Course Information, Content Screen, or Learning Objectives)
-  3. Add another custom block
-  4. Observe: First block disappears
-- **Expected:** All blocks should coexist
-- **Priority:** High (blocks core workflow)
-- **Status:** Fixed
-- **Root Cause:** `commands.insertContent()` replaces the current selection. When the editor contains only atom nodes, focus/selection can inadvertently select existing atoms, causing them to be replaced.
-- **Fix:** Updated all three custom node extensions (StoryboardMetadataNode, ContentScreenNode, LearningObjectivesImportNode) to use ProseMirror transaction API with `tr.insert(state.doc.content.size, node)` to append at document end instead of replacing selection.
-
 ### BUG-004: Adding custom block inserts extra space above topmost block
 - **Location:** lib/tiptap/extensions/ (StoryboardMetadataNode.ts, ContentScreenNode.ts, LearningObjectivesImportNode.ts)
 - **Steps to reproduce:**
@@ -36,6 +23,19 @@
 - **Expected:** Block should insert without adding extra whitespace
 - **Priority:** Low (cosmetic)
 - **Status:** Backlog
+
+### BUG-012: Rapid block addition causes block overwrite (CRITICAL)
+- **Location:** lib/hooks/useStoryboardEditor.ts, lib/tiptap/sync.ts
+- **Severity:** High
+- **Status:** Deferred to post-MVP
+- **Description:** Adding multiple blocks rapidly causes the first block to be deleted when the second saves. Originally documented as occurring within the 2-second autosave window, but confirmed to occur even after save completes and "Saved" indicator shows.
+- **Root Cause:** The `blockId` attribute isn't being preserved through TipTap's `setContent()` roundtrip for Image/Video nodes. The sync layer sees blocks without blockId and marks them for deletion.
+- **Workaround:** Wait for "Saved" indicator AND 1-2 additional seconds before adding another block.
+- **Proper Fix (future):**
+  1. Add explicit blockId attribute handling to Image/Video TipTap extensions (parseHTML/renderHTML)
+  2. Use ProseMirror transactions instead of setContent() for blockId writeback
+  3. Or implement client-side temporary IDs at block creation time
+- **Affected Block Types:** All, but most noticeable with IMAGE and VIDEO
 
 ## ENH-003: Blockquote styling missing italics
 **Status:** Open
@@ -223,7 +223,9 @@ Add an enhancement to docs/EDUTEX_BUGS_ENHANCEMENTS.md:
 
 ## Completed
 
-(None yet)
+### BUG-003: Custom blocks overwrite each other when inserted
+- **Status:** Fixed (January 17, 2026)
+- **Fix:** Updated custom node extensions to use ProseMirror transaction API
 
 ---
 
@@ -235,4 +237,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: January 17, 2026*
+*Last updated: January 22, 2026*

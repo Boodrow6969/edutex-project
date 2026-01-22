@@ -1,49 +1,21 @@
 # Next Steps - EDUTex Storyboard Editor
 
-## Current Priority: Milestone 2.5 - Media Support
-**Status:** In Progress (January 17, 2026)
+## Current Priority: Remaining Modules
+**Status:** Ready to Build (January 22, 2026)
 
-### Goal
-Add foundational image/video block support before continuing M3. Media blocks are infrastructure that other blocks (job aids, facilitator notes) will use.
+### Priority Order
+1. **Quiz Builder** — No dependencies, ready to build
+2. **Content Assets** — Foundation for Job Aids and media management
+3. **Job Aids** — Requires Content Assets module
+4. **Evaluation Plan** — Standalone module
 
-### Tasks
-1. **Schema Update**
-   - Add `IMAGE` and `VIDEO` to `BlockType` enum
-   - Run migration
-
-2. **IMAGE Block**
-   - Install `@tiptap/extension-image`
-   - Add to sync layer (both directions)
-   - Add to BlockPicker
-
-3. **VIDEO Block** (Custom Node)
-   - Create `VideoNode.ts` extension
-   - Create `VideoComponent.tsx` 
-   - Support YouTube/Vimeo embeds and direct file URLs
-   - Add to sync layer
-   - Add to BlockPicker
-
-4. **Types & Mappings**
-   - Add `ImageContent` and `VideoContent` interfaces
-   - Update `TIPTAP_NODE_TO_BLOCK_TYPE` and `BLOCK_TYPE_TO_TIPTAP_NODE`
-
-### Files to Create/Modify
-```
-lib/tiptap/extensions/
-  └── VideoNode.ts (NEW)
-components/tiptap/nodes/
-  └── VideoComponent.tsx (NEW)
-lib/types/blocks.ts (UPDATE)
-lib/tiptap/sync.ts (UPDATE)
-lib/tiptap/extensions/index.ts (UPDATE)
-components/tiptap/BlockPicker.tsx (UPDATE)
-prisma/schema.prisma (UPDATE)
-```
+### Known Blockers
+- BUG-012: Rapid block addition causes overwrites (deferred to post-MVP, workaround available)
 
 ---
 
-## Milestone 3: Block Picker & Remaining Blocks (PAUSED)
-**Status:** Paused until M2.5 complete
+## Milestone 3: Block Picker & Core Blocks (PARTIALLY COMPLETE)
+**Status:** Partially Complete - remaining blocks descoped
 
 ### Overview
 Milestone 3 focuses on completing the storyboard editor's block system with a user-friendly Block Picker interface and the remaining custom block types.

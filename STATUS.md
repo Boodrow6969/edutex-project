@@ -1,51 +1,42 @@
 # EDUTex Project Status
 
-Last Updated: January 17, 2026
+Last Updated: January 22, 2026
 
 ---
 
-## Current Version: 0.6.0
+## Current Version: 0.8.0
 
 ## TipTap Storyboard Editor Milestones
 
 ### Milestone 1: Basic TipTap Integration
 **Status: Complete**
 
-- TipTap editor replaces old frame-based storyboard view
-- Block sync layer for bidirectional database conversion
-- Autosave with debounce
-- Markdown shortcuts for basic formatting
-- Basic block types: Paragraph, Headings, Lists, Blockquotes
-
 ### Milestone 2: Custom Block Nodes
 **Status: Complete (January 15, 2026)**
+- STORYBOARD_METADATA block
+- Original ELEARNING_SCREEN block
 
-- `STORYBOARD_METADATA` block (course info header)
-- `ELEARNING_SCREEN` block (two-column visuals/script)
-- ReactNodeViewRenderer integration for custom React components
-- Sync layer extended for custom block types
-- Test buttons for block insertion (temporary)
+### Milestone 2.5: Media Support
+**Status: Complete (January 17-20, 2026)**
+- IMAGE block (CustomImage extension with blockId)
+- VIDEO block (custom VideoNode with YouTube/Vimeo/file support)
 
-### Milestone 3: Block Picker & Remaining Blocks
-**Status: Next Up**
+### Milestone 3: Block Picker & Core Blocks
+**Status: Partially Complete (January 17-21, 2026)**
 
-- Block Picker modal (slash command or button)
-- Remaining block types:
-  - `CHECKLIST`
-  - `TABLE`
-  - `FACILITATOR_NOTES`
-  - `MATERIALS_LIST`
-  - `LEARNING_OBJECTIVES_IMPORT`
-- Remove test buttons once Block Picker is ready
+Completed:
+- Block Picker dropdown with 10 block options
+- ELEARNING_SCREEN → CONTENT_SCREEN refactor with expanded fields
+- LEARNING_OBJECTIVES_IMPORT with auto-fetch and Quick Add
+
+Descoped (moved to Job Aids / Facilitator modules):
+- CHECKLIST
+- TABLE
+- FACILITATOR_NOTES
+- MATERIALS_LIST
 
 ### Milestone 4: Polish & Migration
 **Status: Planned**
-
-- Legacy `STORYBOARD_FRAME` migration
-- Drag-and-drop reordering polish
-- Block duplication and copy/paste
-- Keyboard shortcuts for block operations
-- Performance optimizations
 
 ---
 
@@ -57,6 +48,7 @@ Last Updated: January 17, 2026
 | Curriculum Management | Complete |
 | Course Creation Flow | Complete |
 | Figma Design System | Complete |
+| Storyboard Export (Word) | Complete |
 | Role-based Navigation | Planned |
 | Task & Reminders | Planned |
 | GoLive Schedule | Planned |
