@@ -11,28 +11,12 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 
-// Extend Image to explicitly include blockId attribute
-const CustomImage = Image.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      blockId: {
-        default: null,
-        parseHTML: (element) => element.getAttribute('data-block-id'),
-        renderHTML: (attributes) => {
-          if (!attributes.blockId) return {};
-          return { 'data-block-id': attributes.blockId };
-        },
-      },
-    };
-  },
-});
-
 // Custom block nodes (Milestone 2+)
 import { StoryboardMetadataNode } from './StoryboardMetadataNode';
 import { ContentScreenNode } from './ContentScreenNode';
 import { LearningObjectivesImportNode } from './LearningObjectivesImportNode';
 import { VideoNode } from './VideoNode';
+
 
 /**
  * Custom extension to add blockId attribute to all block-level nodes.
@@ -56,9 +40,6 @@ const BlockIdExtension = Extension.create({
           'storyboardMetadata',
           'contentScreen',
           'learningObjectivesImport',
-          // M2.5: Media blocks
-          'image',
-          'video',
         ],
         attributes: {
           blockId: {
@@ -142,7 +123,7 @@ export function getStoryboardExtensions() {
     ContentScreenNode,
     LearningObjectivesImportNode,
     // M2.5: Media blocks
-    CustomImage.configure({
+    Image.configure({
       inline: false,
       allowBase64: false,
       HTMLAttributes: {
@@ -173,4 +154,4 @@ export { StarterKit, Placeholder };
 export { StoryboardMetadataNode };
 export { ContentScreenNode };
 export { LearningObjectivesImportNode };
-export { VideoNode };
+
