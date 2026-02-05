@@ -167,35 +167,54 @@ function blockToNode(block: Block): JSONContent | null {
     }
 
     // M2: Storyboard blocks
-    case 'STORYBOARD_METADATA': {
-      return {
-        type: 'storyboardMetadata',
-        attrs: {
-          blockId: block.id,
-          title: getString(blockContent, 'title'),
-          audience: getString(blockContent, 'audience'),
-          duration: getString(blockContent, 'duration'),
-          deliveryMethod: getString(blockContent, 'deliveryMethod') || 'eLearning',
-        },
-      };
-    }
-
     case 'CONTENT_SCREEN': {
       return {
         type: 'contentScreen',
         attrs: {
           blockId: block.id,
+          // Core fields
           screenId: getString(blockContent, 'screenId'),
           screenTitle: getString(blockContent, 'screenTitle'),
           screenType: getString(blockContent, 'screenType') || 'content',
+          duration: getString(blockContent, 'duration'),
+          designerNotes: getString(blockContent, 'designerNotes') || getString(blockContent, 'notes'),
+          developerNotes: getString(blockContent, 'developerNotes'),
+
+          // Content type fields
           visuals: getString(blockContent, 'visuals'),
           onScreenText: getString(blockContent, 'onScreenText'),
           voiceoverScript: getString(blockContent, 'voiceoverScript'),
           interactionType: getString(blockContent, 'interactionType') || 'none',
           interactionDetails: getString(blockContent, 'interactionDetails'),
-          designerNotes: getString(blockContent, 'designerNotes') || getString(blockContent, 'notes'),
-          developerNotes: getString(blockContent, 'developerNotes'),
-          duration: getString(blockContent, 'duration'),
+
+          // Title/Intro type fields
+          titleCardText: getString(blockContent, 'titleCardText'),
+          briefVoiceover: getString(blockContent, 'briefVoiceover'),
+          backgroundNotes: getString(blockContent, 'backgroundNotes'),
+
+          // Video type fields
+          videoSource: getString(blockContent, 'videoSource'),
+          scenes: blockContent.scenes || [],
+
+          // Practice type fields
+          activityType: getString(blockContent, 'activityType') || 'other',
+          activityDescription: getString(blockContent, 'activityDescription'),
+          instructions: getString(blockContent, 'instructions'),
+          hints: getString(blockContent, 'hints'),
+          correctFeedback: getString(blockContent, 'correctFeedback'),
+          incorrectFeedback: getString(blockContent, 'incorrectFeedback'),
+
+          // Assessment type fields
+          questionType: getString(blockContent, 'questionType') || 'multiple_choice',
+          questionText: getString(blockContent, 'questionText'),
+          answerOptions: blockContent.answerOptions || [],
+          points: typeof blockContent.points === 'number' ? blockContent.points : 1,
+
+          // Scenario type fields
+          scenarioSetup: getString(blockContent, 'scenarioSetup'),
+          decisionPrompt: getString(blockContent, 'decisionPrompt'),
+          scenarioOptions: blockContent.scenarioOptions || [],
+          debrief: getString(blockContent, 'debrief'),
         },
       };
     }
@@ -210,33 +229,6 @@ function blockToNode(block: Block): JSONContent | null {
           objectives: Array.isArray(objectives) ? objectives : [],
           displayMode: getString(blockContent, 'displayMode') || 'detailed',
           projectId: getString(blockContent, 'projectId'),
-        },
-      };
-    }
-
-    // M2.5: Media blocks
-    case 'IMAGE': {
-      return {
-        type: 'image',
-        attrs: {
-          blockId: block.id,
-          src: getString(blockContent, 'src'),
-          alt: getString(blockContent, 'alt'),
-          title: getString(blockContent, 'title'),
-        },
-      };
-    }
-
-    case 'VIDEO': {
-      return {
-        type: 'video',
-        attrs: {
-          blockId: block.id,
-          src: getString(blockContent, 'src'),
-          videoType: getString(blockContent, 'videoType') || 'youtube',
-          title: getString(blockContent, 'title'),
-          poster: getString(blockContent, 'poster'),
-          caption: getString(blockContent, 'caption'),
         },
       };
     }
@@ -376,33 +368,53 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
     }
 
     // M2: Storyboard blocks
-    case 'storyboardMetadata': {
-      return {
-        type: 'STORYBOARD_METADATA',
-        content: {
-          title: (node.attrs?.title as string) || '',
-          audience: (node.attrs?.audience as string) || '',
-          duration: (node.attrs?.duration as string) || '',
-          deliveryMethod: (node.attrs?.deliveryMethod as string) || 'eLearning',
-        },
-      };
-    }
-
     case 'contentScreen': {
       return {
         type: 'CONTENT_SCREEN',
         content: {
+          // Core fields
           screenId: (node.attrs?.screenId as string) || '',
           screenTitle: (node.attrs?.screenTitle as string) || '',
           screenType: (node.attrs?.screenType as string) || 'content',
+          duration: (node.attrs?.duration as string) || '',
+          designerNotes: (node.attrs?.designerNotes as string) || '',
+          developerNotes: (node.attrs?.developerNotes as string) || '',
+
+          // Content type fields
           visuals: (node.attrs?.visuals as string) || '',
           onScreenText: (node.attrs?.onScreenText as string) || '',
           voiceoverScript: (node.attrs?.voiceoverScript as string) || '',
           interactionType: (node.attrs?.interactionType as string) || 'none',
           interactionDetails: (node.attrs?.interactionDetails as string) || '',
-          designerNotes: (node.attrs?.designerNotes as string) || '',
-          developerNotes: (node.attrs?.developerNotes as string) || '',
-          duration: (node.attrs?.duration as string) || '',
+
+          // Title/Intro type fields
+          titleCardText: (node.attrs?.titleCardText as string) || '',
+          briefVoiceover: (node.attrs?.briefVoiceover as string) || '',
+          backgroundNotes: (node.attrs?.backgroundNotes as string) || '',
+
+          // Video type fields
+          videoSource: (node.attrs?.videoSource as string) || '',
+          scenes: node.attrs?.scenes || [],
+
+          // Practice type fields
+          activityType: (node.attrs?.activityType as string) || 'other',
+          activityDescription: (node.attrs?.activityDescription as string) || '',
+          instructions: (node.attrs?.instructions as string) || '',
+          hints: (node.attrs?.hints as string) || '',
+          correctFeedback: (node.attrs?.correctFeedback as string) || '',
+          incorrectFeedback: (node.attrs?.incorrectFeedback as string) || '',
+
+          // Assessment type fields
+          questionType: (node.attrs?.questionType as string) || 'multiple_choice',
+          questionText: (node.attrs?.questionText as string) || '',
+          answerOptions: node.attrs?.answerOptions || [],
+          points: typeof node.attrs?.points === 'number' ? node.attrs.points : 1,
+
+          // Scenario type fields
+          scenarioSetup: (node.attrs?.scenarioSetup as string) || '',
+          decisionPrompt: (node.attrs?.decisionPrompt as string) || '',
+          scenarioOptions: node.attrs?.scenarioOptions || [],
+          debrief: (node.attrs?.debrief as string) || '',
         },
       };
     }
@@ -416,33 +428,6 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
           objectives: Array.isArray(objectives) ? objectives : [],
           displayMode: (node.attrs?.displayMode as string) || 'detailed',
           projectId: (node.attrs?.projectId as string) || '',
-        },
-      };
-    }
-
-    // M2.5: Media blocks
-    case 'image': {
-      return {
-        type: 'IMAGE',
-        content: {
-          src: (node.attrs?.src as string) || '',
-          alt: (node.attrs?.alt as string) || '',
-          title: (node.attrs?.title as string) || '',
-          width: node.attrs?.width || null,
-          height: node.attrs?.height || null,
-        },
-      };
-    }
-
-    case 'video': {
-      return {
-        type: 'VIDEO',
-        content: {
-          src: (node.attrs?.src as string) || '',
-          videoType: (node.attrs?.videoType as string) || 'youtube',
-          title: (node.attrs?.title as string) || '',
-          poster: (node.attrs?.poster as string) || '',
-          caption: (node.attrs?.caption as string) || '',
         },
       };
     }

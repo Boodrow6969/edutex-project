@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Editor } from '@tiptap/react';
 import {
   Plus,
-  Info,
   Monitor,
   Type,
   AlignLeft,
@@ -13,7 +12,6 @@ import {
   Quote,
   Target,
   Image as ImageIcon,
-  Film,
 } from 'lucide-react';
 
 // =============================================================================
@@ -38,13 +36,6 @@ interface BlockOption {
 // =============================================================================
 
 const blockOptions: BlockOption[] = [
-  {
-    id: 'storyboardMetadata',
-    label: 'Course Information',
-    description: 'Add course title, audience, and duration',
-    icon: <Info className="w-4 h-4" />,
-    action: (editor) => editor.chain().focus().insertStoryboardMetadata().run(),
-  },
   {
     id: 'contentScreen',
     label: 'Content Screen',
@@ -71,15 +62,6 @@ const blockOptions: BlockOption[] = [
       if (url) {
         editor.chain().focus().setImage({ src: url, alt: '', title: '' }).run();
       }
-    },
-  },
-  {
-    id: 'video',
-    label: 'Video',
-    description: 'Embed YouTube, Vimeo, or video file',
-    icon: <Film className="w-4 h-4" />,
-    action: (editor) => {
-      editor.chain().focus().setVideo({ src: '', videoType: 'youtube', title: '' }).run();
     },
   },
   {

@@ -12,10 +12,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 
 // Custom block nodes (Milestone 2+)
-import { StoryboardMetadataNode } from './StoryboardMetadataNode';
 import { ContentScreenNode } from './ContentScreenNode';
 import { LearningObjectivesImportNode } from './LearningObjectivesImportNode';
-import { VideoNode } from './VideoNode';
 
 
 /**
@@ -37,7 +35,6 @@ const BlockIdExtension = Extension.create({
           'codeBlock',
           'horizontalRule',
           // M2: Storyboard blocks
-          'storyboardMetadata',
           'contentScreen',
           'learningObjectivesImport',
         ],
@@ -119,7 +116,6 @@ export function getStoryboardExtensions() {
     BlockIdExtension,
     CalloutVariantExtension,
     // M2: Storyboard blocks
-    StoryboardMetadataNode,
     ContentScreenNode,
     LearningObjectivesImportNode,
     // M2.5: Media blocks
@@ -130,7 +126,6 @@ export function getStoryboardExtensions() {
         class: 'rounded-lg max-w-full my-4',
       },
     }),
-    VideoNode,
   ];
 }
 
@@ -151,7 +146,6 @@ export function getReadOnlyExtensions() {
 export { StarterKit, Placeholder };
 
 // Export custom nodes
-export { StoryboardMetadataNode };
 export { ContentScreenNode };
 export { LearningObjectivesImportNode };
 
