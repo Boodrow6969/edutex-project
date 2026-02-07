@@ -26,6 +26,8 @@ model User {
   createdPages  Page[]
   createdTasks  Task[]
   assignedTasks Task[]    @relation("TaskAssignee")
+  createdTokens       StakeholderAccessToken[] @relation("TokenCreator")
+  reviewedSubmissions StakeholderSubmission[]  @relation("SubmissionReviewer")
 
   @@map("users")
 }
@@ -127,6 +129,8 @@ model Project {
   deliverables Deliverable[]
   blueprints  LearningBlueprint[]
   curricula   CurriculumCourse[]
+  stakeholderTokens      StakeholderAccessToken[]
+  stakeholderSubmissions StakeholderSubmission[]
 
   @@map("projects")
 }
@@ -258,6 +262,11 @@ model Storyboard {
   linkedObjectiveIds String[] @default([])
   version            Int      @default(1)
 
+  // Course information header fields
+  title           String @default("")
+  duration        String @default("")
+  deliveryMethod  String @default("eLearning")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -326,7 +335,7 @@ enum BlockType {
   FACILITATOR_NOTES
   MATERIALS_LIST
 
-  // Media blocks
+  // Media blocks (Milestone 2.5)
   IMAGE
   VIDEO
 }
@@ -526,4 +535,94 @@ model ActivityInstance {
   pattern   ActivityPattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
 
   @@map("activity_instances")
+}
+
+// Stakeholder Needs Analysis Models
+enum TrainingType {
+  PERFORMANCE_PROBLEM
+  NEW_SYSTEM
+  COMPLIANCE
+  ROLE_CHANGE
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REVISION_REQUESTED
+}
+
+model StakeholderAccessToken {
+  id               String    @id @default(cuid())
+  token            String    @unique @default(cuid())
+  projectId        String
+  project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trainingType     TrainingType
+  createdById      String
+  createdBy        User      @relation("TokenCreator", fields: [createdById], references: [id])
+  isActive         Boolean   @default(true)
+  expiresAt        DateTime?
+  stakeholderName  String?
+  stakeholderEmail String?
+  submission       StakeholderSubmission?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([token])
+  @@index([projectId])
+  @@map("stakeholder_access_tokens")
+}
+
+model StakeholderSubmission {
+  id             String           @id @default(cuid())
+  tokenId        String           @unique
+  token          StakeholderAccessToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  projectId      String
+  project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  trainingType   TrainingType
+  status         SubmissionStatus @default(DRAFT)
+  submittedAt    DateTime?
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewedBy     User?            @relation("SubmissionReviewer", fields: [reviewedById], references: [id])
+  revisionNotes  String?          @db.Text
+  responses      StakeholderResponse[]
+  changeLogs     StakeholderChangeLog[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@map("stakeholder_submissions")
+}
+
+model StakeholderResponse {
+  id           String    @id @default(cuid())
+  submissionId String
+  submission   StakeholderSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  questionId   String
+  value        String    @db.Text
+  updatedBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([submissionId, questionId])
+  @@index([submissionId])
+  @@map("stakeholder_responses")
+}
+
+model StakeholderChangeLog {
+  id            String    @id @default(cuid())
+  submissionId  String
+  submission    StakeholderSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  questionId    String
+  changedBy     String
+  previousValue String?   @db.Text
+  newValue      String    @db.Text
+  changedAt     DateTime  @default(now())
+
+  @@index([submissionId])
+  @@index([submissionId, questionId])
+  @@map("stakeholder_change_logs")
 }
