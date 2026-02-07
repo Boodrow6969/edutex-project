@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -28,6 +26,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.*
 
 # vercel
 .vercel
@@ -38,12 +37,13 @@ next-env.d.ts
 
 # prisma
 /prisma/migrations
-
 /app/generated/prisma
 
-.env
-.env.*
-echo *.tmp.* >> .gitignore
-echo nul >> .gitignore
-
+# cursor temp files
 *.tmp.*
+
+# windows artifacts
+nul
+
+# build artifacts
+files.zip
