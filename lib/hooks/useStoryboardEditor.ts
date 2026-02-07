@@ -18,6 +18,15 @@ export interface PageMetadata {
   workspaceId: string;
 }
 
+export interface StoryboardData {
+  id: string;
+  title: string;
+  targetAudience: string;
+  duration: string;
+  deliveryMethod: string;
+  status: string;
+}
+
 export interface UseStoryboardEditorOptions {
   pageId: string;
   readOnly?: boolean;
@@ -27,6 +36,8 @@ export interface UseStoryboardEditorOptions {
 export interface UseStoryboardEditorReturn {
   editor: Editor | null;
   pageMetadata: PageMetadata | null;
+  storyboardData: StoryboardData | null;
+  projectName: string;
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
@@ -53,6 +64,8 @@ export function useStoryboardEditor({
 }: UseStoryboardEditorOptions): UseStoryboardEditorReturn {
   // State
   const [pageMetadata, setPageMetadata] = useState<PageMetadata | null>(null);
+  const [storyboardData, setStoryboardData] = useState<StoryboardData | null>(null);
+  const [projectName, setProjectName] = useState<string>('');
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -137,6 +150,60 @@ export function useStoryboardEditor({
       });
 
       const fetchedBlocks = (data.blocks || []) as Block[];
+
+      // For storyboard pages, fetch storyboard data
+      if (data.type === 'STORYBOARD') {
+        try {
+          // Fetch storyboard data
+          const storyboardResponse = await fetch(`/api/pages/${pageId}/storyboard`);
+          if (storyboardResponse.ok) {
+            const storyboard = await storyboardResponse.json();
+
+            // If storyboard doesn't have an ID, it doesn't exist yet - create it
+            if (!storyboard.id) {
+              const createResponse = await fetch(`/api/pages/${pageId}/storyboard`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  targetAudience: '',
+                  status: 'draft',
+                }),
+              });
+              if (createResponse.ok) {
+                const createdStoryboard = await createResponse.json();
+                setStoryboardData({
+                  id: createdStoryboard.id,
+                  title: createdStoryboard.title || '',
+                  targetAudience: createdStoryboard.targetAudience || '',
+                  duration: createdStoryboard.duration || '',
+                  deliveryMethod: createdStoryboard.deliveryMethod || 'eLearning',
+                  status: createdStoryboard.status || 'draft',
+                });
+              }
+            } else {
+              setStoryboardData({
+                id: storyboard.id,
+                title: storyboard.title || '',
+                targetAudience: storyboard.targetAudience || '',
+                duration: storyboard.duration || '',
+                deliveryMethod: storyboard.deliveryMethod || 'eLearning',
+                status: storyboard.status || 'draft',
+              });
+            }
+          }
+
+          // Fetch project name for default title
+          if (data.projectId) {
+            const projectResponse = await fetch(`/api/projects/${data.projectId}`);
+            if (projectResponse.ok) {
+              const project = await projectResponse.json();
+              setProjectName(project.name || '');
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching storyboard or project data:', err);
+        }
+      }
       setBlocks(fetchedBlocks);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch page';
@@ -499,6 +566,8 @@ export function useStoryboardEditor({
   return {
     editor,
     pageMetadata,
+    storyboardData,
+    projectName,
     isLoading,
     isSaving,
     error,

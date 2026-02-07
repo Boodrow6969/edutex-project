@@ -3,6 +3,8 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import StakeholderSummaryCard from '@/components/stakeholder/StakeholderSummaryCard';
+import StakeholderContactsCard from '@/components/stakeholder/StakeholderContactsCard';
 
 interface Project {
   id: string;
@@ -218,6 +220,12 @@ export default function WorkspacePage() {
             <div className="text-2xl font-bold text-green-600">{workspace.memberCount}</div>
             <div className="text-sm text-gray-500">Members</div>
           </div>
+        </div>
+
+        {/* Needs Analysis & Stakeholders */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <StakeholderSummaryCard workspaceId={workspaceId} />
+          <StakeholderContactsCard workspaceId={workspaceId} />
         </div>
 
         {/* Quick Actions */}

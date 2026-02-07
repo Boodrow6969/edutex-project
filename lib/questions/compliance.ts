@@ -39,7 +39,7 @@ export const complianceQuestions: QuestionDefinition[] = [
       "Compliance deadlines are hard stops — they don't flex. This date drives everything: format selection, rollout strategy, and what can realistically be built in time. If the deadline is impossibly tight, you may need to recommend a phased approach (e.g., quick awareness session now + full training later) rather than one comprehensive course. Always confirm whether this date is a regulatory deadline, an internal target, or an audit date.",
     stakeholderGuidance:
       "Provide the hard deadline for training completion. Is this date set by the regulation itself, by an upcoming audit, or by internal policy?\n*Examples: \"Regulatory deadline: December 31, 2026,\" \"Internal target: All employees by Q3 to be audit-ready by Q4,\" \"Audit is March 15 — everyone must be complete by March 1\"*",
-    fieldType: FieldType.SHORT_TEXT,
+    fieldType: FieldType.DATE_WITH_TEXT,
     required: true,
     displayOrder: 42,
     appliesTo: [TrainingType.COMPLIANCE],

@@ -91,7 +91,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "A hard deadline (compliance date, system go-live) vs. a soft goal (\"sometime in Q2\") tells you entirely different things about project constraints. Flag hard deadlines prominently in your review — they dictate scope, format decisions, and whether phased delivery makes sense. If the timeline is unrealistic for the scope, that's a critical review finding.",
     stakeholderGuidance:
       "If there's a specific date this training needs to be ready (like a system go-live or regulatory deadline), enter it here. If it's more of a general timeframe, describe that instead.\n*Examples: \"March 15, 2026 — system go-live,\" \"By end of Q2, flexible on exact date,\" \"ASAP — incidents are happening now\"*",
-    fieldType: FieldType.SHORT_TEXT,
+    fieldType: FieldType.DATE_WITH_TEXT,
     required: true,
     displayOrder: 6,
     appliesTo: "ALL",

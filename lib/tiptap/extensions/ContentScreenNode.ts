@@ -31,39 +31,58 @@ export const ContentScreenNode = Node.create<ContentScreenOptions>({
 
   addAttributes() {
     return {
-      screenId: {
-        default: '',
-      },
-      screenTitle: {
-        default: '',
-      },
-      screenType: {
-        default: 'content',
-      },
-      visuals: {
-        default: '',
-      },
-      onScreenText: {
-        default: '',
-      },
-      voiceoverScript: {
-        default: '',
-      },
-      interactionType: {
-        default: 'none',
-      },
-      interactionDetails: {
-        default: '',
-      },
-      designerNotes: {
-        default: '',
-      },
-      developerNotes: {
-        default: '',
-      },
-      duration: {
-        default: '',
-      },
+      // Core attributes (all screen types)
+      screenId: { default: '' },
+      screenTitle: { default: '' },
+      screenType: { default: 'content' },
+      duration: { default: '' },
+      designerNotes: { default: '' },
+      developerNotes: { default: '' },
+
+      // Content type fields (default layout)
+      visuals: { default: '' },
+      onScreenText: { default: '' },
+      voiceoverScript: { default: '' },
+      interactionType: { default: 'none' },
+      interactionDetails: { default: '' },
+
+      // Title/Intro type fields
+      titleCardText: { default: '' },
+      briefVoiceover: { default: '' },
+      backgroundNotes: { default: '' },
+
+      // Video type fields
+      videoSource: { default: '' },
+      scenes: { default: [] }, // Array of { timecode, visualDescription, voiceover, onScreenText }
+
+      // Practice type fields
+      activityType: { default: 'other' },
+      activityDescription: { default: '' },
+      instructions: { default: '' },
+      hints: { default: '' },
+      correctFeedback: { default: '' },
+      incorrectFeedback: { default: '' },
+
+      // Assessment type fields (redesigned)
+      assessmentPurpose: { default: '' },
+      assessmentFormat: { default: '' },
+      assessmentFormatOther: { default: '' },
+      linkedObjectiveIds: { default: [] },
+      cognitiveDemand: { default: '' },
+      assessmentRationale: { default: [] },
+      assessmentRationaleOther: { default: '' },
+      estimatedDuration: { default: '' },
+      attemptsAllowed: { default: '1' },
+      gradedWeighted: { default: '' },
+      dynamicScopeValue: { default: '' },
+      feedbackStrategy: { default: '' },
+      passingCriteria: { default: '' },
+
+      // Scenario type fields
+      scenarioSetup: { default: '' },
+      decisionPrompt: { default: '' },
+      scenarioOptions: { default: [] }, // Array of { text, consequence, isBestChoice }
+      debrief: { default: '' },
     };
   },
 

@@ -101,7 +101,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
       "Critical for your project plan. Training development can't meaningfully start without system access (for screenshots, task walkthroughs, assessment scenarios). If this date is close to go-live, flag the compressed timeline as a risk.",
     stakeholderGuidance:
       "Provide the expected date or timeframe when the training team can access the demo environment.",
-    fieldType: FieldType.SHORT_TEXT,
+    fieldType: FieldType.DATE_WITH_TEXT,
     required: true,
     displayOrder: 36,
     appliesTo: [TrainingType.NEW_SYSTEM],

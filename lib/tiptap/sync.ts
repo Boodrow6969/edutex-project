@@ -205,10 +205,19 @@ function blockToNode(block: Block): JSONContent | null {
           incorrectFeedback: getString(blockContent, 'incorrectFeedback'),
 
           // Assessment type fields
-          questionType: getString(blockContent, 'questionType') || 'multiple_choice',
-          questionText: getString(blockContent, 'questionText'),
-          answerOptions: blockContent.answerOptions || [],
-          points: typeof blockContent.points === 'number' ? blockContent.points : 1,
+          assessmentPurpose: getString(blockContent, 'assessmentPurpose'),
+          assessmentFormat: getString(blockContent, 'assessmentFormat'),
+          assessmentFormatOther: getString(blockContent, 'assessmentFormatOther'),
+          linkedObjectiveIds: blockContent.linkedObjectiveIds || [],
+          cognitiveDemand: getString(blockContent, 'cognitiveDemand'),
+          assessmentRationale: blockContent.assessmentRationale || [],
+          assessmentRationaleOther: getString(blockContent, 'assessmentRationaleOther'),
+          estimatedDuration: getString(blockContent, 'estimatedDuration'),
+          attemptsAllowed: getString(blockContent, 'attemptsAllowed') || '1',
+          gradedWeighted: getString(blockContent, 'gradedWeighted'),
+          dynamicScopeValue: getString(blockContent, 'dynamicScopeValue'),
+          feedbackStrategy: getString(blockContent, 'feedbackStrategy'),
+          passingCriteria: getString(blockContent, 'passingCriteria'),
 
           // Scenario type fields
           scenarioSetup: getString(blockContent, 'scenarioSetup'),
@@ -405,10 +414,19 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
           incorrectFeedback: (node.attrs?.incorrectFeedback as string) || '',
 
           // Assessment type fields
-          questionType: (node.attrs?.questionType as string) || 'multiple_choice',
-          questionText: (node.attrs?.questionText as string) || '',
-          answerOptions: node.attrs?.answerOptions || [],
-          points: typeof node.attrs?.points === 'number' ? node.attrs.points : 1,
+          assessmentPurpose: (node.attrs?.assessmentPurpose as string) || '',
+          assessmentFormat: (node.attrs?.assessmentFormat as string) || '',
+          assessmentFormatOther: (node.attrs?.assessmentFormatOther as string) || '',
+          linkedObjectiveIds: node.attrs?.linkedObjectiveIds || [],
+          cognitiveDemand: (node.attrs?.cognitiveDemand as string) || '',
+          assessmentRationale: node.attrs?.assessmentRationale || [],
+          assessmentRationaleOther: (node.attrs?.assessmentRationaleOther as string) || '',
+          estimatedDuration: (node.attrs?.estimatedDuration as string) || '',
+          attemptsAllowed: (node.attrs?.attemptsAllowed as string) || '1',
+          gradedWeighted: (node.attrs?.gradedWeighted as string) || '',
+          dynamicScopeValue: (node.attrs?.dynamicScopeValue as string) || '',
+          feedbackStrategy: (node.attrs?.feedbackStrategy as string) || '',
+          passingCriteria: (node.attrs?.passingCriteria as string) || '',
 
           // Scenario type fields
           scenarioSetup: (node.attrs?.scenarioSetup as string) || '',

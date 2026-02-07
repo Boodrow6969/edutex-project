@@ -76,12 +76,15 @@ model Workspace {
   id          String   @id @default(cuid())
   name        String
   description String?
+  stakeholders Json?   @default("[]")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   members   WorkspaceMember[]
   projects  Project[]
   curricula Curriculum[]
+  stakeholderTokens      StakeholderAccessToken[]
+  stakeholderSubmissions StakeholderSubmission[]
 
   @@map("workspaces")
 }
@@ -129,8 +132,6 @@ model Project {
   deliverables Deliverable[]
   blueprints  LearningBlueprint[]
   curricula   CurriculumCourse[]
-  stakeholderTokens      StakeholderAccessToken[]
-  stakeholderSubmissions StakeholderSubmission[]
 
   @@map("projects")
 }
@@ -556,8 +557,8 @@ enum SubmissionStatus {
 model StakeholderAccessToken {
   id               String    @id @default(cuid())
   token            String    @unique @default(cuid())
-  projectId        String
-  project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workspaceId      String
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   trainingType     TrainingType
   createdById      String
   createdBy        User      @relation("TokenCreator", fields: [createdById], references: [id])
@@ -570,7 +571,7 @@ model StakeholderAccessToken {
   updatedAt        DateTime  @updatedAt
 
   @@index([token])
-  @@index([projectId])
+  @@index([workspaceId])
   @@map("stakeholder_access_tokens")
 }
 
@@ -578,8 +579,8 @@ model StakeholderSubmission {
   id             String           @id @default(cuid())
   tokenId        String           @unique
   token          StakeholderAccessToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
-  projectId      String
-  project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workspaceId    String
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   trainingType   TrainingType
   status         SubmissionStatus @default(DRAFT)
   submittedAt    DateTime?
@@ -592,7 +593,7 @@ model StakeholderSubmission {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  @@index([projectId])
+  @@index([workspaceId])
   @@index([status])
   @@map("stakeholder_submissions")
 }

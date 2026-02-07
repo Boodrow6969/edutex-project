@@ -2,7 +2,9 @@
 
 import { EditorContent } from '@tiptap/react';
 import { useStoryboardEditor, useEditorWordCount } from '@/lib/hooks/useStoryboardEditor';
-import BlockPicker from './BlockPicker';
+import { StoryboardExportButton } from '@/components/storyboard/ExportButton';
+import CourseInfoHeader from '@/components/storyboard/CourseInfoHeader';
+import StoryboardToolbar from '@/components/storyboard/StoryboardToolbar';
 
 // =============================================================================
 // Types
@@ -28,6 +30,8 @@ export default function StoryboardEditor({
   const {
     editor,
     pageMetadata,
+    storyboardData,
+    projectName,
     isLoading,
     isSaving,
     error,
@@ -40,7 +44,7 @@ export default function StoryboardEditor({
     autosaveDelay: 2000,
   });
 
-  const wordCount = useEditorWordCount(editor);
+  const wordCount = useEditorWordCount(editor);        
 
   // ==========================================================================
   // Loading State
@@ -49,7 +53,7 @@ export default function StoryboardEditor({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">      
           <div className="w-5 h-5 border-2 border-[#03428e] border-t-transparent rounded-full animate-spin" />
           <span className="text-gray-600">Loading storyboard...</span>
         </div>
@@ -78,9 +82,26 @@ export default function StoryboardEditor({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Course Information Header */}
+      {storyboardData && !readOnly && (
+        <div className="px-6 pt-4">
+          <CourseInfoHeader
+            storyboardId={storyboardData.id}
+            projectName={projectName}
+            initialData={{
+              title: storyboardData.title,
+              targetAudience: storyboardData.targetAudience,
+              duration: storyboardData.duration,
+              deliveryMethod: storyboardData.deliveryMethod,
+            }}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <StoryboardHeader
         title={pageMetadata?.title || 'Untitled Storyboard'}
+        pageId={pageId}
         saveStatus={saveStatus}
         lastSaved={lastSaved}
         isSaving={isSaving}
@@ -96,22 +117,20 @@ export default function StoryboardEditor({
         </div>
       )}
 
-      {/* Block Picker Toolbar */}
-      {editor && !readOnly && (
-        <div className="bg-gray-50 border-b border-gray-200 px-6 py-2">
-          <BlockPicker editor={editor} projectId={projectId} />
-        </div>
-      )}
-
       {/* Editor */}
       <div className="flex-1 overflow-auto bg-white">
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto px-6 py-8 pb-24">
           <EditorContent
             editor={editor}
             className="storyboard-editor"
           />
         </div>
       </div>
+
+      {/* Bottom Toolbar */}
+      {editor && !readOnly && (
+        <StoryboardToolbar editor={editor} projectId={projectId} />
+      )}
 
       {/* Editor Styles */}
       <style jsx global>{`
@@ -167,24 +186,24 @@ export default function StoryboardEditor({
         }
 
         /* Nested lists */
-        .storyboard-editor .ProseMirror ul ul {
+        .storyboard-editor .ProseMirror ul ul {        
           list-style-type: circle;
         }
 
-        .storyboard-editor .ProseMirror ul ul ul {
+        .storyboard-editor .ProseMirror ul ul ul {     
           list-style-type: square;
         }
 
-        .storyboard-editor .ProseMirror blockquote {
+        .storyboard-editor .ProseMirror blockquote {   
           border-left: 4px solid #d1d5db;
           padding: 0.75em 1em;
           margin: 1em 0;
           color: #4b5563;
           background-color: #f9fafb;
-          border-radius: 0 0.375rem 0.375rem 0;
+          border-radius: 0 0.375rem 0.375rem 0;        
         }
 
-        .storyboard-editor .ProseMirror blockquote p {
+        .storyboard-editor .ProseMirror blockquote p { 
           margin: 0;
         }
 
@@ -192,21 +211,21 @@ export default function StoryboardEditor({
           border-left-color: #3b82f6;
           background-color: #eff6ff;
           padding: 0.75em 1em;
-          border-radius: 0 0.375rem 0.375rem 0;
+          border-radius: 0 0.375rem 0.375rem 0;        
         }
 
         .storyboard-editor .ProseMirror blockquote[data-variant="warning"] {
           border-left-color: #f59e0b;
           background-color: #fffbeb;
           padding: 0.75em 1em;
-          border-radius: 0 0.375rem 0.375rem 0;
+          border-radius: 0 0.375rem 0.375rem 0;        
         }
 
         .storyboard-editor .ProseMirror blockquote[data-variant="tip"] {
           border-left-color: #10b981;
           background-color: #ecfdf5;
           padding: 0.75em 1em;
-          border-radius: 0 0.375rem 0.375rem 0;
+          border-radius: 0 0.375rem 0.375rem 0;        
         }
 
         .storyboard-editor .ProseMirror code {
@@ -214,7 +233,7 @@ export default function StoryboardEditor({
           padding: 0.2em 0.4em;
           border-radius: 0.25em;
           font-size: 0.875em;
-          font-family: ui-monospace, monospace;
+          font-family: ui-monospace, monospace;        
         }
 
         .storyboard-editor .ProseMirror pre {
@@ -226,7 +245,7 @@ export default function StoryboardEditor({
           margin: 1em 0;
         }
 
-        .storyboard-editor .ProseMirror pre code {
+        .storyboard-editor .ProseMirror pre code {     
           background: none;
           padding: 0;
           color: inherit;
@@ -258,12 +277,12 @@ export default function StoryboardEditor({
         }
 
         /* Focus styles */
-        .storyboard-editor .ProseMirror:focus {
+        .storyboard-editor .ProseMirror:focus {        
           outline: none;
         }
 
         /* Selection styles */
-        .storyboard-editor .ProseMirror ::selection {
+        .storyboard-editor .ProseMirror ::selection {  
           background-color: #dbeafe;
         }
       `}</style>
@@ -277,7 +296,8 @@ export default function StoryboardEditor({
 
 interface StoryboardHeaderProps {
   title: string;
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+  pageId: string;
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error';   
   lastSaved: Date | null;
   isSaving: boolean;
   wordCount: number;
@@ -287,6 +307,7 @@ interface StoryboardHeaderProps {
 
 function StoryboardHeader({
   title,
+  pageId,
   saveStatus,
   lastSaved,
   isSaving,
@@ -298,7 +319,7 @@ function StoryboardHeader({
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Left: Title and badge */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">      
           <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
           <span className="px-2 py-0.5 text-xs font-medium bg-pink-100 text-pink-700 rounded">
             Storyboard
@@ -306,9 +327,9 @@ function StoryboardHeader({
         </div>
 
         {/* Right: Status and actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">      
           {/* Word count */}
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500">     
             {wordCount} {wordCount === 1 ? 'word' : 'words'}
           </span>
 
@@ -319,6 +340,12 @@ function StoryboardHeader({
             isSaving={isSaving}
           />
 
+          {/* Export button */}
+          <StoryboardExportButton 
+            pageId={pageId} 
+            pageTitle={title} 
+          />
+
           {/* Save button */}
           {!readOnly && (
             <button
@@ -326,7 +353,7 @@ function StoryboardHeader({
               disabled={isSaving}
               className="px-4 py-2 bg-[#03428e] text-white text-sm font-medium rounded-lg hover:bg-[#02346f] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSaving ? 'Saving...' : 'Save'}
+              {isSaving ? 'Saving...' : 'Save'}        
             </button>
           )}
         </div>
@@ -347,7 +374,7 @@ function StoryboardHeader({
 // =============================================================================
 
 interface SaveStatusProps {
-  status: 'idle' | 'saving' | 'saved' | 'error';
+  status: 'idle' | 'saving' | 'saved' | 'error';       
   lastSaved: Date | null;
   isSaving: boolean;
 }
@@ -356,7 +383,7 @@ function SaveStatus({ status, lastSaved, isSaving }: SaveStatusProps) {
   if (isSaving || status === 'saving') {
     return (
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />   
         <span>Saving...</span>
       </div>
     );
