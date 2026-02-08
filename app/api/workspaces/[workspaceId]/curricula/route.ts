@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     await assertWorkspaceMember(workspaceId, user.id);
 
     const curricula = await prisma.curriculum.findMany({
-      where: { workspaceId },
+      where: { workspaceId, archivedAt: null },
       select: {
         id: true,
         name: true,

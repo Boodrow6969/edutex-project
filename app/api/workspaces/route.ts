@@ -12,14 +12,19 @@ import { WorkspaceRole } from '@prisma/client';
 
 /**
  * GET /api/workspaces
- * Lists all workspaces the current user is a member of, including their courses.
+ * Lists all workspaces the current user is a member of, including their courses and curricula.
+ * Query params:
+ * - includeArchived=true — include archived workspaces/courses/curricula
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUserOrThrow();
+    const includeArchived = request.nextUrl.searchParams.get('includeArchived') === 'true';
+    const archiveFilter = includeArchived ? {} : { archivedAt: null };
 
     const workspaces = await prisma.workspace.findMany({
       where: {
+        ...archiveFilter,
         members: {
           some: {
             userId: user.id,
@@ -28,10 +33,26 @@ export async function GET() {
       },
       include: {
         courses: {
+          where: archiveFilter,
           select: {
             id: true,
             name: true,
             description: true,
+            archivedAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: {
+            name: 'asc',
+          },
+        },
+        curricula: {
+          where: archiveFilter,
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            archivedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -58,10 +79,12 @@ export async function GET() {
       id: workspace.id,
       name: workspace.name,
       description: workspace.description,
+      archivedAt: workspace.archivedAt,
       createdAt: workspace.createdAt,
       updatedAt: workspace.updatedAt,
       role: workspace.members[0]?.role ?? null,
       courses: workspace.courses,
+      curricula: workspace.curricula,
     }));
 
     return Response.json(result);

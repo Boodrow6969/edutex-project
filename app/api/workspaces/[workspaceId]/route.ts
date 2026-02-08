@@ -32,6 +32,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       where: { id: workspaceId },
       include: {
         courses: {
+          where: { archivedAt: null },
           select: {
             id: true,
             name: true,
@@ -44,6 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           },
         },
         curricula: {
+          where: { archivedAt: null },
           select: {
             id: true,
             name: true,
@@ -59,8 +61,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         _count: {
           select: {
             members: true,
-            courses: true,
-            curricula: true,
+            courses: { where: { archivedAt: null } },
+            curricula: { where: { archivedAt: null } },
           },
         },
       },
@@ -176,11 +178,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/workspaces/[workspaceId]
- * Delete a workspace and all its courses, pages, etc.
+ * Delete a workspace and all its courses, curricula, pages, etc.
  * Requires ADMINISTRATOR role.
  *
- * Note: This is a hard delete. The schema uses onDelete: Cascade,
- * so all related records (members, courses, pages, etc.) will be deleted.
+ * Request body: { "confirmName": "string" } — must match the workspace name exactly.
+ *
+ * Uses a transaction to explicitly delete courses and curricula first
+ * (overriding SetNull behavior), then deletes the workspace which
+ * cascades members, tokens, and submissions.
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
@@ -192,8 +197,38 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       WorkspaceRole.ADMINISTRATOR,
     ]);
 
-    await prisma.workspace.delete({
+    // Validate confirmation name
+    const body = await request.json();
+    const { confirmName } = body;
+
+    if (!confirmName || typeof confirmName !== 'string') {
+      return Response.json(
+        { error: 'confirmName is required' },
+        { status: 400 }
+      );
+    }
+
+    const workspace = await prisma.workspace.findUnique({
       where: { id: workspaceId },
+      select: { name: true },
+    });
+
+    if (!workspace) {
+      throw new NotFoundError('Workspace not found');
+    }
+
+    if (confirmName !== workspace.name) {
+      return Response.json(
+        { error: 'Workspace name does not match. Deletion cancelled.' },
+        { status: 400 }
+      );
+    }
+
+    // Transaction: delete children explicitly, then workspace
+    await prisma.$transaction(async (tx) => {
+      await tx.course.deleteMany({ where: { workspaceId } });
+      await tx.curriculum.deleteMany({ where: { workspaceId } });
+      await tx.workspace.delete({ where: { id: workspaceId } });
     });
 
     return Response.json({ success: true, message: 'Workspace deleted' });

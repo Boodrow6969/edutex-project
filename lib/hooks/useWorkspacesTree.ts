@@ -10,6 +10,7 @@ export interface Course {
   id: string;
   name: string;
   description: string | null;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +22,7 @@ export interface Curriculum {
   id: string;
   name: string;
   description: string | null;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,12 +34,15 @@ export interface Workspace {
   id: string;
   name: string;
   description: string | null;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
   role: WorkspaceRole | null;
   courses: Course[];
   curricula?: Curriculum[];
 }
+
+export type ArchiveItemType = 'workspace' | 'course' | 'curriculum';
 
 /**
  * Hook return type
@@ -46,10 +51,30 @@ export interface UseWorkspacesTreeReturn {
   workspaces: Workspace[];
   isLoading: boolean;
   error: string | null;
+  showArchived: boolean;
+  setShowArchived: (show: boolean) => void;
   refetch: () => Promise<void>;
   createWorkspace: (name: string, description?: string) => Promise<Workspace | null>;
   createCourse: (workspaceId: string, name: string, description?: string) => Promise<Course | null>;
   createCurriculum: (workspaceId: string, name: string, description?: string) => Promise<Curriculum | null>;
+  archiveItem: (type: ArchiveItemType, id: string, action: 'archive' | 'restore') => Promise<boolean>;
+  deleteItem: (type: ArchiveItemType, id: string) => Promise<boolean>;
+}
+
+function getArchiveUrl(type: ArchiveItemType, id: string): string {
+  switch (type) {
+    case 'workspace': return `/api/workspaces/${id}/archive`;
+    case 'course': return `/api/courses/${id}/archive`;
+    case 'curriculum': return `/api/curricula/${id}/archive`;
+  }
+}
+
+function getDeleteUrl(type: ArchiveItemType, id: string): string {
+  switch (type) {
+    case 'workspace': return `/api/workspaces/${id}`;
+    case 'course': return `/api/courses/${id}`;
+    case 'curriculum': return `/api/curricula/${id}`;
+  }
 }
 
 /**
@@ -60,11 +85,13 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   const fetchWorkspaces = useCallback(async () => {
     try {
       setError(null);
-      const response = await fetch('/api/workspaces');
+      const url = showArchived ? '/api/workspaces?includeArchived=true' : '/api/workspaces';
+      const response = await fetch(url);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -85,7 +112,7 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showArchived]);
 
   useEffect(() => {
     fetchWorkspaces();
@@ -214,13 +241,65 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
     []
   );
 
+  const archiveItem = useCallback(
+    async (type: ArchiveItemType, id: string, action: 'archive' | 'restore'): Promise<boolean> => {
+      try {
+        const response = await fetch(getArchiveUrl(type, id), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || `Failed to ${action} item`);
+        }
+
+        // Refetch to get updated data
+        await fetchWorkspaces();
+        return true;
+      } catch (err) {
+        console.error(`Error ${action}ing item:`, err);
+        return false;
+      }
+    },
+    [fetchWorkspaces]
+  );
+
+  const deleteItem = useCallback(
+    async (type: ArchiveItemType, id: string): Promise<boolean> => {
+      try {
+        const response = await fetch(getDeleteUrl(type, id), {
+          method: 'DELETE',
+        });
+
+        if (!response.ok && response.status !== 204) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to delete item');
+        }
+
+        // Refetch to get updated data
+        await fetchWorkspaces();
+        return true;
+      } catch (err) {
+        console.error('Error deleting item:', err);
+        return false;
+      }
+    },
+    [fetchWorkspaces]
+  );
+
   return {
     workspaces,
     isLoading,
     error,
+    showArchived,
+    setShowArchived,
     refetch: fetchWorkspaces,
     createWorkspace,
     createCourse,
     createCurriculum,
+    archiveItem,
+    deleteItem,
   };
 }

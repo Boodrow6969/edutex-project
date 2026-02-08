@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
     const courses = await prisma.course.findMany({
       where: {
         workspaceId,
+        archivedAt: null,
       },
       select: {
         id: true,
