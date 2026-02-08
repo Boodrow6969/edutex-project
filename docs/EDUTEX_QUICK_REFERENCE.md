@@ -32,7 +32,7 @@
 | M2.5: IMAGE + VIDEO | ✅ Complete |
 | M3: Block Picker | ✅ Complete |
 | M3: CONTENT_SCREEN | ✅ Complete |
-| M3: LEARNING_OBJECTIVES_IMPORT | ✅ Complete |
+| M3: LEARNING_OBJECTIVES_IMPORT (course objectives auto-fetch) | ✅ Complete |
 | Export to Word (.docx) | ✅ Complete |
 
 ### Available Block Types (in BlockPicker)
@@ -112,7 +112,7 @@ Full list: `docs/EDUTEX_BUGS_ENHANCEMENTS.md`
 
 ### Documentation
 ```
-/STATUS.md                    # Project status
+/STATUS.md                    # Course/project status
 /CHANGELOG.md                 # Version history
 /NEXT_STEPS.md               # Current priorities
 /docs/EDUTEX_BUGS_ENHANCEMENTS.md  # Bug/enhancement tracker

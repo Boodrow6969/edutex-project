@@ -5,6 +5,15 @@
 - Stack: Next.js 15, React 19, TypeScript, Tailwind CSS, Prisma ORM, PostgreSQL
 - Project root: D:\Dropbox\Dropbox\EduTex\app\
 
+### Important: Project → Course Rename (2026-02-08)
+- The Prisma model for courses was renamed from `Project` to `Course`. There is no `Project` model.
+- Database table: `courses` (was `projects`). All FKs: `courseId` (was `projectId`).
+- API routes: `/api/courses/[courseId]` (was `/api/projects/[projectId]`)
+- UI routes: `/workspace/[id]/course/[id]` (was `/workspace/[id]/project/[id]`)
+- Auth helper: `assertCourseAccess()` (was `assertProjectAccess()`)
+- Library: `lib/courses/getCourseOverview` (was `lib/projects/getProjectOverview`)
+- If you see any remaining `Project` model references in code, they are stale and should be updated.
+
 ## Absolute Rules — Never Break These
 
 ### File Safety

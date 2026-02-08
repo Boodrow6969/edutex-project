@@ -1,5 +1,7 @@
 # EDUTex Stakeholder Form UI — Claude Code Prompts
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course`. Stakeholder models now use `workspaceId` (migrated from `projectId`). References to `projectId` in these prompts reflect the original spec; update as needed when running.
+
 Use these prompts sequentially in Cursor. Each phase builds on the previous one and produces something testable. Feed one phase at a time — confirm it works before moving to the next.
 
 Reference docs (should be in your `docs/` folder):

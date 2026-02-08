@@ -16,6 +16,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.9.1] - 2026-02-08
+
+### Changed
+- **BREAKING: Renamed Project → Course throughout codebase**
+  - Prisma model: `Project` → `Course`, database table: `projects` → `courses`
+  - All `projectId` columns renamed to `courseId` across all tables
+  - API endpoints: `/api/projects/[projectId]` → `/api/courses/[courseId]`
+  - UI routes: `/workspace/[id]/project/[id]` → `/workspace/[id]/course/[id]`
+  - Auth helper: `assertProjectAccess()` → `assertCourseAccess()`
+  - Library: `lib/projects/getProjectOverview` → `lib/courses/getCourseOverview`
+  - Legacy routes: `/projects/` → `/courses/`
+  - All components, hooks, and types updated
+
+---
+
 ## [0.8.0] - 2026-01-21
 
 ### Added
@@ -224,6 +239,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 | Version | Date | Focus |
 |---------|------|-------|
+| 0.9.1 | Feb 2026 | Project → Course rename |
 | 0.8.0 | Jan 2026 | Storyboard Export + CONTENT_SCREEN refactor |
 | 0.7.0 | Jan 2026 | TipTap Storyboard Editor (Milestone 2.5) - Media Support |
 | 0.6.0 | Jan 2026 | TipTap Storyboard Editor (Milestone 2) - Custom Blocks |

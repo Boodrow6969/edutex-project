@@ -67,7 +67,7 @@ Create a modal/popover for inserting blocks:
 - Notes per item
 
 ##### LEARNING_OBJECTIVES_IMPORT Block
-- Import objectives from project blueprint
+- Import objectives from course blueprint
 - Display imported objectives
 - Track if edited since import
 - Link to source objective

@@ -1,5 +1,7 @@
 # EDUTex Stakeholder Needs Analysis — Data Model
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course` and all `projectId` FKs were renamed to `courseId`. The stakeholder models now use `workspaceId` (migrated from `projectId`). Prisma schema references to `Project` below reflect the original spec; the live schema uses `Course` and `workspaceId`.
+
 ## Overview
 
 This document defines the data model for the stakeholder needs analysis feature. It covers:
@@ -7,7 +9,7 @@ This document defines the data model for the stakeholder needs analysis feature.
 1. **TypeScript types** for question definitions (Option B — constants in code, not database)
 2. **Prisma schema additions** for the four database models (Access Token, Submission, Response, Change Log)
 3. **Enum definitions** shared between TypeScript and Prisma
-4. **Integration points** with existing schema (Project, User, Workspace)
+4. **Integration points** with existing schema (Course, User, Workspace)
 5. **Claude Code prompt** for implementation
 
 ---

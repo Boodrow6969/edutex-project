@@ -19,7 +19,7 @@ The core foundation of EduTex has been successfully implemented:
 
 The Prisma schema includes complete models for:
 - **Authentication**: User, Account, Session, VerificationToken
-- **Core**: Workspace, Project, Page, Block
+- **Core**: Workspace, Course, Page, Block
 - **Instructional Design**: Learning Objectives, Tasks, Deliverables
 - **Roles**: ADMINISTRATOR, MANAGER, DESIGNER, FACILITATOR, SME
 
@@ -300,9 +300,9 @@ app/
 
 Now that your foundation is set up, you're ready to:
 
-1. **Create sample data** - Use Prisma Studio to add test workspaces and projects
+1. **Create sample data** - Use Prisma Studio to add test workspaces and courses
 2. **Build workflows** - Implement the needs analysis to objectives workflow
-3. **Add templates** - Create project and page templates
+3. **Add templates** - Create course and page templates
 4. **Test AI features** - Try the instructional design AI functions
 5. **Customize UI** - Adapt the design to your preferences
 

@@ -1,5 +1,7 @@
 # EDUTex Navigation Restructure Specification
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course`. Route paths like `/workspace/{wsId}/project/{projId}` are now `/workspace/{wsId}/course/{courseId}`.
+
 **Date:** January 17, 2026  
 **Purpose:** Simplify sidebar navigation, make Workspaces the primary organizational concept
 

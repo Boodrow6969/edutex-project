@@ -1,5 +1,7 @@
 # EDUTex Stakeholder Needs Analysis — API Routes
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course`. Stakeholder models now use `workspaceId` (migrated from `projectId`). References to `projectId` in query params and request bodies below reflect the original spec; the live API uses `courseId` or `workspaceId` as appropriate.
+
 ## Overview
 
 This document defines all API routes for the stakeholder needs analysis feature. Three groups:

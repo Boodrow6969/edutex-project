@@ -1,5 +1,7 @@
 # EDUTex Stakeholder Needs Analysis — Step 4: Form UI Implementation Spec
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course`. Stakeholder models now use `workspaceId` (migrated from `projectId`). References to `projectId` in this spec reflect the original design; the live code uses `courseId` or `workspaceId`.
+
 ## Overview
 
 Build the public-facing stakeholder form at `/stakeholder/form/[token]`. This page lives outside the app shell — no sidebar, no auth, no navigation. A stakeholder receives a link, opens it, identifies themselves, answers questions filtered by training type, and submits. The ID reviews it later (Step 5).

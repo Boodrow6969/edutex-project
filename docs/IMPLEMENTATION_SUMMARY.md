@@ -128,7 +128,7 @@ export function getStoryboardExtensions() {
 - Prisma ORM with PostgreSQL
 - Complete schema for all core models:
   - Authentication (User, Account, Session)
-  - Workspaces and Projects
+  - Workspaces and Courses (renamed from Projects in v0.9.1)
   - Pages with block-based content
   - Learning Objectives with Bloom's Taxonomy
   - Tasks and Deliverables
@@ -142,7 +142,7 @@ export function getStoryboardExtensions() {
 - JWT sessions
 
 ### 4. AppFlowy-Inspired UI
-- **Sidebar**: 256px left navigation with collapsible workspace/project tree
+- **Sidebar**: 256px left navigation with collapsible workspace/course tree
 - **TopBar**: Context-aware breadcrumbs and actions
 - **Main Canvas**: Scrollable content area
 - Clean, minimalist design focused on productivity
@@ -202,7 +202,7 @@ export function getStoryboardExtensions() {
 The foundation is solid and ready for feature development. Next steps:
 
 **Phase 2**: Build end-to-end workflow
-1. Workspace/Project CRUD operations
+1. Workspace/Course CRUD operations
 2. Needs Analysis page with AI assistance
 3. Learning Objectives page with generation
 4. Connect the full workflow

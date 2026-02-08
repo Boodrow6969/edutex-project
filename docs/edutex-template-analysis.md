@@ -1,5 +1,7 @@
 # EDUTex Template Analysis & Integration Specification
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course` and `projectId` FKs were renamed to `courseId`. References to `projectId` in data models below reflect the original spec.
+
 **Analysis Date:** December 30, 2025  
 **Source:** LDT Standard Templates (28 files)  
 **Purpose:** Define data models, input/output mapping, and business stakeholder requirements for EDUTex platform integration

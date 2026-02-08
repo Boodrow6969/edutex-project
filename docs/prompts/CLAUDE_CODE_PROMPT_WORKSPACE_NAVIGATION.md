@@ -1,5 +1,7 @@
 # Claude Code Prompt: Fix Workspace Navigation
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course`. Route path `/workspace/{wsId}/project/{id}` is now `/workspace/{wsId}/course/{id}`.
+
 ## Problem
 Clicking a workspace name in the sidebar only expands/collapses the submenu. It should navigate to `/workspace/{workspaceId}` and show a Workspace detail page.
 

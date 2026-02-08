@@ -1,5 +1,7 @@
 # EDUTex Stakeholder Needs Analysis — Question Content Specification
 
+> **Migration Note (2026-02-08):** The `Project` model was renamed to `Course`. References to `projectId` in the data model section at the bottom of this document reflect the original spec; the live schema uses `courseId` or `workspaceId`.
+
 ## Document Purpose
 
 This specification defines every question in the Stakeholder Needs Analysis webform across all four training types. Each question includes three content layers:

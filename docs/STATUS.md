@@ -13,7 +13,7 @@ Last Updated: February 7, 2026
 ### Core Platform
 - Authentication (NextAuth) — login, session management
 - Workspace management — create, switch workspaces
-- Project creation — standalone and curriculum-linked
+- Course creation — standalone and curriculum-linked
 - Curriculum management — hierarchical structure with course linking
 - Sidebar navigation and TopBar
 - Global Figma design system (primary #03428e, consistent styling)

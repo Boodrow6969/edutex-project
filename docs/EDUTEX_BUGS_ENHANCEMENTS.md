@@ -3,7 +3,7 @@
 ## Bugs
 
 ### BUG-001: Flash when creating new course
-- **Location:** `components/modals/CreateProjectModal.tsx`
+- **Location:** `components/modals/CreateCourseModal.tsx` (renamed from CreateProjectModal)
 - **Issue:** Modal closes before navigation completes, causing brief flash of courses page
 - **Fix:** Keep modal open until `router.push()` completes, or remove `onClose()` call since page navigation unmounts modal anyway
 - **Priority:** Low (cosmetic)
@@ -28,8 +28,8 @@
 - **Note:** Originally referenced StoryboardMetadataNode.ts, which was replaced by the CourseInfoHeader component in Phase 1. Bug may still apply to remaining custom block types.
 
 ### BUG-005: Workspace sidebar toggle doesn't collapse on second click
-- **Location:** Sidebar workspace/project menu component
-- **Description:** Clicking a workspace in the sidebar expands it to show its projects, but clicking the same workspace again does not collapse it. The only way to collapse an expanded workspace is to click a different workspace, which expands the new one and collapses the previous. Expected behavior: clicking an expanded workspace should toggle it closed.
+- **Location:** Sidebar workspace/course menu component
+- **Description:** Clicking a workspace in the sidebar expands it to show its courses, but clicking the same workspace again does not collapse it. The only way to collapse an expanded workspace is to click a different workspace, which expands the new one and collapses the previous. Expected behavior: clicking an expanded workspace should toggle it closed.
 - **Priority:** Low (UX)
 - **Status:** Open
 
@@ -55,13 +55,19 @@
 - **Affected Block Types:** All custom block types
 - **Note:** Originally documented as most noticeable with IMAGE and VIDEO blocks. IMAGE/VIDEO standalone extensions have since been removed, but the underlying race condition still applies to CONTENT_SCREEN and other blocks.
 
+### BUG-013: Course created from Dashboard "+Add Course" does not appear in sidebar
+- **Location:** Workspace Dashboard (`app/workspace/[workspaceId]/workspace-detail-page.tsx`) and sidebar (`components/Sidebar.tsx` / `lib/hooks/useWorkspacesTree.ts`)
+- **Description:** Creating a course via the "+Add Course" button on the Workspace Dashboard successfully creates the course and displays it on the dashboard, but the sidebar workspace tree does not update to show the new course. Creating a course via the sidebar "+ New Course" link works correctly and appears immediately. The dashboard creation path likely does not trigger the sidebar's data refresh/mutation.
+- **Priority:** High (functional)
+- **Status:** Open
+
 ---
 
 ## Enhancements
 
-### ENH-001: ID Dashboard - My Projects Card
+### ENH-001: ID Dashboard - My Courses Card
 - **Location:** Instructional Designer Dashboard
-- **Description:** Top card should display "My Projects" for quick access to active work
+- **Description:** Top card should display "My Courses" for quick access to active work
 - **Priority:** Medium
 - **Status:** Planned
 
@@ -136,7 +142,7 @@
 - **Status:** Backlog
 
 ### ENH-013: Workspace Chevron Toggle Collapse
-- **Location:** Sidebar workspace/project menu component
+- **Location:** Sidebar workspace/course menu component
 - **Description:** Allow the chevron arrow on an expanded workspace to collapse the submenu while staying on that workspace's detail page. Currently clicking anywhere on the row navigates + expands. User may want to collapse the submenu without navigating away.
 - **Proposed behavior:**
   - Click workspace NAME → navigate + expand (current)
@@ -146,9 +152,9 @@
 
 ### ENH-014: Course Page Terminology Updates
 - **Date Added:** January 17, 2026
-- **Location:** app/workspace/[workspaceId]/project/[projectId]/page.tsx
+- **Location:** app/workspace/[workspaceId]/course/[courseId]/page.tsx (renamed from project/[projectId])
 - **Description:** Update terminology on Course detail page for clarity:
-  1. **Breadcrumb**: Currently shows "Workspaces / Project". Should show "Workspaces / [Workspace Name] / [Course Name]" or at minimum "Workspaces / Course"
+  1. **Breadcrumb**: Should show "Workspaces / [Workspace Name] / [Course Name]"
   2. **"Pages" section**: Rename to something more contextually appropriate for instructional design. Options: "Course Components", "Design Documents", "Course Sections", "Modules"
   3. **"+ New Page" button**: Update label to match new section name (e.g., "+ New Component", "+ New Section")
 - **Priority:** Low
@@ -156,7 +162,7 @@
 
 ### ENH-015: Collapsible Course Information & Learning Objectives header
 - **Location:** components/storyboard/CourseInfoHeader.tsx, new LO header component
-- **Description:** Course Information and Learning Objectives should both appear as fixed header sections above the TipTap editor. Both should auto-minimize/collapse by default so they don't take up too much room. Expandable on click to view/edit details. Learning Objectives pulls from project, Course Information pulls from project name and saves to Storyboard model.
+- **Description:** Course Information and Learning Objectives should both appear as fixed header sections above the TipTap editor. Both should auto-minimize/collapse by default so they don't take up too much room. Expandable on click to view/edit details. Learning Objectives pulls from course, Course Information pulls from course name and saves to Storyboard model.
 - **Priority:** Medium
 - **Status:** Backlog
 - **Note:** CourseInfoHeader exists but does not yet have collapse behavior. Learning Objectives header not yet built.
@@ -169,12 +175,12 @@
 
 ### ENH-017: Sidebar hierarchy for course subsections
 - **Location:** Sidebar component
-- **Description:** When viewing a course subsection (Storyboard, Needs Analysis, etc.), the sidebar should show the course hierarchy instead of breadcrumbs at top. Example: Workspace > Project > [Pages list with current page highlighted]. See screenshot reference.
+- **Description:** When viewing a course subsection (Storyboard, Needs Analysis, etc.), the sidebar should show the course hierarchy instead of breadcrumbs at top. Example: Workspace > Course > [Pages list with current page highlighted]. See screenshot reference.
 - **Priority:** Medium
 - **Status:** Backlog
 
 ### ENH-018: Node-based course flow visualization
-- **Location:** New component (likely components/project/CourseFlowView.tsx or similar)
+- **Location:** New component (likely components/course/CourseFlowView.tsx or similar)
 - **Description:** Visual map of course structure using React Flow library. Auto-generates from storyboard blocks. Shows section groupings, screen sequences, screen types (color-coded), and branching paths. Nodes clickable to jump to block in editor. Provides at-a-glance view of course architecture.
 - **Dependencies:** React Flow library
 - **Priority:** Medium (workflow/visualization)
@@ -214,7 +220,13 @@
 - **Location:** components/stakeholder/SubmissionDetailPanel.tsx
 - **Description:** When requesting revision, allow the ID to add notes on individual question responses (inline note icon or expandable field per entry in the slide-over panel), in addition to the existing general revision notes field. Stakeholder sees both — specific notes next to the relevant questions, plus the general note at the top of the revision banner. Change log should track which entries received notes.
 - **Priority:** Medium (Feature)
-- **Status:** Backlog 
+- **Status:** Backlog
+
+### ENH-025: Add description field to sidebar course creation
+- **Location:** `components/Sidebar.tsx`
+- **Description:** The sidebar "+ New Course" inline creation only captures a course name. Add an optional description field or a follow-up prompt/modal that allows entering a description at creation time.
+- **Priority:** Low (UX)
+- **Status:** Backlog
 
 ---
 
@@ -234,7 +246,7 @@
 
 ### FUT-003: Course Email Templates
 - **Location:** Individual Course view
-- **Description:** Tool for drafting course invite/reminder emails with templates that pull project data for prepopulation
+- **Description:** Tool for drafting course invite/reminder emails with templates that pull course data for prepopulation
 - **Complexity:** Medium (email generation, data binding)
 - **Status:** Backlog
 
@@ -254,7 +266,7 @@
 
 ### Storyboard Phase 1: CourseInfoHeader
 - **Status:** Complete (February 2026)
-- **Description:** Fixed Course Information header above TipTap editor with title, target audience, duration, delivery method. Pre-populates from project. Saves to Storyboard model with 500ms debounced autosave.
+- **Description:** Fixed Course Information header above TipTap editor with title, target audience, duration, delivery method. Pre-populates from course. Saves to Storyboard model with 500ms debounced autosave.
 
 ### Storyboard Phase 2: Bottom Toolbar (StoryboardToolbar)
 - **Status:** Complete (February 2026)
@@ -288,4 +300,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: February 5, 2026*
+*Last updated: February 8, 2026*
