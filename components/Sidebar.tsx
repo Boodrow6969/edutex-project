@@ -362,10 +362,12 @@ export default function Sidebar() {
 
     return (
       <div key={workspace.id} className="space-y-0.5">
-        <div className={`group relative flex items-center ${isArchived ? 'opacity-60' : ''}`}>
+        <div className="group relative flex items-center">
           <button
             onClick={() => handleWorkspaceClick(workspace.id)}
             className={`w-full flex items-center justify-between px-4 py-2 text-sm rounded-lg transition-colors ${
+              isArchived ? 'opacity-60' : ''
+            } ${
               isActiveWorkspace
                 ? 'bg-[#03428e] text-white'
                 : 'text-gray-300 hover:text-white hover:bg-white/10'
@@ -513,10 +515,12 @@ export default function Sidebar() {
             {workspace.courses.map((course) => {
               const isCourseArchived = !!course.archivedAt;
               return (
-                <div key={course.id} className={`group/item relative ${isCourseArchived ? 'opacity-60' : ''}`}>
+                <div key={course.id} className="group/item relative">
                   <Link
                     href={`/workspace/${workspace.id}/course/${course.id}`}
                     className={`flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg truncate transition-colors ${
+                      isCourseArchived ? 'opacity-60' : ''
+                    } ${
                       pathname?.includes(course.id)
                         ? 'bg-[#03428e] text-white'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
@@ -557,10 +561,12 @@ export default function Sidebar() {
             {workspace.curricula?.map((curriculum) => {
               const isCurriculumArchived = !!curriculum.archivedAt;
               return (
-                <div key={curriculum.id} className={`group/item relative ${isCurriculumArchived ? 'opacity-60' : ''}`}>
+                <div key={curriculum.id} className="group/item relative">
                   <Link
                     href={`/workspace/${workspace.id}/curriculum/${curriculum.id}`}
                     className={`flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg truncate transition-colors ${
+                      isCurriculumArchived ? 'opacity-60' : ''
+                    } ${
                       pathname?.includes(curriculum.id)
                         ? 'bg-[#03428e] text-white'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
