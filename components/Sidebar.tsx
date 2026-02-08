@@ -362,7 +362,7 @@ export default function Sidebar() {
 
     return (
       <div key={workspace.id} className="space-y-0.5">
-        <div className="group relative flex items-center">
+        <div className={`group relative flex items-center ${contextMenu?.id === workspace.id ? 'z-40' : ''}`}>
           <button
             onClick={() => handleWorkspaceClick(workspace.id)}
             className={`w-full flex items-center justify-between px-4 py-2 text-sm rounded-lg transition-colors ${
@@ -515,7 +515,7 @@ export default function Sidebar() {
             {workspace.courses.map((course) => {
               const isCourseArchived = !!course.archivedAt;
               return (
-                <div key={course.id} className="group/item relative">
+                <div key={course.id} className={`group/item relative ${contextMenu?.id === course.id ? 'z-40' : ''}`}>
                   <Link
                     href={`/workspace/${workspace.id}/course/${course.id}`}
                     className={`flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg truncate transition-colors ${
@@ -561,7 +561,7 @@ export default function Sidebar() {
             {workspace.curricula?.map((curriculum) => {
               const isCurriculumArchived = !!curriculum.archivedAt;
               return (
-                <div key={curriculum.id} className="group/item relative">
+                <div key={curriculum.id} className={`group/item relative ${contextMenu?.id === curriculum.id ? 'z-40' : ''}`}>
                   <Link
                     href={`/workspace/${workspace.id}/curriculum/${curriculum.id}`}
                     className={`flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg truncate transition-colors ${
