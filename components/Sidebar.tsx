@@ -323,7 +323,7 @@ export default function Sidebar() {
     return (
       <div
         ref={contextMenuRef}
-        className="absolute right-0 top-full mt-1 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 py-1"
+        className="absolute right-0 top-full mt-1 w-40 bg-[#1E293B] border border-gray-600 rounded-lg shadow-2xl z-50 py-1"
       >
         {contextMenu.isArchived ? (
           <button
@@ -530,7 +530,9 @@ export default function Sidebar() {
                       </span>
                     )}
                   </Link>
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                  <div className={`absolute right-1 top-1/2 -translate-y-1/2 transition-opacity ${
+                    contextMenu?.id === course.id ? 'opacity-100' : 'opacity-0 group-hover/item:opacity-100'
+                  }`}>
                     <button
                       onClick={(e) =>
                         openContextMenu(e, {
@@ -572,7 +574,9 @@ export default function Sidebar() {
                       </span>
                     )}
                   </Link>
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                  <div className={`absolute right-1 top-1/2 -translate-y-1/2 transition-opacity ${
+                    contextMenu?.id === curriculum.id ? 'opacity-100' : 'opacity-0 group-hover/item:opacity-100'
+                  }`}>
                     <button
                       onClick={(e) =>
                         openContextMenu(e, {
