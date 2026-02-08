@@ -37,8 +37,8 @@ interface TaskStats {
   };
 }
 
-interface ProjectOverviewData {
-  project: {
+interface CourseOverviewData {
+  course: {
     id: string;
     name: string;
     description: string | null;
@@ -51,7 +51,7 @@ interface ProjectOverviewData {
   taskStats: TaskStats;
 }
 
-interface ProjectOverviewProps {
+interface CourseOverviewProps {
   courseId: string;
   workspaceId: string;
   onCreatePage: () => void;
@@ -73,14 +73,14 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
 };
 
 /**
- * Main project overview component that fetches and displays project summary data.
+ * Main course overview component that fetches and displays course summary data.
  */
-export default function ProjectOverview({
+export default function CourseOverview({
   courseId,
   workspaceId,
   onCreatePage,
-}: ProjectOverviewProps) {
-  const [data, setData] = useState<ProjectOverviewData | null>(null);
+}: CourseOverviewProps) {
+  const [data, setData] = useState<CourseOverviewData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,17 +95,17 @@ export default function ProjectOverview({
           return;
         }
         if (response.status === 404) {
-          setError('Project not found');
+          setError('Course not found');
           return;
         }
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch project overview');
+        throw new Error(errorData.error || 'Failed to fetch course overview');
       }
 
       const overview = await response.json();
       setData(overview);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load project';
+      const message = err instanceof Error ? err.message : 'Failed to load course';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -126,7 +126,7 @@ export default function ProjectOverview({
       <div className="flex items-center justify-center py-16">
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-gray-600">Loading project...</span>
+          <span className="text-gray-600">Loading course...</span>
         </div>
       </div>
     );
@@ -165,16 +165,16 @@ export default function ProjectOverview({
         </div>
       )}
 
-      {/* Project Header */}
+      {/* Course Header */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">{data.project.name}</h1>
-            {data.project.description && (
-              <p className="mt-2 text-gray-600">{data.project.description}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{data.course.name}</h1>
+            {data.course.description && (
+              <p className="mt-2 text-gray-600">{data.course.description}</p>
             )}
             <p className="mt-3 text-sm text-gray-500">
-              Created {formatDate(data.project.createdAt)}
+              Created {formatDate(data.course.createdAt)}
             </p>
           </div>
 
@@ -229,7 +229,7 @@ export default function ProjectOverview({
 }
 
 // Export a hook for parent components to trigger refresh
-export function useProjectOverviewRefresh() {
+export function useCourseOverviewRefresh() {
   const [refreshKey, setRefreshKey] = useState(0);
   const triggerRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
   return { refreshKey, triggerRefresh };

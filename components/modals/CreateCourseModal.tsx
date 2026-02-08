@@ -3,19 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface CreateProjectModalProps {
+interface CreateCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   workspaceId: string;
-  onSuccess?: (project: { id: string; name: string }) => void;
+  onSuccess?: (course: { id: string; name: string }) => void;
 }
 
-export default function CreateProjectModal({
+export default function CreateCourseModal({
   isOpen,
   onClose,
   workspaceId,
   onSuccess,
-}: CreateProjectModalProps) {
+}: CreateCourseModalProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export default function CreateProjectModal({
     setError(null);
 
     try {
-      const response = await fetch('/api/projects', {
+      const response = await fetch('/api/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,24 +70,24 @@ export default function CreateProjectModal({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to create project');
+        throw new Error(data.error || 'Failed to create course');
       }
 
-      const project = await response.json();
+      const course = await response.json();
 
       // Call success callback if provided
       if (onSuccess) {
-        onSuccess(project);
+        onSuccess(course);
       }
 
       // Reset and close modal
       resetForm();
       onClose();
 
-      // Navigate to the new project
-      router.push(`/workspace/${workspaceId}/project/${project.id}`);
+      // Navigate to the new course
+      router.push(`/workspace/${workspaceId}/course/${course.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create project');
+      setError(err instanceof Error ? err.message : 'Failed to create course');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +102,7 @@ export default function CreateProjectModal({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">New Course</h2>
-            <p className="text-sm text-gray-500">Create a new learning project</p>
+            <p className="text-sm text-gray-500">Create a new learning course</p>
           </div>
           <button
             type="button"
@@ -131,11 +131,11 @@ export default function CreateProjectModal({
 
             {/* Name */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="project-name">
+              <label className="text-sm font-medium text-gray-700" htmlFor="course-name">
                 Name <span className="text-red-500">*</span>
               </label>
               <input
-                id="project-name"
+                id="course-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -147,11 +147,11 @@ export default function CreateProjectModal({
 
             {/* Description */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="project-description">
+              <label className="text-sm font-medium text-gray-700" htmlFor="course-description">
                 Description
               </label>
               <textarea
-                id="project-description"
+                id="course-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -162,11 +162,11 @@ export default function CreateProjectModal({
 
             {/* Client Name */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="project-client">
+              <label className="text-sm font-medium text-gray-700" htmlFor="course-client">
                 Client name
               </label>
               <input
-                id="project-client"
+                id="course-client"
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
@@ -175,13 +175,13 @@ export default function CreateProjectModal({
               />
             </div>
 
-            {/* Project Type */}
+            {/* Course Type */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="project-type">
-                Project type
+              <label className="text-sm font-medium text-gray-700" htmlFor="course-type">
+                Course type
               </label>
               <input
-                id="project-type"
+                id="course-type"
                 type="text"
                 value={courseType}
                 onChange={(e) => setCourseType(e.target.value)}
@@ -193,11 +193,11 @@ export default function CreateProjectModal({
             {/* Phase and Priority - side by side */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700" htmlFor="project-phase">
+                <label className="text-sm font-medium text-gray-700" htmlFor="course-phase">
                   Phase
                 </label>
                 <select
-                  id="project-phase"
+                  id="course-phase"
                   value={phase}
                   onChange={(e) => setPhase(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
@@ -211,11 +211,11 @@ export default function CreateProjectModal({
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700" htmlFor="project-priority">
+                <label className="text-sm font-medium text-gray-700" htmlFor="course-priority">
                   Priority
                 </label>
                 <select
-                  id="project-priority"
+                  id="course-priority"
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
@@ -229,11 +229,11 @@ export default function CreateProjectModal({
 
             {/* Target Go Live */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="project-golive">
+              <label className="text-sm font-medium text-gray-700" htmlFor="course-golive">
                 Target go-live date
               </label>
               <input
-                id="project-golive"
+                id="course-golive"
                 type="date"
                 value={targetGoLive}
                 onChange={(e) => setTargetGoLive(e.target.value)}

@@ -241,7 +241,7 @@ export default function WorkspaceDetailPage() {
                 {workspace.courses.map((course) => (
                   <Link
                     key={course.id}
-                    href={`/workspace/${workspaceId}/project/${course.id}`}
+                    href={`/workspace/${workspaceId}/course/${course.id}`}
                     className="flex items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-[#03428e] hover:bg-blue-50/30 transition-colors group"
                   >
                     <div className="flex items-center gap-3">

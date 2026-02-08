@@ -49,7 +49,7 @@ const PAGE_TYPE_COLORS: Record<PageType, string> = {
 };
 
 /**
- * Displays a list of pages in a project with links to each page.
+ * Displays a list of pages in a course with links to each page.
  */
 export default function PagesList({
   pages,
@@ -103,7 +103,7 @@ export default function PagesList({
           pages.map((page) => (
             <Link
               key={page.id}
-              href={`/workspace/${workspaceId}/project/${courseId}/page/${page.id}`}
+              href={`/workspace/${workspaceId}/course/${courseId}/page/${page.id}`}
               className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group"
             >
               <div className="flex items-center gap-3 min-w-0">

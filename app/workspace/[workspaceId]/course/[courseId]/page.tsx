@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { PageType } from '@prisma/client';
-import ProjectOverview from '@/components/project/ProjectOverview';
+import CourseOverview from '@/components/course/CourseOverview';
 
 const PAGE_TYPE_LABELS: Record<PageType, string> = {
   CUSTOM: 'Custom',
@@ -22,11 +22,11 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
 };
 
 /**
- * Project detail page showing project overview with pages, objectives, and tasks.
+ * Course detail page showing course overview with pages, objectives, and tasks.
  */
-export default function ProjectPage() {
+export default function CoursePage() {
   const params = useParams();
-  const courseId = params.projectId as string;
+  const courseId = params.courseId as string;
   const workspaceId = params.workspaceId as string;
 
   // Page creation state
@@ -93,13 +93,13 @@ export default function ProjectPage() {
             Workspaces
           </Link>
           <span>/</span>
-          <span className="text-gray-900">Project</span>
+          <span className="text-gray-900">Course</span>
         </nav>
       </div>
 
       {/* Main content */}
       <div className="p-6 max-w-6xl mx-auto">
-        <ProjectOverview
+        <CourseOverview
           key={refreshKey}
           courseId={courseId}
           workspaceId={workspaceId}

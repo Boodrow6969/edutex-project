@@ -6,7 +6,7 @@ import Link from 'next/link';
 import StakeholderSummaryCard from '@/components/stakeholder/StakeholderSummaryCard';
 import StakeholderContactsCard from '@/components/stakeholder/StakeholderContactsCard';
 
-interface Project {
+interface Course {
   id: string;
   name: string;
   description: string | null;
@@ -31,9 +31,9 @@ interface WorkspaceDetails {
   updatedAt: string;
   role: string | null;
   memberCount: number;
-  projectCount: number;
+  courseCount: number;
   curriculumCount: number;
-  projects: Project[];
+  courses: Course[];
   curricula: Curriculum[];
 }
 
@@ -91,7 +91,7 @@ export default function WorkspacePage() {
     setCreatingCourse(true);
 
     try {
-      const response = await fetch('/api/projects', {
+      const response = await fetch('/api/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -209,7 +209,7 @@ export default function WorkspacePage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-2xl font-bold text-blue-600">{workspace.projectCount}</div>
+            <div className="text-2xl font-bold text-blue-600">{workspace.courseCount}</div>
             <div className="text-sm text-gray-500">Courses</div>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -253,7 +253,7 @@ export default function WorkspacePage() {
         {/* Courses Section */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Courses</h2>
-          {workspace.projects.length === 0 ? (
+          {workspace.courses.length === 0 ? (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
               <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -268,10 +268,10 @@ export default function WorkspacePage() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {workspace.projects.map((project) => (
+              {workspace.courses.map((course) => (
                 <Link
-                  key={project.id}
-                  href={`/workspace/${workspaceId}/project/${project.id}`}
+                  key={course.id}
+                  href={`/workspace/${workspaceId}/course/${course.id}`}
                   className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start gap-3">
@@ -281,9 +281,9 @@ export default function WorkspacePage() {
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
-                      {project.description && (
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+                      <h3 className="font-medium text-gray-900 truncate">{course.name}</h3>
+                      {course.description && (
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{course.description}</p>
                       )}
                     </div>
                   </div>

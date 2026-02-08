@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { PageType } from '@prisma/client';
 import EditCurriculumModal from '@/components/modals/EditCurriculumModal';
 import AddCourseToCurriculumModal from '@/components/modals/AddCourseToCurriculumModal';
-import CreateProjectModal from '@/components/modals/CreateProjectModal';
+import CreateCourseModal from '@/components/modals/CreateCourseModal';
 
 interface CurriculumPage {
   id: string;
@@ -189,14 +189,14 @@ export default function CurriculumDetailPage() {
     const [moved] = newCourses.splice(currentIndex, 1);
     newCourses.splice(newIndex, 0, moved);
 
-    const orderedProjectIds = newCourses.map((c) => c.id);
+    const orderedCourseIds = newCourses.map((c) => c.id);
 
     setReordering(true);
     try {
       const response = await fetch(`/api/curricula/${curriculumId}/courses/reorder`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderedProjectIds }),
+        body: JSON.stringify({ orderedCourseIds }),
       });
 
       if (!response.ok) {
@@ -211,13 +211,13 @@ export default function CurriculumDetailPage() {
     }
   };
 
-  const handleCourseCreated = async (project: { id: string }) => {
+  const handleCourseCreated = async (course: { id: string }) => {
     // Link the newly created course to this curriculum
     try {
       await fetch(`/api/curricula/${curriculumId}/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId: project.id }),
+        body: JSON.stringify({ courseId: course.id }),
       });
       fetchCurriculum();
     } catch (err) {
@@ -434,7 +434,7 @@ export default function CurriculumDetailPage() {
                     className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 group"
                   >
                     <Link
-                      href={`/workspace/${workspaceId}/project/${course.id}`}
+                      href={`/workspace/${workspaceId}/course/${course.id}`}
                       className="flex-1 flex items-center gap-3"
                     >
                       <span className="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-500 text-xs rounded">
@@ -590,7 +590,7 @@ export default function CurriculumDetailPage() {
       />
 
       {/* Create Course Modal */}
-      <CreateProjectModal
+      <CreateCourseModal
         isOpen={showCreateCourseModal}
         onClose={() => setShowCreateCourseModal(false)}
         workspaceId={workspaceId}

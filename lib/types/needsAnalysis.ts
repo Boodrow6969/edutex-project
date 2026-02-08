@@ -27,7 +27,7 @@ export interface NeedsAnalysisResult {
   /** Constraints and limitations identified (time, budget, tech, etc.) */
   constraints: string[];
 
-  /** Recommended tasks for the instructional design project */
+  /** Recommended tasks for the instructional design course */
   recommendedTasks: RecommendedTask[];
 }
 

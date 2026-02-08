@@ -17,8 +17,8 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
   const user = await getCurrentUserOrThrow();
   await assertCourseAccess(courseId, user.id);
 
-  // Fetch project info
-  const project = await prisma.course.findUnique({
+  // Fetch course info
+  const course = await prisma.course.findUnique({
     where: { id: courseId },
     select: {
       id: true,
@@ -28,11 +28,11 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
     },
   });
 
-  if (!project) {
+  if (!course) {
     notFound();
   }
 
-  // Fetch all blueprints for this project
+  // Fetch all blueprints for this course
   const blueprints = await prisma.learningBlueprint.findMany({
     where: { courseId },
     orderBy: { createdAt: 'desc' },
@@ -58,14 +58,14 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <div>
         <Link
-          href={`/projects/${courseId}`}
+          href={`/courses/${courseId}`}
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 inline-block"
         >
-          ← Back to Project
+          ← Back to Course
         </Link>
-        <h1 className="text-3xl font-bold">{project.name}</h1>
-        {project.clientName && (
-          <p className="text-sm text-gray-500 mt-1">Client: {project.clientName}</p>
+        <h1 className="text-3xl font-bold">{course.name}</h1>
+        {course.clientName && (
+          <p className="text-sm text-gray-500 mt-1">Client: {course.clientName}</p>
         )}
       </div>
 
@@ -74,7 +74,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
           <h2 className="text-xl font-semibold">Learning blueprints</h2>
           {blueprints.length > 0 && (
             <Link
-              href={`/projects/${courseId}/blueprints/new`}
+              href={`/courses/${courseId}/blueprints/new`}
               className="px-4 py-2 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
             >
               New blueprint
@@ -88,7 +88,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
               No blueprints yet. Create your first blueprint to get started.
             </p>
             <Link
-              href={`/projects/${courseId}/blueprints/new`}
+              href={`/courses/${courseId}/blueprints/new`}
               className="inline-block px-4 py-2 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
             >
               Create first blueprint
@@ -114,7 +114,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
                   >
                     <td className="px-4 py-3">
                       <Link
-                        href={`/projects/${courseId}/blueprints/${blueprint.id}`}
+                        href={`/courses/${courseId}/blueprints/${blueprint.id}`}
                         className="text-sm font-medium text-blue-600 hover:text-blue-700"
                       >
                         {blueprint.title}

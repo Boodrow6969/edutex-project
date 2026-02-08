@@ -31,7 +31,7 @@ export default function StoryboardEditor({
     editor,
     pageMetadata,
     storyboardData,
-    projectName,
+    courseName,
     isLoading,
     isSaving,
     error,
@@ -87,7 +87,7 @@ export default function StoryboardEditor({
         <div className="px-6 pt-4">
           <CourseInfoHeader
             storyboardId={storyboardData.id}
-            projectName={projectName}
+            courseName={courseName}
             initialData={{
               title: storyboardData.title,
               targetAudience: storyboardData.targetAudience,

@@ -42,12 +42,12 @@ export default function AddCourseToCurriculumModal({
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/projects?workspaceId=${workspaceId}`);
+        const response = await fetch(`/api/courses?workspaceId=${workspaceId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch courses');
         }
         const data = await response.json();
-        const allCourses = data.projects || [];
+        const allCourses = data.courses || [];
         // Filter out already linked courses
         const availableCourses = allCourses.filter(
           (c: Course) => !linkedCourseIds.includes(c.id)

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useWorkspacesTree } from '@/lib/hooks/useWorkspacesTree';
-import CreateProjectModal from '@/components/modals/CreateProjectModal';
+import CreateCourseModal from '@/components/modals/CreateCourseModal';
 import CreateCurriculumModal from '@/components/modals/CreateCurriculumModal';
 
 export default function WorkspacePage() {
@@ -152,7 +152,7 @@ export default function WorkspacePage() {
       {/* Modals */}
       {defaultWorkspace && (
         <>
-          <CreateProjectModal
+          <CreateCourseModal
             isOpen={showCreateCourseModal}
             onClose={() => setShowCreateCourseModal(false)}
             workspaceId={defaultWorkspace.id}

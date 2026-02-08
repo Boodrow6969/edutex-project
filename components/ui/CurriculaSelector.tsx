@@ -54,7 +54,7 @@ export default function CurriculaSelector({
     fetchCurricula();
   }, [workspaceId]);
 
-  // Fetch current curricula memberships for this project
+  // Fetch current curricula memberships for this course
   useEffect(() => {
     const fetchCurrentMemberships = async () => {
       if (!courseId) return;

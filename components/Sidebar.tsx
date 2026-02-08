@@ -99,7 +99,7 @@ export default function Sidebar() {
     isLoading,
     error,
     createWorkspace,
-    createProject,
+    createCourse,
     createCurriculum,
   } = useWorkspacesTree();
 
@@ -111,9 +111,9 @@ export default function Sidebar() {
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [creatingWorkspace, setCreatingWorkspace] = useState(false);
 
-  const [showCreateProject, setShowCreateProject] = useState<string | null>(null);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [creatingProject, setCreatingProject] = useState(false);
+  const [showCreateCourse, setShowCreateCourse] = useState<string | null>(null);
+  const [newCourseName, setNewCourseName] = useState('');
+  const [creatingCourse, setCreatingCourse] = useState(false);
 
   const [showCreateCurriculum, setShowCreateCurriculum] = useState<string | null>(null);
   const [newCurriculumName, setNewCurriculumName] = useState('');
@@ -140,17 +140,17 @@ export default function Sidebar() {
     }
   };
 
-  const handleCreateProject = async (e: React.FormEvent, workspaceId: string) => {
+  const handleCreateCourse = async (e: React.FormEvent, workspaceId: string) => {
     e.preventDefault();
-    if (!newProjectName.trim() || creatingProject) return;
+    if (!newCourseName.trim() || creatingCourse) return;
 
-    setCreatingProject(true);
-    const project = await createProject(workspaceId, newProjectName.trim());
-    setCreatingProject(false);
+    setCreatingCourse(true);
+    const course = await createCourse(workspaceId, newCourseName.trim());
+    setCreatingCourse(false);
 
-    if (project) {
-      setNewProjectName('');
-      setShowCreateProject(null);
+    if (course) {
+      setNewCourseName('');
+      setShowCreateCourse(null);
     }
   };
 
@@ -198,7 +198,7 @@ export default function Sidebar() {
   const renderWorkspaceTree = (workspace: Workspace) => {
     const isExpanded = expandedWorkspaceId === workspace.id;
     const isActiveWorkspace = pathname?.startsWith(`/workspace/${workspace.id}`);
-    const isCreatingProjectHere = showCreateProject === workspace.id;
+    const isCreatingCourseHere = showCreateCourse === workspace.id;
     const isCreatingCurriculumHere = showCreateCurriculum === workspace.id;
 
     return (
@@ -218,30 +218,30 @@ export default function Sidebar() {
         {isExpanded && (
           <div className="ml-4 space-y-0.5">
             {/* Submenu actions */}
-            {isCreatingProjectHere ? (
-              <form onSubmit={(e) => handleCreateProject(e, workspace.id)} className="px-4 py-2">
+            {isCreatingCourseHere ? (
+              <form onSubmit={(e) => handleCreateCourse(e, workspace.id)} className="px-4 py-2">
                 <input
                   type="text"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
+                  value={newCourseName}
+                  onChange={(e) => setNewCourseName(e.target.value)}
                   placeholder="Course name..."
                   className="w-full px-2 py-1.5 text-sm bg-white/10 border border-white/20 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#03428e]"
                   autoFocus
-                  disabled={creatingProject}
+                  disabled={creatingCourse}
                 />
                 <div className="flex gap-2 mt-2">
                   <button
                     type="submit"
-                    disabled={!newProjectName.trim() || creatingProject}
+                    disabled={!newCourseName.trim() || creatingCourse}
                     className="px-3 py-1 text-xs bg-[#03428e] text-white rounded hover:bg-[#022d61] disabled:opacity-50"
                   >
-                    {creatingProject ? '...' : 'Add'}
+                    {creatingCourse ? '...' : 'Add'}
                   </button>
                   <button
                     type="button"
                     onClick={() => {
-                      setShowCreateProject(null);
-                      setNewProjectName('');
+                      setShowCreateCourse(null);
+                      setNewCourseName('');
                     }}
                     className="px-3 py-1 text-xs text-gray-400 hover:text-white"
                   >
@@ -252,9 +252,9 @@ export default function Sidebar() {
             ) : (
               <button
                 onClick={() => {
-                  setShowCreateProject(workspace.id);
+                  setShowCreateCourse(workspace.id);
                   setShowCreateCurriculum(null);
-                  setNewProjectName('');
+                  setNewCourseName('');
                 }}
                 className="w-full text-left px-4 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               >
@@ -297,7 +297,7 @@ export default function Sidebar() {
               <button
                 onClick={() => {
                   setShowCreateCurriculum(workspace.id);
-                  setShowCreateProject(null);
+                  setShowCreateCourse(null);
                   setNewCurriculumName('');
                 }}
                 className="w-full text-left px-4 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
@@ -321,23 +321,23 @@ export default function Sidebar() {
             </Link>
 
             {/* Divider */}
-            {(workspace.projects.length > 0 || (workspace.curricula && workspace.curricula.length > 0)) && (
+            {(workspace.courses.length > 0 || (workspace.curricula && workspace.curricula.length > 0)) && (
               <div className="my-2 border-t border-white/10" />
             )}
 
-            {/* Courses (projects) */}
-            {workspace.projects.map((project) => (
+            {/* Courses */}
+            {workspace.courses.map((course) => (
               <Link
-                key={project.id}
-                href={`/workspace/${workspace.id}/project/${project.id}`}
+                key={course.id}
+                href={`/workspace/${workspace.id}/course/${course.id}`}
                 className={`flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg truncate transition-colors ${
-                  pathname?.includes(project.id)
+                  pathname?.includes(course.id)
                     ? 'bg-[#03428e] text-white'
                     : 'text-gray-300 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <BookIcon className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate">{project.name}</span>
+                <span className="truncate">{course.name}</span>
               </Link>
             ))}
 

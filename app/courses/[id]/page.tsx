@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
-type ProjectDetailPageProps = {
+type CourseDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-async function updateProject(formData: FormData) {
+async function updateCourse(formData: FormData) {
   "use server";
 
   const id = String(formData.get("id") || "").trim();
@@ -16,7 +16,7 @@ async function updateProject(formData: FormData) {
   const priority = String(formData.get("priority") || "").trim();
 
   if (!id) {
-    throw new Error("Project ID is required");
+    throw new Error("Course ID is required");
   }
 
   await prisma.course.update({
@@ -28,19 +28,19 @@ async function updateProject(formData: FormData) {
     },
   });
 
-  revalidatePath(`/projects/${id}`);
+  revalidatePath(`/courses/${id}`);
 }
 
-export default async function ProjectDetailPage(
-  props: ProjectDetailPageProps
+export default async function CourseDetailPage(
+  props: CourseDetailPageProps
 ) {
   const { id } = await props.params;
 
-  const project = await prisma.course.findUnique({
+  const course = await prisma.course.findUnique({
     where: { id },
   });
 
-  if (!project) {
+  if (!course) {
     notFound();
   }
 
@@ -51,23 +51,23 @@ export default async function ProjectDetailPage(
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-4">
-      <h1 className="text-3xl font-bold">{project.name}</h1>
+      <h1 className="text-3xl font-bold">{course.name}</h1>
       <p className="text-sm text-gray-500">
-        Status: {project.status} (Phase: {project.phase}, Priority: {project.priority})
+        Status: {course.status} (Phase: {course.phase}, Priority: {course.priority})
       </p>
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">Pipeline Information</h2>
         <div className="text-sm space-y-1">
-          {project.clientName && (
-            <p className="text-gray-600">Client: {project.clientName}</p>
+          {course.clientName && (
+            <p className="text-gray-600">Client: {course.clientName}</p>
           )}
-          {project.courseType && (
-            <p className="text-gray-600">Type: {project.courseType}</p>
+          {course.courseType && (
+            <p className="text-gray-600">Type: {course.courseType}</p>
           )}
-          {project.targetGoLive && (
+          {course.targetGoLive && (
             <p className="text-gray-600">
-              Target go live: {formatDate(project.targetGoLive)}
+              Target go live: {formatDate(course.targetGoLive)}
             </p>
           )}
         </div>
@@ -76,7 +76,7 @@ export default async function ProjectDetailPage(
       <section className="border rounded-xl p-4 space-y-4">
         <h2 className="text-lg font-semibold">Learning blueprints</h2>
         <Link
-          href={`/projects/${id}/blueprints`}
+          href={`/courses/${id}/blueprints`}
           className="inline-block px-4 py-2 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
         >
           View blueprints
@@ -85,9 +85,9 @@ export default async function ProjectDetailPage(
 
       <section className="border rounded-xl p-4 space-y-4">
         <h2 className="text-lg font-semibold">Update Status</h2>
-        <form action={updateProject} className="space-y-3">
-          <input type="hidden" name="id" value={project.id} />
-          
+        <form action={updateCourse} className="space-y-3">
+          <input type="hidden" name="id" value={course.id} />
+
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="status">
               Status
@@ -95,7 +95,7 @@ export default async function ProjectDetailPage(
             <select
               id="status"
               name="status"
-              defaultValue={project.status || "draft"}
+              defaultValue={course.status || "draft"}
               className="w-full border rounded px-3 py-2 text-sm"
             >
               <option value="draft">Draft</option>
@@ -112,7 +112,7 @@ export default async function ProjectDetailPage(
             <select
               id="phase"
               name="phase"
-              defaultValue={project.phase || "intake"}
+              defaultValue={course.phase || "intake"}
               className="w-full border rounded px-3 py-2 text-sm"
             >
               <option value="intake">Intake</option>
@@ -130,7 +130,7 @@ export default async function ProjectDetailPage(
             <select
               id="priority"
               name="priority"
-              defaultValue={project.priority || "medium"}
+              defaultValue={course.priority || "medium"}
               className="w-full border rounded px-3 py-2 text-sm"
             >
               <option value="low">Low</option>
@@ -148,18 +148,18 @@ export default async function ProjectDetailPage(
         </form>
       </section>
 
-      {project.description && (
+      {course.description && (
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">Description</h2>
           <p className="text-sm whitespace-pre-wrap">
-            {project.description}
+            {course.description}
           </p>
         </section>
       )}
 
       <section className="pt-4 border-t mt-4">
         <p className="text-xs text-gray-400">
-          Created at {project.createdAt.toISOString()}
+          Created at {course.createdAt.toISOString()}
         </p>
       </section>
     </main>

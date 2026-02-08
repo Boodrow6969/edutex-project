@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { WorkspaceRole } from '@prisma/client';
 
 /**
- * Project data structure from the API
+ * Course data structure from the API
  */
-export interface Project {
+export interface Course {
   id: string;
   name: string;
   description: string | null;
@@ -35,7 +35,7 @@ export interface Workspace {
   createdAt: string;
   updatedAt: string;
   role: WorkspaceRole | null;
-  projects: Project[];
+  courses: Course[];
   curricula?: Curriculum[];
 }
 
@@ -48,13 +48,13 @@ export interface UseWorkspacesTreeReturn {
   error: string | null;
   refetch: () => Promise<void>;
   createWorkspace: (name: string, description?: string) => Promise<Workspace | null>;
-  createProject: (workspaceId: string, name: string, description?: string) => Promise<Project | null>;
+  createCourse: (workspaceId: string, name: string, description?: string) => Promise<Course | null>;
   createCurriculum: (workspaceId: string, name: string, description?: string) => Promise<Curriculum | null>;
 }
 
 /**
  * Custom hook for fetching and managing the workspaces tree.
- * Provides functions for creating workspaces and projects.
+ * Provides functions for creating workspaces and courses.
  */
 export function useWorkspacesTree(): UseWorkspacesTreeReturn {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -124,11 +124,11 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
     []
   );
 
-  const createProject = useCallback(
-    async (workspaceId: string, name: string, description?: string): Promise<Project | null> => {
+  const createCourse = useCallback(
+    async (workspaceId: string, name: string, description?: string): Promise<Course | null> => {
       try {
         setError(null);
-        const response = await fetch('/api/projects', {
+        const response = await fetch('/api/courses', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -138,18 +138,18 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
 
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.error || 'Failed to create project');
+          throw new Error(data.error || 'Failed to create course');
         }
 
-        const newProject = await response.json();
+        const newCourse = await response.json();
 
-        // Add the new project to the appropriate workspace
+        // Add the new course to the appropriate workspace
         setWorkspaces((prev) =>
           prev.map((workspace) => {
             if (workspace.id === workspaceId) {
               return {
                 ...workspace,
-                projects: [...workspace.projects, newProject].sort((a, b) =>
+                courses: [...workspace.courses, newCourse].sort((a, b) =>
                   a.name.localeCompare(b.name)
                 ),
               };
@@ -158,11 +158,11 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
           })
         );
 
-        return newProject;
+        return newCourse;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to create project';
+        const message = err instanceof Error ? err.message : 'Failed to create course';
         setError(message);
-        console.error('Error creating project:', err);
+        console.error('Error creating course:', err);
         return null;
       }
     },
@@ -220,7 +220,7 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
     error,
     refetch: fetchWorkspaces,
     createWorkspace,
-    createProject,
+    createCourse,
     createCurriculum,
   };
 }

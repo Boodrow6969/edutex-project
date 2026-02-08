@@ -27,7 +27,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [projectName, setProjectName] = useState<string | null>(null);
+  const [courseName, setCourseName] = useState<string | null>(null);
   const [blueprintTitle, setBlueprintTitle] = useState<string | null>(null);
 
   // Form state
@@ -44,30 +44,30 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     });
   }, [params]);
 
-  // Fetch project and blueprint info for breadcrumb
+  // Fetch course and blueprint info for breadcrumb
   useEffect(() => {
     if (!courseId || !blueprintId) return;
 
-    const fetchProjectAndBlueprint = async () => {
+    const fetchCourseAndBlueprint = async () => {
       try {
-        // Fetch project
-        const projectResponse = await fetch(`/api/courses/${courseId}`);
-        if (projectResponse.ok) {
-          const projectData = await projectResponse.json();
-          setProjectName(projectData.name || null);
+        // Fetch course
+        const courseResponse = await fetch(`/api/courses/${courseId}`);
+        if (courseResponse.ok) {
+          const courseData = await courseResponse.json();
+          setCourseName(courseData.name || null);
         }
 
         // Fetch blueprint (we can get it from the blueprint detail or create a simple API)
-        // For now, we'll try to get it from the project API or fetch blueprint directly
+        // For now, we'll try to get it from the course API or fetch blueprint directly
         // Since there's no direct blueprint API, we'll skip blueprint title for now
-        // and just use the project name in breadcrumb
+        // and just use the course name in breadcrumb
       } catch (err) {
         // Silently fail - breadcrumb is optional
-        console.error('Failed to fetch project info:', err);
+        console.error('Failed to fetch course info:', err);
       }
     };
 
-    fetchProjectAndBlueprint();
+    fetchCourseAndBlueprint();
   }, [courseId, blueprintId]);
 
   // Fetch objectives
@@ -120,7 +120,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     e.preventDefault();
 
     if (!courseId || !blueprintId) {
-      setError('Project ID or Blueprint ID is missing');
+      setError('Course ID or Blueprint ID is missing');
       return;
     }
 
@@ -180,7 +180,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
 
   const handleDelete = async (id: string) => {
     if (!courseId || !blueprintId) {
-      setError('Project ID or Blueprint ID is missing');
+      setError('Course ID or Blueprint ID is missing');
       return;
     }
 
@@ -222,40 +222,40 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
       {/* Navigation */}
       <div className="space-y-2">
         <Link
-          href={`/projects/${courseId}/blueprints/${blueprintId}`}
+          href={`/courses/${courseId}/blueprints/${blueprintId}`}
           className="text-sm text-gray-500 hover:text-gray-700 inline-block"
         >
           ← Back to Blueprint
         </Link>
-        {(projectName || courseId) && (
+        {(courseName || courseId) && (
           <div className="text-sm text-gray-500">
             <Link
-              href={`/projects/${courseId}`}
+              href={`/courses/${courseId}`}
               className="hover:text-gray-700"
             >
-              Projects
+              Courses
             </Link>
-            {projectName && (
+            {courseName && (
               <>
                 {' › '}
                 <Link
-                  href={`/projects/${courseId}`}
+                  href={`/courses/${courseId}`}
                   className="hover:text-gray-700"
                 >
-                  {projectName}
+                  {courseName}
                 </Link>
               </>
             )}
             {' › '}
             <Link
-              href={`/projects/${courseId}/blueprints`}
+              href={`/courses/${courseId}/blueprints`}
               className="hover:text-gray-700"
             >
               Blueprints
             </Link>
             {' › '}
             <Link
-              href={`/projects/${courseId}/blueprints/${blueprintId}`}
+              href={`/courses/${courseId}/blueprints/${blueprintId}`}
               className="hover:text-gray-700"
             >
               Blueprint

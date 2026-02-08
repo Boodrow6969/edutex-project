@@ -30,7 +30,7 @@ interface PageMetadata {
 export default function PageEditorPage() {
   const params = useParams();
   const pageId = params.pageId as string;
-  const courseId = params.projectId as string;
+  const courseId = params.courseId as string;
   const workspaceId = params.workspaceId as string;
 
   const [pageMetadata, setPageMetadata] = useState<PageMetadata | null>(null);
@@ -162,10 +162,10 @@ export default function PageEditorPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <p className="text-red-600 font-medium">{error}</p>
           <Link
-            href={`/workspace/${workspaceId}/project/${courseId}`}
+            href={`/workspace/${workspaceId}/course/${courseId}`}
             className="inline-block mt-4 text-blue-600 hover:text-blue-700"
           >
-            Back to Project
+            Back to Course
           </Link>
         </div>
       </div>
@@ -244,10 +244,10 @@ export default function PageEditorPage() {
           </Link>
           <span>/</span>
           <Link
-            href={`/workspace/${workspaceId}/project/${courseId}`}
+            href={`/workspace/${workspaceId}/course/${courseId}`}
             className="hover:text-blue-600"
           >
-            Project
+            Course
           </Link>
           <span>/</span>
           <span className="text-gray-900">{pageMetadata?.title || 'Page'}</span>

@@ -151,7 +151,7 @@ export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewP
 
       const data = await response.json();
       // Redirect to blueprint detail page - use validated courseId
-      router.push(`/projects/${validCourseId}/blueprints/${data.id}`);
+      router.push(`/courses/${validCourseId}/blueprints/${data.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);

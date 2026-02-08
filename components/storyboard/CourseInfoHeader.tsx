@@ -5,7 +5,7 @@ import { FileText } from 'lucide-react';
 
 interface CourseInfoHeaderProps {
   storyboardId: string;
-  projectName: string;
+  courseName: string;
   initialData: {
     title: string;
     targetAudience: string;
@@ -24,10 +24,10 @@ const DELIVERY_METHODS = [
 
 export default function CourseInfoHeader({
   storyboardId,
-  projectName,
+  courseName,
   initialData
 }: CourseInfoHeaderProps) {
-  const [title, setTitle] = useState(initialData.title || projectName);
+  const [title, setTitle] = useState(initialData.title || courseName);
   const [targetAudience, setTargetAudience] = useState(initialData.targetAudience);
   const [duration, setDuration] = useState(initialData.duration);
   const [deliveryMethod, setDeliveryMethod] = useState(initialData.deliveryMethod || 'eLearning');

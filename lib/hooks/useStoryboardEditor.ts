@@ -37,7 +37,7 @@ export interface UseStoryboardEditorReturn {
   editor: Editor | null;
   pageMetadata: PageMetadata | null;
   storyboardData: StoryboardData | null;
-  projectName: string;
+  courseName: string;
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
@@ -65,7 +65,7 @@ export function useStoryboardEditor({
   // State
   const [pageMetadata, setPageMetadata] = useState<PageMetadata | null>(null);
   const [storyboardData, setStoryboardData] = useState<StoryboardData | null>(null);
-  const [projectName, setProjectName] = useState<string>('');
+  const [courseName, setProjectName] = useState<string>('');
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -192,7 +192,7 @@ export function useStoryboardEditor({
             }
           }
 
-          // Fetch project name for default title
+          // Fetch course name for default title
           if (data.courseId) {
             const courseResponse = await fetch(`/api/courses/${data.courseId}`);
             if (courseResponse.ok) {
@@ -567,7 +567,7 @@ export function useStoryboardEditor({
     editor,
     pageMetadata,
     storyboardData,
-    projectName,
+    courseName,
     isLoading,
     isSaving,
     error,

@@ -16,7 +16,7 @@ export interface CourseInfoData {
 
 interface CourseInfoHeaderProps {
   storyboardId: string;
-  projectName: string;
+  courseName: string;
   initialData: CourseInfoData;
 }
 
@@ -34,11 +34,11 @@ const DELIVERY_METHODS = [
 
 export default function CourseInfoHeader({
   storyboardId,
-  projectName,
+  courseName,
   initialData,
 }: CourseInfoHeaderProps) {
   const [formData, setFormData] = useState<CourseInfoData>(() => ({
-    title: initialData.title || projectName,
+    title: initialData.title || courseName,
     targetAudience: initialData.targetAudience || '',
     duration: initialData.duration || '',
     deliveryMethod: initialData.deliveryMethod || 'eLearning',

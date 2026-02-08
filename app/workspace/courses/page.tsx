@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ProjectCard from '@/components/workspace/ProjectCard';
-import CreateProjectModal from '@/components/modals/CreateProjectModal';
+import CourseCard from '@/components/workspace/CourseCard';
+import CreateCourseModal from '@/components/modals/CreateCourseModal';
 
 interface CurriculumBadge {
   id: string;
   name: string;
 }
 
-interface Project {
+interface Course {
   id: string;
   name: string;
   description: string | null;
@@ -30,7 +30,7 @@ interface Workspace {
 }
 
 export default function CoursesPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,15 +78,15 @@ export default function CoursesPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/projects?workspaceId=${selectedWorkspaceId}`);
+        const response = await fetch(`/api/courses?workspaceId=${selectedWorkspaceId}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch projects');
+          throw new Error('Failed to fetch courses');
         }
         const data = await response.json();
-        setProjects(data.projects || []);
+        setCourses(data.courses || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch projects');
-        setProjects([]);
+        setError(err instanceof Error ? err.message : 'Failed to fetch courses');
+        setCourses([]);
       } finally {
         setIsLoading(false);
       }
@@ -95,12 +95,12 @@ export default function CoursesPage() {
     fetchProjects();
   }, [selectedWorkspaceId]);
 
-  const handleProjectCreated = () => {
-    // Refetch projects
+  const handleCourseCreated = () => {
+    // Refetch courses
     if (selectedWorkspaceId) {
-      fetch(`/api/projects?workspaceId=${selectedWorkspaceId}`)
+      fetch(`/api/courses?workspaceId=${selectedWorkspaceId}`)
         .then((res) => res.json())
-        .then((data) => setProjects(data.projects || []))
+        .then((data) => setCourses(data.courses || []))
         .catch(console.error);
     }
   };
@@ -113,7 +113,7 @@ export default function CoursesPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Manage your learning design projects
+              Manage your learning design courses
             </p>
           </div>
           <button
@@ -190,7 +190,7 @@ export default function CoursesPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-600">
             {error}
           </div>
-        ) : projects.length === 0 ? (
+        ) : courses.length === 0 ? (
           <div className="bg-white border-2 border-dashed border-gray-200 rounded-lg p-12 text-center">
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
@@ -236,10 +236,10 @@ export default function CoursesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
+            {courses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
                 workspaceId={selectedWorkspaceId!}
               />
             ))}
@@ -249,11 +249,11 @@ export default function CoursesPage() {
 
       {/* Create Modal */}
       {selectedWorkspaceId && (
-        <CreateProjectModal
+        <CreateCourseModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           workspaceId={selectedWorkspaceId}
-          onSuccess={handleProjectCreated}
+          onSuccess={handleCourseCreated}
         />
       )}
     </div>

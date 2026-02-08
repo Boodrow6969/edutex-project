@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
-async function createProject(formData: FormData) {
+async function createCourse(formData: FormData) {
   "use server";
 
   const name = String(formData.get("name") || "").trim();
@@ -14,7 +14,7 @@ async function createProject(formData: FormData) {
   const targetGoLiveStr = String(formData.get("targetGoLive") || "").trim();
 
   if (!name) {
-    throw new Error("Project name is required");
+    throw new Error("Course name is required");
   }
 
   let targetGoLive: Date | null = null;
@@ -37,26 +37,26 @@ async function createProject(formData: FormData) {
     },
   });
 
-  revalidatePath("/projects");
+  revalidatePath("/courses");
 }
 
-export default async function ProjectsPage() {
-  const projects = await prisma.course.findMany({
+export default async function CoursesPage() {
+  const courses = await prisma.course.findMany({
     orderBy: { createdAt: "desc" },
   });
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold">Projects</h1>
+        <h1 className="text-3xl font-bold">Courses</h1>
         <p className="text-sm text-gray-500">
-          Simple project list and create form for EduTex.
+          Simple course list and create form for EduTex.
         </p>
       </header>
 
       <section className="border rounded-xl p-4 space-y-4">
-        <h2 className="text-xl font-semibold">Create new project</h2>
-        <form action={createProject} className="space-y-3">
+        <h2 className="text-xl font-semibold">Create new course</h2>
+        <form action={createCourse} className="space-y-3">
           <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="name">
               Name
@@ -157,48 +157,48 @@ export default async function ProjectsPage() {
             type="submit"
             className="text-sm font-semibold px-4 py-2 rounded bg-black text-white"
           >
-            Save project
+            Save course
           </button>
         </form>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Existing projects</h2>
+        <h2 className="text-xl font-semibold">Existing courses</h2>
 
-        {projects.length === 0 ? (
+        {courses.length === 0 ? (
           <p className="text-sm text-gray-500">
-            No projects yet. Create your first one above.
+            No courses yet. Create your first one above.
           </p>
         ) : (
           <ul className="space-y-2">
-            {projects.map((project) => (
+            {courses.map((course) => (
               <li
-                key={project.id}
+                key={course.id}
                 className="border rounded-lg px-3 py-2 flex items-center justify-between"
               >
                 <div>
-                  <Link href={`/projects/${project.id}`}>
+                  <Link href={`/courses/${course.id}`}>
                     <div className="text-sm font-semibold">
-                      {project.name}
+                      {course.name}
                     </div>
                   </Link>
-                  {project.clientName && (
+                  {course.clientName && (
                     <div className="text-xs text-gray-500">
-                      Client: {project.clientName}
+                      Client: {course.clientName}
                     </div>
                   )}
                   <div className="text-xs text-gray-500">
-                    {project.courseType && <span>{project.courseType} · </span>}
-                    Phase: {project.phase} · Priority: {project.priority}
+                    {course.courseType && <span>{course.courseType} · </span>}
+                    Phase: {course.phase} · Priority: {course.priority}
                   </div>
-                  {project.description && (
+                  {course.description && (
                     <div className="text-xs text-gray-500 line-clamp-2 mt-1">
-                      {project.description}
+                      {course.description}
                     </div>
                   )}
                 </div>
                 <span className="text-xs uppercase tracking-wide text-gray-400">
-                  {project.status}
+                  {course.status}
                 </span>
               </li>
             ))}
@@ -208,4 +208,3 @@ export default async function ProjectsPage() {
     </main>
   );
 }
-

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 
 interface TopBarProps {
-  projectName?: string;
+  courseName?: string;
   pageName?: string;
   pageType?: string;
 }
@@ -14,7 +14,7 @@ const roles = [
   { id: 'stakeholder', label: 'Stakeholder/SME' },
 ];
 
-export default function TopBar({ projectName, pageName, pageType }: TopBarProps) {
+export default function TopBar({ courseName, pageName, pageType }: TopBarProps) {
   const [selectedRole, setSelectedRole] = useState(roles[0]);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -105,9 +105,9 @@ export default function TopBar({ projectName, pageName, pageType }: TopBarProps)
         {/* Breadcrumbs - visible on larger screens */}
         <div className="hidden md:flex items-center gap-2 text-sm">
           <span className="text-gray-400">/</span>
-          {projectName && (
+          {courseName && (
             <>
-              <span className="text-gray-500">{projectName}</span>
+              <span className="text-gray-500">{courseName}</span>
               {pageName && (
                 <>
                   <span className="text-gray-400">/</span>
@@ -116,7 +116,7 @@ export default function TopBar({ projectName, pageName, pageType }: TopBarProps)
               )}
             </>
           )}
-          {!projectName && !pageName && (
+          {!courseName && !pageName && (
             <span className="text-gray-500">Workspace</span>
           )}
           {pageType && (
