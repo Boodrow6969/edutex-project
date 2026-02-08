@@ -17,7 +17,7 @@ interface PageMetadata {
   id: string;
   title: string;
   type: PageType;
-  projectId: string;
+  courseId: string;
   workspaceId: string;
 }
 
@@ -30,7 +30,7 @@ interface PageMetadata {
 export default function PageEditorPage() {
   const params = useParams();
   const pageId = params.pageId as string;
-  const projectId = params.projectId as string;
+  const courseId = params.projectId as string;
   const workspaceId = params.workspaceId as string;
 
   const [pageMetadata, setPageMetadata] = useState<PageMetadata | null>(null);
@@ -65,7 +65,7 @@ export default function PageEditorPage() {
           id: data.id,
           title: data.title,
           type: data.type,
-          projectId: data.projectId,
+          courseId: data.courseId,
           workspaceId: data.workspaceId,
         });
 
@@ -162,7 +162,7 @@ export default function PageEditorPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <p className="text-red-600 font-medium">{error}</p>
           <Link
-            href={`/workspace/${workspaceId}/project/${projectId}`}
+            href={`/workspace/${workspaceId}/project/${courseId}`}
             className="inline-block mt-4 text-blue-600 hover:text-blue-700"
           >
             Back to Project
@@ -203,7 +203,7 @@ export default function PageEditorPage() {
       return (
         <NeedsAnalysisView
           pageId={pageId}
-          projectId={projectId}
+          courseId={courseId}
           initialData={needsAnalysisData ?? undefined}
           onSave={handleSaveNeedsAnalysis}
         />
@@ -213,20 +213,20 @@ export default function PageEditorPage() {
       return (
         <TaskAnalysisView
           pageId={pageId}
-          projectId={projectId}
+          courseId={courseId}
           initialData={taskAnalysisData ?? undefined}
           onSave={handleSaveTaskAnalysis}
         />
       );
     }
     if (isLearningObjectives) {
-      return <LearningObjectivesView pageId={pageId} projectId={projectId} />;
+      return <LearningObjectivesView pageId={pageId} courseId={courseId} />;
     }
     if (isStoryboard) {
       return (
         <StoryboardEditor
           pageId={pageId}
-          projectId={projectId}
+          courseId={courseId}
           workspaceId={workspaceId}
         />
       );
@@ -244,7 +244,7 @@ export default function PageEditorPage() {
           </Link>
           <span>/</span>
           <Link
-            href={`/workspace/${workspaceId}/project/${projectId}`}
+            href={`/workspace/${workspaceId}/project/${courseId}`}
             className="hover:text-blue-600"
           >
             Project

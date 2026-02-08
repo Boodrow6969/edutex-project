@@ -210,6 +210,12 @@
 - **Priority:** Medium (feature expansion)
 - **Status:** Backlog
 
+### ENH-024: Per-Entry Revision Notes on Submission Review
+- **Location:** components/stakeholder/SubmissionDetailPanel.tsx
+- **Description:** When requesting revision, allow the ID to add notes on individual question responses (inline note icon or expandable field per entry in the slide-over panel), in addition to the existing general revision notes field. Stakeholder sees both — specific notes next to the relevant questions, plus the general note at the top of the revision banner. Change log should track which entries received notes.
+- **Priority:** Medium (Feature)
+- **Status:** Backlog 
+
 ---
 
 ## Future / Phase 2

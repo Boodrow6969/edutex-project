@@ -6,18 +6,18 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
 
 interface RouteParams {
-  params: Promise<{ projectId: string }>;
+  params: Promise<{ courseId: string }>;
 }
 
 /**
- * POST /api/projects/[projectId]/blueprints
+ * POST /api/courses/[courseId]/blueprints
  * Create a new LearningBlueprint with PerformanceNeed.
  * Requires ADMINISTRATOR, MANAGER, or DESIGNER role.
  *
@@ -35,25 +35,25 @@ interface RouteParams {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
-    
-    // Temporary debug log to verify projectId is correctly extracted
-    console.log('[Blueprint API] Received projectId:', projectId, 'Type:', typeof projectId);
+    const { courseId } = await params;
+
+    // Temporary debug log to verify courseId is correctly extracted
+    console.log('[Blueprint API] Received courseId:', courseId, 'Type:', typeof courseId);
 
     // Verify user has permission to create blueprints
-    await assertProjectAccess(projectId, user.id, [
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Verify project exists
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
+    // Verify course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
     });
 
-    if (!project) {
-      throw new NotFoundError('Project not found');
+    if (!course) {
+      throw new NotFoundError('Course not found');
     }
 
     const body = await request.json();
@@ -116,11 +116,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         console.error('[Blueprint API] Available models:', Object.keys(tx));
         throw new Error('Prisma client transaction missing learningBlueprint model. Try running: npx prisma generate');
       }
-      
+
       // Create LearningBlueprint
       const blueprint = await tx.learningBlueprint.create({
         data: {
-          projectId,
+          courseId,
           title: body.title.trim(),
           audience: body.audience.trim(),
           deliveryMode: body.deliveryMode.trim(),
@@ -162,4 +162,3 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return errorResponse(error, 'Failed to create blueprint');
   }
 }
-

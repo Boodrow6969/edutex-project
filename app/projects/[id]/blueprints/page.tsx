@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getCurrentUserOrThrow, assertProjectAccess } from '@/lib/auth-helpers';
+import { getCurrentUserOrThrow, assertCourseAccess } from '@/lib/auth-helpers';
 
 // Force dynamic rendering to avoid static analysis issues with Prisma
 export const dynamic = 'force-dynamic';
@@ -11,15 +11,15 @@ type BlueprintListPageProps = {
 };
 
 export default async function BlueprintListPage(props: BlueprintListPageProps) {
-  const { id: projectId } = await props.params;
+  const { id: courseId } = await props.params;
 
   // Auth check
   const user = await getCurrentUserOrThrow();
-  await assertProjectAccess(projectId, user.id);
+  await assertCourseAccess(courseId, user.id);
 
   // Fetch project info
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
+  const project = await prisma.course.findUnique({
+    where: { id: courseId },
     select: {
       id: true,
       name: true,
@@ -34,7 +34,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
 
   // Fetch all blueprints for this project
   const blueprints = await prisma.learningBlueprint.findMany({
-    where: { projectId },
+    where: { courseId },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -58,7 +58,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <div>
         <Link
-          href={`/projects/${projectId}`}
+          href={`/projects/${courseId}`}
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 inline-block"
         >
           ← Back to Project
@@ -74,7 +74,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
           <h2 className="text-xl font-semibold">Learning blueprints</h2>
           {blueprints.length > 0 && (
             <Link
-              href={`/projects/${projectId}/blueprints/new`}
+              href={`/projects/${courseId}/blueprints/new`}
               className="px-4 py-2 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
             >
               New blueprint
@@ -88,7 +88,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
               No blueprints yet. Create your first blueprint to get started.
             </p>
             <Link
-              href={`/projects/${projectId}/blueprints/new`}
+              href={`/projects/${courseId}/blueprints/new`}
               className="inline-block px-4 py-2 bg-black text-white rounded text-sm font-semibold hover:bg-gray-800"
             >
               Create first blueprint
@@ -114,7 +114,7 @@ export default async function BlueprintListPage(props: BlueprintListPageProps) {
                   >
                     <td className="px-4 py-3">
                       <Link
-                        href={`/projects/${projectId}/blueprints/${blueprint.id}`}
+                        href={`/projects/${courseId}/blueprints/${blueprint.id}`}
                         className="text-sm font-medium text-blue-600 hover:text-blue-700"
                       >
                         {blueprint.title}

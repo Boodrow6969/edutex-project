@@ -5,30 +5,30 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
 } from '@/lib/auth-helpers';
 import { toBloomLevel, isValidBloomLevel, CreateObjectiveInput } from '@/lib/types/objectives';
 import { WorkspaceRole } from '@prisma/client';
 
 interface RouteContext {
-  params: Promise<{ projectId: string }>;
+  params: Promise<{ courseId: string }>;
 }
 
 /**
- * GET /api/projects/[projectId]/objectives
- * Returns all objectives for the project, ordered by createdAt.
+ * GET /api/courses/[courseId]/objectives
+ * Returns all objectives for the course, ordered by createdAt.
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await context.params;
+    const { courseId } = await context.params;
 
-    // Verify user has access to this project
-    await assertProjectAccess(projectId, user.id);
+    // Verify user has access to this course
+    await assertCourseAccess(courseId, user.id);
 
     const objectives = await prisma.objective.findMany({
-      where: { projectId },
+      where: { courseId },
       orderBy: { createdAt: 'asc' },
     });
 
@@ -39,8 +39,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 /**
- * POST /api/projects/[projectId]/objectives
- * Creates one or more objectives for the project.
+ * POST /api/courses/[courseId]/objectives
+ * Creates one or more objectives for the course.
  *
  * Request body:
  * {
@@ -57,11 +57,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await context.params;
+    const { courseId } = await context.params;
     const body = await request.json();
 
     // Verify user has permission to create objectives (Designers and above)
-    await assertProjectAccess(projectId, user.id, [
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
             description: obj.description,
             bloomLevel: toBloomLevel(obj.bloomLevel),
             tags: obj.tags || [],
-            projectId,
+            courseId,
           },
         })
       )

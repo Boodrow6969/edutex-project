@@ -13,7 +13,7 @@ import {
 
 interface StoryboardToolbarProps {
   editor: Editor | null;
-  projectId?: string;
+  courseId?: string;
 }
 
 interface ToolbarButton {
@@ -69,13 +69,13 @@ const toolbarButtons: ToolbarButton[] = [
   },
 ];
 
-export default function StoryboardToolbar({ editor, projectId }: StoryboardToolbarProps) {
+export default function StoryboardToolbar({ editor, courseId }: StoryboardToolbarProps) {
   if (!editor) return null;
 
   const handleInsert = (button: ToolbarButton) => {
     if (button.isObjectives) {
       // Insert Learning Objectives Import block
-      editor.chain().focus().insertLearningObjectivesImport({ projectId }).run();
+      editor.chain().focus().insertLearningObjectivesImport({ courseId }).run();
     } else if (button.screenType) {
       // Insert Content Screen with specific type
       const { state, dispatch } = editor.view;

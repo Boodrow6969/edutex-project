@@ -49,24 +49,24 @@ async function main() {
   });
   console.log('Dev user added as ADMINISTRATOR');
 
-  // 4. Create Project
-  console.log('Creating demo project...');
-  const project = await prisma.project.upsert({
-    where: { id: 'demo-project-id' },
+  // 4. Create Course
+  console.log('Creating demo course...');
+  const course = await prisma.course.upsert({
+    where: { id: 'demo-course-id' },
     update: {},
     create: {
-      id: 'demo-project-id',
+      id: 'demo-course-id',
       name: 'Sales Onboarding Program',
       description: 'A comprehensive onboarding program for new sales representatives',
       status: 'IN_PROGRESS',
       workspaceId: workspace.id,
       clientName: 'Acme Corp',
-      projectType: 'onboarding',
+      courseType: 'onboarding',
       phase: 'design',
       priority: 'high',
     },
   });
-  console.log(`Project created: ${project.name}`);
+  console.log(`Course created: ${course.name}`);
 
   // 5. Create Pages for each course tab type
   // Note: Using available PageType enum values
@@ -93,7 +93,7 @@ async function main() {
         id: pageId,
         title,
         type,
-        projectId: project.id,
+        courseId: course.id,
         createdById: devUser.id,
         order: i,
       },

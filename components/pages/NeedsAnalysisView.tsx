@@ -23,7 +23,7 @@ const TABS = [
 ];
 
 export default function NeedsAnalysisView({
-  projectId,
+  courseId,
   pageId,
   initialData,
   onSave,
@@ -140,7 +140,7 @@ export default function NeedsAnalysisView({
       case 'success-metrics':
         return <SuccessMetricsTab data={formData} onChange={handleFormChange} />;
       case 'objectives':
-        return <ObjectivesTab projectId={projectId} pageId={pageId} />;
+        return <ObjectivesTab courseId={courseId} pageId={pageId} />;
       default:
         return null;
     }

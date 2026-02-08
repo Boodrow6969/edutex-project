@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
 } from '@/lib/auth-helpers';
 import { createTasksFromAnalysis } from '@/lib/tasks/createTasksFromAnalysis';
@@ -18,7 +18,7 @@ import { WorkspaceRole } from '@prisma/client';
  *
  * Request body:
  * {
- *   projectId: string,
+ *   courseId: string,
  *   analysis: NeedsAnalysisResult
  * }
  *
@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUserOrThrow();
     const body = await request.json();
 
-    // Validate projectId
-    if (!body.projectId || typeof body.projectId !== 'string') {
+    // Validate courseId
+    if (!body.courseId || typeof body.courseId !== 'string') {
       return Response.json(
-        { error: 'projectId is required' },
+        { error: 'courseId is required' },
         { status: 400 }
       );
     }
@@ -55,9 +55,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify user has permission to create tasks in this project
+    // Verify user has permission to create tasks in this course
     // Designers and above can create tasks
-    await assertProjectAccess(body.projectId, user.id, [
+    await assertCourseAccess(body.courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // Create tasks from analysis
     const result = await createTasksFromAnalysis(
-      body.projectId,
+      body.courseId,
       user.id,
       analysis
     );

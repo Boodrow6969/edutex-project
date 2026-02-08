@@ -28,7 +28,7 @@ async function getStoryboardWithAccess(
       page: {
         select: {
           id: true,
-          projectId: true,
+          courseId: true,
           curriculumId: true,
         },
       },

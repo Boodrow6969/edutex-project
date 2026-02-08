@@ -20,7 +20,7 @@ import {
 
 interface BlockPickerProps {
   editor: Editor | null;
-  projectId?: string;
+  courseId?: string;
 }
 
 interface BlockOption {
@@ -28,7 +28,7 @@ interface BlockOption {
   label: string;
   description: string;
   icon: React.ReactNode;
-  action: (editor: Editor, context?: { projectId?: string }) => void;
+  action: (editor: Editor, context?: { courseId?: string }) => void;
 }
 
 // =============================================================================
@@ -49,7 +49,7 @@ const blockOptions: BlockOption[] = [
     description: 'Import objectives from this project',
     icon: <Target className="w-4 h-4" />,
     action: (editor, context) => {
-      editor.chain().focus().insertLearningObjectivesImport({ projectId: context?.projectId }).run();
+      editor.chain().focus().insertLearningObjectivesImport({ courseId: context?.courseId }).run();
     },
   },
   {
@@ -105,7 +105,7 @@ const blockOptions: BlockOption[] = [
 // Component
 // =============================================================================
 
-export default function BlockPicker({ editor, projectId }: BlockPickerProps) {
+export default function BlockPicker({ editor, courseId }: BlockPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -142,7 +142,7 @@ export default function BlockPicker({ editor, projectId }: BlockPickerProps) {
   }
 
   const handleSelect = (option: BlockOption) => {
-    option.action(editor, { projectId });
+    option.action(editor, { courseId });
     setIsOpen(false);
   };
 

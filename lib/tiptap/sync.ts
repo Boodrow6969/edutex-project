@@ -237,7 +237,7 @@ function blockToNode(block: Block): JSONContent | null {
           importedAt: getString(blockContent, 'importedAt'),
           objectives: Array.isArray(objectives) ? objectives : [],
           displayMode: getString(blockContent, 'displayMode') || 'detailed',
-          projectId: getString(blockContent, 'projectId'),
+          courseId: getString(blockContent, 'courseId'),
         },
       };
     }
@@ -445,7 +445,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
           importedAt: (node.attrs?.importedAt as string) || '',
           objectives: Array.isArray(objectives) ? objectives : [],
           displayMode: (node.attrs?.displayMode as string) || 'detailed',
-          projectId: (node.attrs?.projectId as string) || '',
+          courseId: (node.attrs?.courseId as string) || '',
         },
       };
     }

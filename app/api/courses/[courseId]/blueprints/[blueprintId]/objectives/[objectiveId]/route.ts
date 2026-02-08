@@ -6,18 +6,18 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
 
 interface RouteParams {
-  params: Promise<{ projectId: string; blueprintId: string; objectiveId: string }>;
+  params: Promise<{ courseId: string; blueprintId: string; objectiveId: string }>;
 }
 
 /**
- * PUT /api/projects/[projectId]/blueprints/[blueprintId]/objectives/[objectiveId]
+ * PUT /api/courses/[courseId]/blueprints/[blueprintId]/objectives/[objectiveId]
  * Update an objective.
  * Requires ADMINISTRATOR, MANAGER, or DESIGNER role.
  *
@@ -32,27 +32,27 @@ interface RouteParams {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId, blueprintId, objectiveId } = await params;
+    const { courseId, blueprintId, objectiveId } = await params;
 
     // Verify user has permission to update objectives
-    await assertProjectAccess(projectId, user.id, [
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Verify blueprint exists and belongs to project
+    // Verify blueprint exists and belongs to course
     const blueprint = await prisma.learningBlueprint.findUnique({
       where: { id: blueprintId },
-      select: { id: true, projectId: true },
+      select: { id: true, courseId: true },
     });
 
     if (!blueprint) {
       throw new NotFoundError('Blueprint not found');
     }
 
-    if (blueprint.projectId !== projectId) {
-      throw new NotFoundError('Blueprint does not belong to this project');
+    if (blueprint.courseId !== courseId) {
+      throw new NotFoundError('Blueprint does not belong to this course');
     }
 
     // Verify objective exists and belongs to blueprint
@@ -138,34 +138,34 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * DELETE /api/projects/[projectId]/blueprints/[blueprintId]/objectives/[objectiveId]
+ * DELETE /api/courses/[courseId]/blueprints/[blueprintId]/objectives/[objectiveId]
  * Delete an objective.
  * Requires ADMINISTRATOR, MANAGER, or DESIGNER role.
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId, blueprintId, objectiveId } = await params;
+    const { courseId, blueprintId, objectiveId } = await params;
 
     // Verify user has permission to delete objectives
-    await assertProjectAccess(projectId, user.id, [
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Verify blueprint exists and belongs to project
+    // Verify blueprint exists and belongs to course
     const blueprint = await prisma.learningBlueprint.findUnique({
       where: { id: blueprintId },
-      select: { id: true, projectId: true },
+      select: { id: true, courseId: true },
     });
 
     if (!blueprint) {
       throw new NotFoundError('Blueprint not found');
     }
 
-    if (blueprint.projectId !== projectId) {
-      throw new NotFoundError('Blueprint does not belong to this project');
+    if (blueprint.courseId !== courseId) {
+      throw new NotFoundError('Blueprint does not belong to this course');
     }
 
     // Verify objective exists and belongs to blueprint
@@ -191,6 +191,3 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return errorResponse(error, 'Failed to delete objective');
   }
 }
-
-
-

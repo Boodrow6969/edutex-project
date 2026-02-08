@@ -12,8 +12,8 @@ import {
 import { WorkspaceRole, PageType } from '@prisma/client';
 
 /**
- * GET /api/projects?workspaceId=123
- * Fetches all projects for a workspace.
+ * GET /api/courses?workspaceId=123
+ * Fetches all courses for a workspace.
  * Requires membership in the workspace (any role).
  *
  * Query parameters:
@@ -22,7 +22,7 @@ import { WorkspaceRole, PageType } from '@prisma/client';
  * Response:
  * {
  *   "role": "ADMINISTRATOR",
- *   "projects": [...]
+ *   "courses": [...]
  * }
  */
 export async function GET(request: NextRequest) {
@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
     // Verify user has access to this workspace (any role is acceptable)
     const userMembership = await assertWorkspaceMember(workspaceId, user.id);
 
-    // Fetch all projects for this workspace, ordered by createdAt desc
-    const projects = await prisma.project.findMany({
+    // Fetch all courses for this workspace, ordered by createdAt desc
+    const courses = await prisma.course.findMany({
       where: {
         workspaceId,
       },
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         name: true,
         description: true,
         clientName: true,
-        projectType: true,
+        courseType: true,
         phase: true,
         priority: true,
         status: true,
@@ -81,23 +81,23 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform to flatten curricula
-    const projectsWithCurricula = projects.map((project) => ({
-      ...project,
-      curricula: project.curricula.map((cc) => cc.curriculum),
+    const coursesWithCurricula = courses.map((course) => ({
+      ...course,
+      curricula: course.curricula.map((cc) => cc.curriculum),
     }));
 
     return Response.json({
       role: userMembership.role,
-      projects: projectsWithCurricula,
+      courses: coursesWithCurricula,
     });
   } catch (error) {
-    return errorResponse(error, 'Failed to fetch projects');
+    return errorResponse(error, 'Failed to fetch courses');
   }
 }
 
 /**
- * POST /api/projects
- * Creates a new project inside a workspace.
+ * POST /api/courses
+ * Creates a new course inside a workspace.
  * Requires membership in the workspace (ADMINISTRATOR, MANAGER, or DESIGNER).
  *
  * Request body:
@@ -132,28 +132,28 @@ export async function POST(request: NextRequest) {
     const name = body.name.trim();
     const description = body.description?.trim() || null;
     const clientName = body.clientName?.trim() || null;
-    const projectType = body.projectType?.trim() || null;
+    const courseType = body.courseType?.trim() || null;
     const phase = body.phase?.trim() || 'intake';
     const priority = body.priority?.trim() || 'medium';
     const targetGoLive = body.targetGoLive ? new Date(body.targetGoLive) : null;
 
-    // Verify user has permission to create projects in this workspace
-    // ADMINISTRATOR, MANAGER, and DESIGNER can create projects
+    // Verify user has permission to create courses in this workspace
+    // ADMINISTRATOR, MANAGER, and DESIGNER can create courses
     await assertWorkspaceMember(workspaceId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Create the project with default pages in a transaction
-    const project = await prisma.$transaction(async (tx) => {
-      // Create the project
-      const newProject = await tx.project.create({
+    // Create the course with default pages in a transaction
+    const course = await prisma.$transaction(async (tx) => {
+      // Create the course
+      const newCourse = await tx.course.create({
         data: {
           name,
           description,
           clientName,
-          projectType,
+          courseType,
           phase,
           priority,
           targetGoLive,
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
           data: {
             title: page.title,
             type: page.type,
-            projectId: newProject.id,
+            courseId: newCourse.id,
             createdById: user.id,
             order: page.order,
           },
@@ -192,12 +192,12 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return newProject;
+      return newCourse;
     });
 
-    // Fetch the project with counts
-    const projectWithCounts = await prisma.project.findUnique({
-      where: { id: project.id },
+    // Fetch the course with counts
+    const courseWithCounts = await prisma.course.findUnique({
+      where: { id: course.id },
       include: {
         _count: {
           select: {
@@ -211,25 +211,25 @@ export async function POST(request: NextRequest) {
 
     return Response.json(
       {
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        clientName: project.clientName,
-        projectType: project.projectType,
-        phase: project.phase,
-        priority: project.priority,
-        status: project.status,
-        targetGoLive: project.targetGoLive,
-        workspaceId: project.workspaceId,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-        pageCount: projectWithCounts?._count.pages ?? 0,
-        taskCount: projectWithCounts?._count.tasks ?? 0,
-        objectiveCount: projectWithCounts?._count.objectives ?? 0,
+        id: course.id,
+        name: course.name,
+        description: course.description,
+        clientName: course.clientName,
+        courseType: course.courseType,
+        phase: course.phase,
+        priority: course.priority,
+        status: course.status,
+        targetGoLive: course.targetGoLive,
+        workspaceId: course.workspaceId,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+        pageCount: courseWithCounts?._count.pages ?? 0,
+        taskCount: courseWithCounts?._count.tasks ?? 0,
+        objectiveCount: courseWithCounts?._count.objectives ?? 0,
       },
       { status: 201 }
     );
   } catch (error) {
-    return errorResponse(error, 'Failed to create project');
+    return errorResponse(error, 'Failed to create course');
   }
 }

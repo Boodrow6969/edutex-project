@@ -27,7 +27,7 @@ export const dynamic = 'force-dynamic';
  *   pageId: string  // ID of the NEEDS_ANALYSIS page
  * }
  *
- * Returns: { objectives: GeneratedObjective[], projectId: string }
+ * Returns: { objectives: GeneratedObjective[], courseId: string }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -41,20 +41,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for mock mode - still need to get projectId from DB for realistic response
+    // Check for mock mode - still need to get courseId from DB for realistic response
     if (isMockAiEnabled()) {
       logMockMode('generateObjectivesFromAnalysis');
 
-      // Get minimal page info for projectId
+      // Get minimal page info for courseId
       const page = await prisma.page.findUnique({
         where: { id: body.pageId },
-        select: { projectId: true },
+        select: { courseId: true },
       });
 
       await simulateApiDelay();
       return Response.json({
         objectives: mockGeneratedObjectives,
-        projectId: page?.projectId || 'demo-project-id',
+        courseId: page?.courseId || 'demo-course-id',
       });
     }
 
@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
       select: {
         id: true,
         type: true,
-        projectId: true,
+        courseId: true,
         curriculumId: true,
-        project: {
+        course: {
           select: {
             id: true,
             name: true,
@@ -117,11 +117,11 @@ export async function POST(request: NextRequest) {
     // Build a comprehensive prompt from needs analysis data
     const contextParts: string[] = [];
 
-    // Handle both project and curriculum pages
-    if (page.project) {
-      contextParts.push(`Project: ${page.project.name}`);
-      if (page.project.description) {
-        contextParts.push(`Project Description: ${page.project.description}`);
+    // Handle both course and curriculum pages
+    if (page.course) {
+      contextParts.push(`Course: ${page.course.name}`);
+      if (page.course.description) {
+        contextParts.push(`Course Description: ${page.course.description}`);
       }
     } else if (page.curriculum) {
       contextParts.push(`Curriculum: ${page.curriculum.name}`);
@@ -236,7 +236,7 @@ Return your response as a JSON array:
 
     return Response.json({
       objectives,
-      projectId: page.projectId || null,
+      courseId: page.courseId || null,
     });
   } catch (error) {
     return errorResponse(error, 'Failed to generate objectives from analysis');

@@ -96,7 +96,7 @@ export default function AddCourseToCurriculumModal({
       const response = await fetch(`/api/curricula/${curriculumId}/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: selectedCourseId }),
+        body: JSON.stringify({ courseId: selectedCourseId }),
       });
 
       if (!response.ok) {

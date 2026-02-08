@@ -62,7 +62,7 @@ export interface NeedsAnalysisFormData {
  * Props for the NeedsAnalysisView component
  */
 export interface NeedsAnalysisProps {
-  projectId: string;
+  courseId: string;
   pageId?: string;
   initialData?: Partial<NeedsAnalysisFormData>;
   onSave?: (data: NeedsAnalysisFormData) => Promise<void>;

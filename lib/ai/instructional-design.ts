@@ -36,7 +36,7 @@ Format the output as a numbered list.`,
 /**
  * Generate measurable learning objectives from context and needs analysis.
  *
- * @param input - Generation input including projectId, optional context, and optional needs summary
+ * @param input - Generation input including courseId, optional context, and optional needs summary
  * @param projectInfo - Basic project information (name, description)
  * @returns Array of generated objectives with Bloom levels and rationales
  */

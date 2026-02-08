@@ -29,7 +29,7 @@ export async function GET(
     }
 
     // Fetch page with blocks and related data
-    // Schema: Page has blocks[], optional storyboard relation, and project relation
+    // Schema: Page has blocks[], optional storyboard relation, and course relation
     const page = await prisma.page.findUnique({
       where: { id: pageId },
       include: {
@@ -37,7 +37,7 @@ export async function GET(
           orderBy: { order: 'asc' },
         },
         storyboard: true,  // Storyboard model has targetAudience, status, version
-        project: true,     // For project name
+        course: true,      // For course name
       },
     });
 
@@ -75,7 +75,7 @@ export async function GET(
     // Generate the Word document
     const buffer = await storyboardToDocx(blocks, {
       pageTitle: page.title || 'Storyboard',
-      projectName: page.project?.name,
+      projectName: page.course?.name,
       storyboardMetadata,
       exportDate: new Date(),
       includeEmptyFields,

@@ -155,14 +155,14 @@ export default function CurriculumDetailPage() {
     }
   };
 
-  const handleUnlinkCourse = async (projectId: string) => {
+  const handleUnlinkCourse = async (courseId: string) => {
     if (!confirm('Remove this course from the curriculum?')) return;
 
     try {
       const response = await fetch(`/api/curricula/${curriculumId}/courses`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId }),
+        body: JSON.stringify({ courseId }),
       });
 
       if (!response.ok) {
@@ -175,10 +175,10 @@ export default function CurriculumDetailPage() {
     }
   };
 
-  const handleMoveCourse = async (projectId: string, direction: 'up' | 'down') => {
+  const handleMoveCourse = async (courseId: string, direction: 'up' | 'down') => {
     if (!curriculum || reordering) return;
 
-    const currentIndex = curriculum.courses.findIndex((c) => c.id === projectId);
+    const currentIndex = curriculum.courses.findIndex((c) => c.id === courseId);
     if (currentIndex === -1) return;
 
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
@@ -217,7 +217,7 @@ export default function CurriculumDetailPage() {
       await fetch(`/api/curricula/${curriculumId}/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: project.id }),
+        body: JSON.stringify({ courseId: project.id }),
       });
       fetchCurriculum();
     } catch (err) {

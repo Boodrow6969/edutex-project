@@ -37,8 +37,8 @@ export interface GeneratedObjective {
  * Input for generating objectives via AI
  */
 export interface GenerateObjectivesInput {
-  /** The project to generate objectives for */
-  projectId: string;
+  /** The course to generate objectives for */
+  courseId: string;
 
   /** Optional additional context from the user */
   context?: string;

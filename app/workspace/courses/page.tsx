@@ -14,7 +14,7 @@ interface Project {
   name: string;
   description: string | null;
   clientName: string | null;
-  projectType: string | null;
+  courseType: string | null;
   phase: string;
   priority: string;
   status: string;

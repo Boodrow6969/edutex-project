@@ -54,7 +54,7 @@ async function verifyPageAccess(pageId: string, userId: string, allowedRoles?: W
     where: { id: pageId },
     select: {
       id: true,
-      projectId: true,
+      courseId: true,
       curriculumId: true,
     },
   });

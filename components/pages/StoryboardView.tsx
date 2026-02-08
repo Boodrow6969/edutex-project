@@ -15,7 +15,7 @@ import {
 } from '@/lib/types/storyboard';
 
 export default function StoryboardView({
-  projectId,
+  courseId,
   pageId,
   pageTitle,
   initialMetadata,

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             id: true,
             order: true,
             createdAt: true,
-            project: {
+            course: {
               select: {
                 id: true,
                 name: true,
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 status: true,
                 phase: true,
                 clientName: true,
-                projectType: true,
+                courseType: true,
               },
             },
           },
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         linkId: cc.id,
         order: cc.order,
         linkedAt: cc.createdAt,
-        ...cc.project,
+        ...cc.course,
       })),
     });
   } catch (error) {

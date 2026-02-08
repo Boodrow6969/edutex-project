@@ -6,40 +6,40 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
 
 interface RouteParams {
-  params: Promise<{ projectId: string; blueprintId: string }>;
+  params: Promise<{ courseId: string; blueprintId: string }>;
 }
 
 /**
- * GET /api/projects/[projectId]/blueprints/[blueprintId]/objectives
+ * GET /api/courses/[courseId]/blueprints/[blueprintId]/objectives
  * Get all objectives for a blueprint.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId, blueprintId } = await params;
+    const { courseId, blueprintId } = await params;
 
-    // Verify user has access to this project
-    await assertProjectAccess(projectId, user.id);
+    // Verify user has access to this course
+    await assertCourseAccess(courseId, user.id);
 
-    // Verify blueprint exists and belongs to project
+    // Verify blueprint exists and belongs to course
     const blueprint = await prisma.learningBlueprint.findUnique({
       where: { id: blueprintId },
-      select: { id: true, projectId: true },
+      select: { id: true, courseId: true },
     });
 
     if (!blueprint) {
       throw new NotFoundError('Blueprint not found');
     }
 
-    if (blueprint.projectId !== projectId) {
-      throw new NotFoundError('Blueprint does not belong to this project');
+    if (blueprint.courseId !== courseId) {
+      throw new NotFoundError('Blueprint does not belong to this course');
     }
 
     const objectives = await prisma.blueprintObjective.findMany({
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * POST /api/projects/[projectId]/blueprints/[blueprintId]/objectives
+ * POST /api/courses/[courseId]/blueprints/[blueprintId]/objectives
  * Create a new objective for a blueprint.
  * Requires ADMINISTRATOR, MANAGER, or DESIGNER role.
  *
@@ -69,27 +69,27 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId, blueprintId } = await params;
+    const { courseId, blueprintId } = await params;
 
     // Verify user has permission to create objectives
-    await assertProjectAccess(projectId, user.id, [
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Verify blueprint exists and belongs to project
+    // Verify blueprint exists and belongs to course
     const blueprint = await prisma.learningBlueprint.findUnique({
       where: { id: blueprintId },
-      select: { id: true, projectId: true },
+      select: { id: true, courseId: true },
     });
 
     if (!blueprint) {
       throw new NotFoundError('Blueprint not found');
     }
 
-    if (blueprint.projectId !== projectId) {
-      throw new NotFoundError('Blueprint does not belong to this project');
+    if (blueprint.courseId !== courseId) {
+      throw new NotFoundError('Blueprint does not belong to this course');
     }
 
     const body = await request.json();
@@ -138,6 +138,3 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return errorResponse(error, 'Failed to create objective');
   }
 }
-
-
-

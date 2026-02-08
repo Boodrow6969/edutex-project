@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
 } from '@/lib/auth-helpers';
 import { generateLearningObjectives } from '@/lib/ai/instructional-design';
@@ -19,11 +19,11 @@ import {
 
 /**
  * POST /api/ai/generateObjectives
- * Generates learning objectives using AI based on project context.
+ * Generates learning objectives using AI based on course context.
  *
  * Request body:
  * {
- *   projectId: string,
+ *   courseId: string,
  *   context?: string,        // Optional additional context from user
  *   needsSummary?: string    // Optional needs analysis summary
  * }
@@ -42,42 +42,42 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUserOrThrow();
     const body = await request.json();
 
-    // Validate projectId
-    if (!body.projectId || typeof body.projectId !== 'string') {
+    // Validate courseId
+    if (!body.courseId || typeof body.courseId !== 'string') {
       return Response.json(
-        { error: 'projectId is required' },
+        { error: 'courseId is required' },
         { status: 400 }
       );
     }
 
     // Verify user has permission to generate objectives (Designers and above)
-    await assertProjectAccess(body.projectId, user.id, [
+    await assertCourseAccess(body.courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Fetch project info for context
-    const project = await prisma.project.findUnique({
-      where: { id: body.projectId },
+    // Fetch course info for context
+    const course = await prisma.course.findUnique({
+      where: { id: body.courseId },
       select: {
         name: true,
         description: true,
       },
     });
 
-    if (!project) {
+    if (!course) {
       return Response.json(
-        { error: 'Project not found' },
+        { error: 'Course not found' },
         { status: 404 }
       );
     }
 
     // Check that we have at least some context to work with
-    const hasContext = body.context?.trim() || body.needsSummary?.trim() || project.description?.trim();
+    const hasContext = body.context?.trim() || body.needsSummary?.trim() || course.description?.trim();
     if (!hasContext) {
       return Response.json(
-        { error: 'At least one source of context is required (context, needsSummary, or project description)' },
+        { error: 'At least one source of context is required (context, needsSummary, or course description)' },
         { status: 400 }
       );
     }
@@ -85,13 +85,13 @@ export async function POST(request: NextRequest) {
     // Generate objectives using AI
     const objectives = await generateLearningObjectives(
       {
-        projectId: body.projectId,
+        courseId: body.courseId,
         context: body.context?.trim() || undefined,
         needsSummary: body.needsSummary?.trim() || undefined,
       },
       {
-        name: project.name,
-        description: project.description,
+        name: course.name,
+        description: course.description,
       }
     );
 

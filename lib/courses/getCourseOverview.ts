@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma';
-import { assertProjectAccess, NotFoundError } from '@/lib/auth-helpers';
+import { assertCourseAccess, NotFoundError } from '@/lib/auth-helpers';
 import { PageType, TaskStatus, BloomLevel } from '@prisma/client';
 
 /**
@@ -42,10 +42,10 @@ export interface TaskStats {
 }
 
 /**
- * Complete project overview data
+ * Complete course overview data
  */
-export interface ProjectOverview {
-  project: {
+export interface CourseOverview {
+  course: {
     id: string;
     name: string;
     description: string | null;
@@ -59,25 +59,25 @@ export interface ProjectOverview {
 }
 
 /**
- * Fetches a complete project overview with pages, objectives stats, and task stats.
+ * Fetches a complete course overview with pages, objectives stats, and task stats.
  * Verifies user access through workspace membership.
  *
- * @param projectId - The project ID to fetch overview for
+ * @param courseId - The course ID to fetch overview for
  * @param userId - The user ID requesting access
- * @returns ProjectOverview with all summary data
- * @throws NotFoundError if project doesn't exist
+ * @returns CourseOverview with all summary data
+ * @throws NotFoundError if course doesn't exist
  * @throws AuthorizationError if user lacks access
  */
-export async function getProjectOverview(
-  projectId: string,
+export async function getCourseOverview(
+  courseId: string,
   userId: string
-): Promise<ProjectOverview> {
-  // Verify user has access to this project
-  await assertProjectAccess(projectId, userId);
+): Promise<CourseOverview> {
+  // Verify user has access to this course
+  await assertCourseAccess(courseId, userId);
 
-  // Fetch project with pages
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
+  // Fetch course with pages
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
     select: {
       id: true,
       name: true,
@@ -98,25 +98,25 @@ export async function getProjectOverview(
     },
   });
 
-  if (!project) {
-    throw new NotFoundError('Project not found');
+  if (!course) {
+    throw new NotFoundError('Course not found');
   }
 
-  // Ensure project has a workspace (should be guaranteed by assertProjectAccess, but TypeScript needs this)
-  if (!project.workspaceId) {
-    throw new NotFoundError('Project does not belong to a workspace');
+  // Ensure course has a workspace (should be guaranteed by assertCourseAccess, but TypeScript needs this)
+  if (!course.workspaceId) {
+    throw new NotFoundError('Course does not belong to a workspace');
   }
 
   // Fetch objective stats using groupBy for efficiency
   const objectiveCounts = await prisma.objective.groupBy({
     by: ['bloomLevel'],
-    where: { projectId },
+    where: { courseId },
     _count: { id: true },
   });
 
   // Fetch recent objectives (last 3)
   const recentObjectives = await prisma.objective.findMany({
-    where: { projectId },
+    where: { courseId },
     select: {
       id: true,
       title: true,
@@ -146,13 +146,13 @@ export async function getProjectOverview(
   // Fetch task stats using groupBy
   const taskCountsByStatus = await prisma.task.groupBy({
     by: ['status'],
-    where: { projectId },
+    where: { courseId },
     _count: { id: true },
   });
 
   const taskCountsByPriority = await prisma.task.groupBy({
     by: ['priority'],
-    where: { projectId },
+    where: { courseId },
     _count: { id: true },
   });
 
@@ -182,15 +182,15 @@ export async function getProjectOverview(
   }
 
   return {
-    project: {
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-      workspaceId: project.workspaceId,
+    course: {
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+      workspaceId: course.workspaceId,
     },
-    pages: project.pages,
+    pages: course.pages,
     objectiveStats: {
       total: totalObjectives,
       byBloomLevel,

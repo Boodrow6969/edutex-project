@@ -20,7 +20,7 @@ interface BlueprintObjective {
 
 export default function ProjectBlueprintObjectivesPage({ params }: ProjectBlueprintObjectivesPageProps) {
   const router = useRouter();
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<string | null>(null);
   const [blueprintId, setBlueprintId] = useState<string | null>(null);
   const [objectives, setObjectives] = useState<BlueprintObjective[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,19 +39,19 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
   // Resolve params
   useEffect(() => {
     params.then((p) => {
-      setProjectId(p.id);
+      setCourseId(p.id);
       setBlueprintId(p.blueprintId);
     });
   }, [params]);
 
   // Fetch project and blueprint info for breadcrumb
   useEffect(() => {
-    if (!projectId || !blueprintId) return;
+    if (!courseId || !blueprintId) return;
 
     const fetchProjectAndBlueprint = async () => {
       try {
         // Fetch project
-        const projectResponse = await fetch(`/api/projects/${projectId}`);
+        const projectResponse = await fetch(`/api/courses/${courseId}`);
         if (projectResponse.ok) {
           const projectData = await projectResponse.json();
           setProjectName(projectData.name || null);
@@ -68,16 +68,16 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     };
 
     fetchProjectAndBlueprint();
-  }, [projectId, blueprintId]);
+  }, [courseId, blueprintId]);
 
   // Fetch objectives
   useEffect(() => {
-    if (!projectId || !blueprintId) return;
+    if (!courseId || !blueprintId) return;
 
     const fetchObjectives = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/blueprints/${blueprintId}/objectives`);
+        const response = await fetch(`/api/courses/${courseId}/blueprints/${blueprintId}/objectives`);
         if (!response.ok) {
           throw new Error('Failed to fetch objectives');
         }
@@ -91,7 +91,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     };
 
     fetchObjectives();
-  }, [projectId, blueprintId]);
+  }, [courseId, blueprintId]);
 
   const resetForm = () => {
     setText('');
@@ -119,7 +119,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!projectId || !blueprintId) {
+    if (!courseId || !blueprintId) {
       setError('Project ID or Blueprint ID is missing');
       return;
     }
@@ -142,8 +142,8 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     try {
       setError(null);
       const url = editingId
-        ? `/api/projects/${projectId}/blueprints/${blueprintId}/objectives/${editingId}`
-        : `/api/projects/${projectId}/blueprints/${blueprintId}/objectives`;
+        ? `/api/courses/${courseId}/blueprints/${blueprintId}/objectives/${editingId}`
+        : `/api/courses/${courseId}/blueprints/${blueprintId}/objectives`;
 
       const method = editingId ? 'PUT' : 'POST';
 
@@ -166,7 +166,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
       }
 
       // Refresh objectives list
-      const fetchResponse = await fetch(`/api/projects/${projectId}/blueprints/${blueprintId}/objectives`);
+      const fetchResponse = await fetch(`/api/courses/${courseId}/blueprints/${blueprintId}/objectives`);
       if (fetchResponse.ok) {
         const data = await fetchResponse.json();
         setObjectives(data);
@@ -179,7 +179,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
   };
 
   const handleDelete = async (id: string) => {
-    if (!projectId || !blueprintId) {
+    if (!courseId || !blueprintId) {
       setError('Project ID or Blueprint ID is missing');
       return;
     }
@@ -191,7 +191,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     try {
       setError(null);
       const response = await fetch(
-        `/api/projects/${projectId}/blueprints/${blueprintId}/objectives/${id}`,
+        `/api/courses/${courseId}/blueprints/${blueprintId}/objectives/${id}`,
         {
           method: 'DELETE',
         }
@@ -203,7 +203,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
       }
 
       // Refresh objectives list
-      const fetchResponse = await fetch(`/api/projects/${projectId}/blueprints/${blueprintId}/objectives`);
+      const fetchResponse = await fetch(`/api/courses/${courseId}/blueprints/${blueprintId}/objectives`);
       if (fetchResponse.ok) {
         const data = await fetchResponse.json();
         setObjectives(data);
@@ -213,7 +213,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
     }
   };
 
-  if (!projectId || !blueprintId) {
+  if (!courseId || !blueprintId) {
     return <div>Loading...</div>;
   }
 
@@ -222,15 +222,15 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
       {/* Navigation */}
       <div className="space-y-2">
         <Link
-          href={`/projects/${projectId}/blueprints/${blueprintId}`}
+          href={`/projects/${courseId}/blueprints/${blueprintId}`}
           className="text-sm text-gray-500 hover:text-gray-700 inline-block"
         >
           ← Back to Blueprint
         </Link>
-        {(projectName || projectId) && (
+        {(projectName || courseId) && (
           <div className="text-sm text-gray-500">
             <Link
-              href={`/projects/${projectId}`}
+              href={`/projects/${courseId}`}
               className="hover:text-gray-700"
             >
               Projects
@@ -239,7 +239,7 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
               <>
                 {' › '}
                 <Link
-                  href={`/projects/${projectId}`}
+                  href={`/projects/${courseId}`}
                   className="hover:text-gray-700"
                 >
                   {projectName}
@@ -248,14 +248,14 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
             )}
             {' › '}
             <Link
-              href={`/projects/${projectId}/blueprints`}
+              href={`/projects/${courseId}/blueprints`}
               className="hover:text-gray-700"
             >
               Blueprints
             </Link>
             {' › '}
             <Link
-              href={`/projects/${projectId}/blueprints/${blueprintId}`}
+              href={`/projects/${courseId}/blueprints/${blueprintId}`}
               className="hover:text-gray-700"
             >
               Blueprint

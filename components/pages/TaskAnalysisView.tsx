@@ -28,7 +28,7 @@ const frequencyOptions = [
 ];
 
 export default function TaskAnalysisView({
-  projectId,
+  courseId,
   pageId,
   initialData,
   onSave,

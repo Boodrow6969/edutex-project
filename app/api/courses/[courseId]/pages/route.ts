@@ -6,13 +6,13 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole, PageType } from '@prisma/client';
 
 interface RouteParams {
-  params: Promise<{ projectId: string }>;
+  params: Promise<{ courseId: string }>;
 }
 
 // Valid page types for validation
@@ -32,19 +32,19 @@ const VALID_PAGE_TYPES: PageType[] = [
 ];
 
 /**
- * GET /api/projects/[projectId]/pages
- * List all pages for a project, ordered by their order field.
+ * GET /api/courses/[courseId]/pages
+ * List all pages for a course, ordered by their order field.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
-    // Verify user has access to this project's workspace
-    await assertProjectAccess(projectId, user.id);
+    // Verify user has access to this course's workspace
+    await assertCourseAccess(courseId, user.id);
 
     const pages = await prisma.page.findMany({
-      where: { projectId },
+      where: { courseId },
       select: {
         id: true,
         title: true,
@@ -88,8 +88,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * POST /api/projects/[projectId]/pages
- * Create a new page in the project.
+ * POST /api/courses/[courseId]/pages
+ * Create a new page in the course.
  * Requires ADMINISTRATOR, MANAGER, DESIGNER, or FACILITATOR role.
  *
  * Request body:
@@ -101,11 +101,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
     // Verify user has permission to create pages
     // SME role cannot create pages (they can only view and comment)
-    await assertProjectAccess(projectId, user.id, [
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
@@ -138,9 +138,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       pageType = body.type as PageType;
     }
 
-    // Get the highest order value for existing pages in this project
+    // Get the highest order value for existing pages in this course
     const maxOrderPage = await prisma.page.findFirst({
-      where: { projectId },
+      where: { courseId },
       orderBy: { order: 'desc' },
       select: { order: true },
     });
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       data: {
         title,
         type: pageType,
-        projectId,
+        courseId,
         createdById: user.id,
         order: newOrder,
       },
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         title: page.title,
         type: page.type,
         order: page.order,
-        projectId: page.projectId,
+        courseId: page.courseId,
         createdAt: page.createdAt,
         updatedAt: page.updatedAt,
         createdBy: page.createdBy,

@@ -15,7 +15,7 @@ interface RouteParams {
 }
 
 /**
- * Helper to get a page and verify user has access through project or curriculum workspace.
+ * Helper to get a page and verify user has access through course or curriculum workspace.
  */
 async function getPageWithAccess(pageId: string, userId: string, allowedRoles?: WorkspaceRole[]) {
   const page = await prisma.page.findUnique({
@@ -23,7 +23,7 @@ async function getPageWithAccess(pageId: string, userId: string, allowedRoles?: 
     select: {
       id: true,
       type: true,
-      projectId: true,
+      courseId: true,
       curriculumId: true,
     },
   });
@@ -32,7 +32,7 @@ async function getPageWithAccess(pageId: string, userId: string, allowedRoles?: 
     throw new NotFoundError('Page not found');
   }
 
-  // Verify workspace membership through page's parent (project or curriculum)
+  // Verify workspace membership through page's parent (course or curriculum)
   await assertPageAccess(pageId, userId, allowedRoles);
 
   return page;

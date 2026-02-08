@@ -8,7 +8,7 @@ async function createProject(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const clientName = String(formData.get("clientName") || "").trim();
-  const projectType = String(formData.get("projectType") || "").trim();
+  const courseType = String(formData.get("courseType") || "").trim();
   const phase = String(formData.get("phase") || "").trim() || "intake";
   const priority = String(formData.get("priority") || "").trim() || "medium";
   const targetGoLiveStr = String(formData.get("targetGoLive") || "").trim();
@@ -25,12 +25,12 @@ async function createProject(formData: FormData) {
     }
   }
 
-  await prisma.project.create({
+  await prisma.course.create({
     data: {
       name,
       description: description || null,
       clientName: clientName || null,
-      projectType: projectType || null,
+      courseType: courseType || null,
       phase,
       priority,
       targetGoLive,
@@ -41,7 +41,7 @@ async function createProject(formData: FormData) {
 }
 
 export default async function ProjectsPage() {
-  const projects = await prisma.project.findMany({
+  const projects = await prisma.course.findMany({
     orderBy: { createdAt: "desc" },
   });
 
@@ -96,12 +96,12 @@ export default async function ProjectsPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium" htmlFor="projectType">
-              Project type
+            <label className="text-sm font-medium" htmlFor="courseType">
+              Course type
             </label>
             <input
-              id="projectType"
-              name="projectType"
+              id="courseType"
+              name="courseType"
               className="w-full border rounded px-3 py-2 text-sm"
               placeholder="e.g., Course, Module, Job Aid"
             />
@@ -188,7 +188,7 @@ export default async function ProjectsPage() {
                     </div>
                   )}
                   <div className="text-xs text-gray-500">
-                    {project.projectType && <span>{project.projectType} · </span>}
+                    {project.courseType && <span>{project.courseType} · </span>}
                     Phase: {project.phase} · Priority: {project.priority}
                   </div>
                   {project.description && (

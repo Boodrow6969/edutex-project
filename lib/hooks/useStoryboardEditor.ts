@@ -14,7 +14,7 @@ export interface PageMetadata {
   id: string;
   title: string;
   type: string;
-  projectId: string;
+  courseId: string;
   workspaceId: string;
 }
 
@@ -145,7 +145,7 @@ export function useStoryboardEditor({
         id: data.id,
         title: data.title,
         type: data.type,
-        projectId: data.projectId,
+        courseId: data.courseId,
         workspaceId: data.workspaceId,
       });
 
@@ -193,15 +193,15 @@ export function useStoryboardEditor({
           }
 
           // Fetch project name for default title
-          if (data.projectId) {
-            const projectResponse = await fetch(`/api/projects/${data.projectId}`);
-            if (projectResponse.ok) {
-              const project = await projectResponse.json();
-              setProjectName(project.name || '');
+          if (data.courseId) {
+            const courseResponse = await fetch(`/api/courses/${data.courseId}`);
+            if (courseResponse.ok) {
+              const course = await courseResponse.json();
+              setProjectName(course.name || '');
             }
           }
         } catch (err) {
-          console.error('Error fetching storyboard or project data:', err);
+          console.error('Error fetching storyboard or course data:', err);
         }
       }
       setBlocks(fetchedBlocks);

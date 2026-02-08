@@ -11,7 +11,7 @@ export async function GET(
     const workspace = await prisma.workspace.findUnique({
       where: { id: workspaceId },
       include: {
-        projects: {
+        courses: {
           select: {
             id: true,
             name: true,
@@ -48,7 +48,7 @@ export async function GET(
         },
         _count: {
           select: {
-            projects: true,
+            courses: true,
             curricula: true,
             members: true,
           },
@@ -69,10 +69,10 @@ export async function GET(
       name: workspace.name,
       description: workspace.description,
       createdAt: workspace.createdAt,
-      courses: workspace.projects, // Rename projects to courses for UI
+      courses: workspace.courses,
       curricula: workspace.curricula,
       _count: {
-        courses: workspace._count.projects,
+        courses: workspace._count.courses,
         curricula: workspace._count.curricula,
         members: workspace._count.members,
       },

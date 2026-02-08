@@ -43,11 +43,11 @@ export default function LearningObjectivesImportComponent({
   updateAttributes,
   deleteNode,
 }: NodeViewProps) {
-  const { importedAt, objectives, displayMode, projectId } = node.attrs as {
+  const { importedAt, objectives, displayMode, courseId } = node.attrs as {
     importedAt: string;
     objectives: ImportedObjective[];
     displayMode: 'compact' | 'detailed';
-    projectId?: string;
+    courseId?: string;
   };
 
   const [isLoading, setIsLoading] = useState(false);
@@ -61,16 +61,16 @@ export default function LearningObjectivesImportComponent({
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
-  // Use projectId from node attributes
-  const resolvedProjectId = projectId;
+  // Use courseId from node attributes
+  const resolvedCourseId = courseId;
 
   // ==========================================================================
   // Fetch Objectives
   // ==========================================================================
 
   const fetchObjectives = useCallback(async () => {
-    if (!resolvedProjectId) {
-      setError('Project ID not available. Cannot fetch objectives.');
+    if (!resolvedCourseId) {
+      setError('Course ID not available. Cannot fetch objectives.');
       return;
     }
 
@@ -78,7 +78,7 @@ export default function LearningObjectivesImportComponent({
     setError(null);
 
     try {
-      const response = await fetch(`/api/projects/${resolvedProjectId}/objectives`);
+      const response = await fetch(`/api/courses/${resolvedCourseId}/objectives`);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -103,7 +103,7 @@ export default function LearningObjectivesImportComponent({
       updateAttributes({
         importedAt: new Date().toISOString(),
         objectives: importedObjectives,
-        projectId: resolvedProjectId,
+        courseId: resolvedCourseId,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch objectives';
@@ -111,21 +111,21 @@ export default function LearningObjectivesImportComponent({
     } finally {
       setIsLoading(false);
     }
-  }, [resolvedProjectId, updateAttributes]);
+  }, [resolvedCourseId, updateAttributes]);
 
   // Auto-fetch on mount if no objectives yet
   useEffect(() => {
-    if (objectives.length === 0 && !importedAt && resolvedProjectId && !isLoading) {
+    if (objectives.length === 0 && !importedAt && resolvedCourseId && !isLoading) {
       fetchObjectives();
     }
-  }, [objectives.length, importedAt, resolvedProjectId, isLoading, fetchObjectives]);
+  }, [objectives.length, importedAt, resolvedCourseId, isLoading, fetchObjectives]);
 
   // ==========================================================================
   // Add Objective
   // ==========================================================================
 
   const handleAddObjective = useCallback(async () => {
-    if (!resolvedProjectId || !newObjectiveText.trim()) {
+    if (!resolvedCourseId || !newObjectiveText.trim()) {
       return;
     }
 
@@ -133,7 +133,7 @@ export default function LearningObjectivesImportComponent({
     setAddError(null);
 
     try {
-      const response = await fetch(`/api/projects/${resolvedProjectId}/objectives`, {
+      const response = await fetch(`/api/courses/${resolvedCourseId}/objectives`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ export default function LearningObjectivesImportComponent({
     } finally {
       setIsAdding(false);
     }
-  }, [resolvedProjectId, newObjectiveText, newBloomLevel, fetchObjectives]);
+  }, [resolvedCourseId, newObjectiveText, newBloomLevel, fetchObjectives]);
 
   // ==========================================================================
   // Render Helpers
@@ -362,7 +362,7 @@ export default function LearningObjectivesImportComponent({
             )}
 
             {/* Quick Add Form */}
-            {resolvedProjectId && (
+            {resolvedCourseId && (
               <div className="mt-4 pt-4 border-t border-gray-200">
                 {!showAddForm ? (
                   <button

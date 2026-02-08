@@ -13,7 +13,7 @@ interface ProjectCardProps {
     name: string;
     description?: string | null;
     clientName?: string | null;
-    projectType?: string | null;
+    courseType?: string | null;
     phase: string;
     priority: string;
     status: string;
@@ -86,9 +86,9 @@ export default function ProjectCard({ project, workspaceId }: ProjectCardProps) 
 
       {/* Badges */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {project.projectType && (
+        {project.courseType && (
           <span className="px-2 py-0.5 text-xs bg-gray-50 text-gray-600 rounded border border-gray-200">
-            {project.projectType}
+            {project.courseType}
           </span>
         )}
         <span

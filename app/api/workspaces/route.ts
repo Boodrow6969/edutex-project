@@ -12,7 +12,7 @@ import { WorkspaceRole } from '@prisma/client';
 
 /**
  * GET /api/workspaces
- * Lists all workspaces the current user is a member of, including their projects.
+ * Lists all workspaces the current user is a member of, including their courses.
  */
 export async function GET() {
   try {
@@ -27,7 +27,7 @@ export async function GET() {
         },
       },
       include: {
-        projects: {
+        courses: {
           select: {
             id: true,
             name: true,
@@ -61,7 +61,7 @@ export async function GET() {
       createdAt: workspace.createdAt,
       updatedAt: workspace.updatedAt,
       role: workspace.members[0]?.role ?? null,
-      projects: workspace.projects,
+      courses: workspace.courses,
     }));
 
     return Response.json(result);
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
-        projects: {
+        courses: {
           select: {
             id: true,
             name: true,
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
         createdAt: workspace.createdAt,
         updatedAt: workspace.updatedAt,
         role: workspace.members[0]?.role ?? WorkspaceRole.ADMINISTRATOR,
-        projects: workspace.projects,
+        courses: workspace.courses,
       },
       { status: 201 }
     );

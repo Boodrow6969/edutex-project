@@ -21,7 +21,7 @@ interface RouteParams {
  *
  * Request body:
  * {
- *   orderedProjectIds: string[]  // Project IDs in the desired order
+ *   orderedCourseIds: string[]  // Course IDs in the desired order
  * }
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
@@ -38,50 +38,50 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
 
-    // Validate orderedProjectIds
-    if (!Array.isArray(body.orderedProjectIds)) {
+    // Validate orderedCourseIds
+    if (!Array.isArray(body.orderedCourseIds)) {
       return Response.json(
-        { error: 'orderedProjectIds must be an array of project IDs' },
+        { error: 'orderedCourseIds must be an array of course IDs' },
         { status: 400 }
       );
     }
 
-    const orderedProjectIds: string[] = body.orderedProjectIds;
+    const orderedCourseIds: string[] = body.orderedCourseIds;
 
     // Validate each ID is a string
-    for (const id of orderedProjectIds) {
+    for (const id of orderedCourseIds) {
       if (typeof id !== 'string' || id.trim() === '') {
         return Response.json(
-          { error: 'Each project ID must be a non-empty string' },
+          { error: 'Each course ID must be a non-empty string' },
           { status: 400 }
         );
       }
     }
 
-    // Verify all projects are actually linked to this curriculum
+    // Verify all courses are actually linked to this curriculum
     const existingLinks = await prisma.curriculumCourse.findMany({
       where: { curriculumId },
-      select: { projectId: true },
+      select: { courseId: true },
     });
 
-    const linkedProjectIds = new Set(existingLinks.map((l) => l.projectId));
-    const invalidIds = orderedProjectIds.filter((id) => !linkedProjectIds.has(id));
+    const linkedCourseIds = new Set(existingLinks.map((l) => l.courseId));
+    const invalidIds = orderedCourseIds.filter((id) => !linkedCourseIds.has(id));
 
     if (invalidIds.length > 0) {
       return Response.json(
-        { error: `Some projects are not linked to this curriculum: ${invalidIds.join(', ')}` },
+        { error: `Some courses are not linked to this curriculum: ${invalidIds.join(', ')}` },
         { status: 400 }
       );
     }
 
     // Update order for each link in a transaction
     await prisma.$transaction(
-      orderedProjectIds.map((projectId, index) =>
+      orderedCourseIds.map((courseId, index) =>
         prisma.curriculumCourse.update({
           where: {
-            curriculumId_projectId: {
+            curriculumId_courseId: {
               curriculumId,
-              projectId,
+              courseId,
             },
           },
           data: { order: index },
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         id: true,
         order: true,
         createdAt: true,
-        project: {
+        course: {
           select: {
             id: true,
             name: true,
@@ -114,12 +114,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       linkId: cc.id,
       order: cc.order,
       linkedAt: cc.createdAt,
-      id: cc.project.id,
-      name: cc.project.name,
-      description: cc.project.description,
-      status: cc.project.status,
-      phase: cc.project.phase,
-      priority: cc.project.priority,
+      id: cc.course.id,
+      name: cc.course.name,
+      description: cc.course.description,
+      status: cc.course.status,
+      phase: cc.course.phase,
+      priority: cc.course.priority,
     }));
 
     return Response.json({ courses: result });

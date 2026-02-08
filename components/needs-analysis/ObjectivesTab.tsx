@@ -14,7 +14,7 @@ interface SavedObjective {
 }
 
 interface ObjectivesTabProps {
-  projectId: string;
+  courseId: string;
   pageId?: string;
 }
 
@@ -28,7 +28,7 @@ const bloomLevelColors: Record<string, string> = {
   CREATE: 'bg-purple-100 text-purple-700',
 };
 
-export default function ObjectivesTab({ projectId, pageId }: ObjectivesTabProps) {
+export default function ObjectivesTab({ courseId, pageId }: ObjectivesTabProps) {
   // Saved objectives from database
   const [objectives, setObjectives] = useState<SavedObjective[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,11 +50,11 @@ export default function ObjectivesTab({ projectId, pageId }: ObjectivesTabProps)
 
   // Load objectives on mount
   const loadObjectives = useCallback(async () => {
-    if (!projectId) return;
+    if (!courseId) return;
 
     try {
       setError(null);
-      const response = await fetch(`/api/projects/${projectId}/objectives`);
+      const response = await fetch(`/api/courses/${courseId}/objectives`);
 
       if (!response.ok) {
         throw new Error('Failed to load objectives');
@@ -67,7 +67,7 @@ export default function ObjectivesTab({ projectId, pageId }: ObjectivesTabProps)
     } finally {
       setIsLoading(false);
     }
-  }, [projectId]);
+  }, [courseId]);
 
   useEffect(() => {
     loadObjectives();
@@ -144,7 +144,7 @@ export default function ObjectivesTab({ projectId, pageId }: ObjectivesTabProps)
     setModalError(null);
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/objectives`, {
+      const response = await fetch(`/api/courses/${courseId}/objectives`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

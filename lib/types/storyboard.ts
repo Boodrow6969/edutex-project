@@ -31,7 +31,7 @@ export interface StoryboardFrame extends StoryboardFrameContent {
 
 // Props for the main StoryboardView component
 export interface StoryboardViewProps {
-  projectId: string;
+  courseId: string;
   pageId: string;
   pageTitle: string;
   initialMetadata?: StoryboardMetadata;

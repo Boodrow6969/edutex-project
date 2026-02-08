@@ -6,30 +6,30 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
 
 interface RouteParams {
-  params: Promise<{ projectId: string }>;
+  params: Promise<{ courseId: string }>;
 }
 
 /**
- * GET /api/projects/[projectId]
- * Get project details including page count and related statistics.
+ * GET /api/courses/[courseId]
+ * Get course details including page count and related statistics.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
-    // Verify user has access to this project's workspace
-    const { membership } = await assertProjectAccess(projectId, user.id);
+    // Verify user has access to this course's workspace
+    const { membership } = await assertCourseAccess(courseId, user.id);
 
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
       include: {
         pages: {
           select: {
@@ -54,31 +54,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!project) {
-      throw new NotFoundError('Project not found');
+    if (!course) {
+      throw new NotFoundError('Course not found');
     }
 
     return Response.json({
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      workspaceId: project.workspaceId,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      workspaceId: course.workspaceId,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
       role: membership.role,
-      pages: project.pages,
-      taskCount: project._count.tasks,
-      objectiveCount: project._count.objectives,
-      deliverableCount: project._count.deliverables,
+      pages: course.pages,
+      taskCount: course._count.tasks,
+      objectiveCount: course._count.objectives,
+      deliverableCount: course._count.deliverables,
     });
   } catch (error) {
-    return errorResponse(error, 'Failed to fetch project');
+    return errorResponse(error, 'Failed to fetch course');
   }
 }
 
 /**
- * PUT /api/projects/[projectId]
- * Update project name and/or description.
+ * PUT /api/courses/[courseId]
+ * Update course name and/or description.
  * Requires ADMINISTRATOR, MANAGER, or DESIGNER role.
  *
  * Request body:
@@ -90,10 +90,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
-    // Verify user has permission to update projects
-    await assertProjectAccess(projectId, user.id, [
+    // Verify user has permission to update courses
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
@@ -125,8 +125,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const project = await prisma.project.update({
-      where: { id: projectId },
+    const course = await prisma.course.update({
+      where: { id: courseId },
       data: updateData,
       include: {
         _count: {
@@ -140,24 +140,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
 
     return Response.json({
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      workspaceId: project.workspaceId,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-      pageCount: project._count.pages,
-      taskCount: project._count.tasks,
-      objectiveCount: project._count.objectives,
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      workspaceId: course.workspaceId,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+      pageCount: course._count.pages,
+      taskCount: course._count.tasks,
+      objectiveCount: course._count.objectives,
     });
   } catch (error) {
-    return errorResponse(error, 'Failed to update project');
+    return errorResponse(error, 'Failed to update course');
   }
 }
 
 /**
- * DELETE /api/projects/[projectId]
- * Delete a project and all its pages, tasks, etc.
+ * DELETE /api/courses/[courseId]
+ * Delete a course and all its pages, tasks, etc.
  * Requires ADMINISTRATOR or MANAGER role.
  *
  * Note: This is a hard delete. The schema uses onDelete: Cascade,
@@ -166,20 +166,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
-    // Only ADMINISTRATOR and MANAGER can delete projects
-    await assertProjectAccess(projectId, user.id, [
+    // Only ADMINISTRATOR and MANAGER can delete courses
+    await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
     ]);
 
-    await prisma.project.delete({
-      where: { id: projectId },
+    await prisma.course.delete({
+      where: { id: courseId },
     });
 
-    return Response.json({ success: true, message: 'Project deleted' });
+    return Response.json({ success: true, message: 'Course deleted' });
   } catch (error) {
-    return errorResponse(error, 'Failed to delete project');
+    return errorResponse(error, 'Failed to delete course');
   }
 }

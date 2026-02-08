@@ -29,7 +29,7 @@ export interface TaskAnalysisFormData {
 }
 
 export interface TaskAnalysisProps {
-  projectId: string;
+  courseId: string;
   pageId?: string;
   initialData?: Partial<TaskAnalysisFormData>;
   onSave?: (data: TaskAnalysisFormData) => Promise<void>;

@@ -30,13 +30,13 @@ export interface CreateTasksResult {
 /**
  * Creates Task records from a NeedsAnalysisResult.
  *
- * @param projectId - The project to create tasks in
+ * @param courseId - The course to create tasks in
  * @param createdById - The user ID who is creating the tasks
  * @param analysis - The needs analysis result containing recommended tasks
  * @returns Object with created tasks and skipped task titles (duplicates)
  */
 export async function createTasksFromAnalysis(
-  projectId: string,
+  courseId: string,
   createdById: string,
   analysis: NeedsAnalysisResult
 ): Promise<CreateTasksResult> {
@@ -46,9 +46,9 @@ export async function createTasksFromAnalysis(
     return { created: [], skipped: [] };
   }
 
-  // Get existing task titles for this project to avoid duplicates
+  // Get existing task titles for this course to avoid duplicates
   const existingTasks = await prisma.task.findMany({
-    where: { projectId },
+    where: { courseId },
     select: { title: true },
   });
 
@@ -76,7 +76,7 @@ export async function createTasksFromAnalysis(
         description: recommendedTask.description || null,
         status: TaskStatus.TODO,
         priority: mapPriority(recommendedTask.priority),
-        projectId,
+        courseId,
         createdById,
       },
     });

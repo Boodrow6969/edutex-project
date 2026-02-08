@@ -44,7 +44,10 @@
       "Bash(python -m json.tool:*)",
       "Bash(move \"D:\\\\Dropbox\\\\Dropbox\\\\EduTex\\\\app\\\\app\\\\workspace\\\\[workspaceId]\\\\stakeholder\\\\page.tsx\" \"D:\\\\Dropbox\\\\Dropbox\\\\EduTex\\\\app\\\\app\\\\workspace\\\\[workspaceId]\\\\needs-analysis\\\\page.tsx\")",
       "Bash(npx prisma migrate:*)",
-      "Bash(npx prisma db execute:*)"
+      "Bash(npx prisma db execute:*)",
+      "Bash(git mv:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"npx tsc --noEmit 2>&1 | Select-String ''projectId|prisma\\\\.project|Project''\")"
     ],
     "deny": [],
     "ask": []

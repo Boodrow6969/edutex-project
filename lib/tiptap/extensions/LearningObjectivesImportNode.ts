@@ -9,7 +9,7 @@ export interface LearningObjectivesImportOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     learningObjectivesImport: {
-      insertLearningObjectivesImport: (options?: { projectId?: string }) => ReturnType;
+      insertLearningObjectivesImport: (options?: { courseId?: string }) => ReturnType;
     };
   }
 }
@@ -40,7 +40,7 @@ export const LearningObjectivesImportNode = Node.create<LearningObjectivesImport
       displayMode: {
         default: 'detailed',
       },
-      projectId: {
+      courseId: {
         default: '',
       },
     };
@@ -65,13 +65,13 @@ export const LearningObjectivesImportNode = Node.create<LearningObjectivesImport
   addCommands() {
     return {
       insertLearningObjectivesImport:
-        (options?: { projectId?: string }) =>
+        (options?: { courseId?: string }) =>
         ({ tr, dispatch, state }) => {
           const node = state.schema.nodes.learningObjectivesImport.create({
             importedAt: '',
             objectives: [],
             displayMode: 'detailed',
-            projectId: options?.projectId || '',
+            courseId: options?.courseId || '',
           });
 
           if (dispatch) {

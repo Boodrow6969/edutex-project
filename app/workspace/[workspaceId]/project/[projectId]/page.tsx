@@ -26,7 +26,7 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
  */
 export default function ProjectPage() {
   const params = useParams();
-  const projectId = params.projectId as string;
+  const courseId = params.projectId as string;
   const workspaceId = params.workspaceId as string;
 
   // Page creation state
@@ -59,7 +59,7 @@ export default function ProjectPage() {
     setCreateError(null);
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/pages`, {
+      const response = await fetch(`/api/courses/${courseId}/pages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -101,7 +101,7 @@ export default function ProjectPage() {
       <div className="p-6 max-w-6xl mx-auto">
         <ProjectOverview
           key={refreshKey}
-          projectId={projectId}
+          courseId={courseId}
           workspaceId={workspaceId}
           onCreatePage={handleOpenCreatePage}
         />

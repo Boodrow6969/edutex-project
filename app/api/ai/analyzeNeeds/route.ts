@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         where: { id: body.pageId },
         select: {
           id: true,
-          projectId: true,
+          courseId: true,
           blocks: {
             orderBy: { order: 'asc' },
             select: {

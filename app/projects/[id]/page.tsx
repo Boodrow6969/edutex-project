@@ -19,7 +19,7 @@ async function updateProject(formData: FormData) {
     throw new Error("Project ID is required");
   }
 
-  await prisma.project.update({
+  await prisma.course.update({
     where: { id },
     data: {
       status,
@@ -36,7 +36,7 @@ export default async function ProjectDetailPage(
 ) {
   const { id } = await props.params;
 
-  const project = await prisma.project.findUnique({
+  const project = await prisma.course.findUnique({
     where: { id },
   });
 
@@ -62,8 +62,8 @@ export default async function ProjectDetailPage(
           {project.clientName && (
             <p className="text-gray-600">Client: {project.clientName}</p>
           )}
-          {project.projectType && (
-            <p className="text-gray-600">Type: {project.projectType}</p>
+          {project.courseType && (
+            <p className="text-gray-600">Type: {project.courseType}</p>
           )}
           {project.targetGoLive && (
             <p className="text-gray-600">

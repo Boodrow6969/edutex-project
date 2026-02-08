@@ -5,7 +5,7 @@ import { GeneratedObjective, BloomLevelString } from '@/lib/types/objectives';
 
 interface LearningObjectivesViewProps {
   pageId: string;
-  projectId: string;
+  courseId: string;
 }
 
 interface SavedObjective {
@@ -14,7 +14,7 @@ interface SavedObjective {
   description: string;
   bloomLevel: BloomLevelString;
   tags: string[];
-  projectId: string;
+  courseId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,7 +50,7 @@ const BLOOM_COLORS: Record<BloomLevelString, string> = {
  */
 export default function LearningObjectivesView({
   pageId,
-  projectId,
+  courseId,
 }: LearningObjectivesViewProps) {
   // Saved objectives from database
   const [savedObjectives, setSavedObjectives] = useState<SavedObjective[]>([]);
@@ -86,7 +86,7 @@ export default function LearningObjectivesView({
   const fetchObjectives = useCallback(async () => {
     try {
       setLoadError(null);
-      const response = await fetch(`/api/projects/${projectId}/objectives`);
+      const response = await fetch(`/api/courses/${courseId}/objectives`);
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Failed to fetch objectives');
@@ -99,7 +99,7 @@ export default function LearningObjectivesView({
     } finally {
       setIsLoadingObjectives(false);
     }
-  }, [projectId]);
+  }, [courseId]);
 
   useEffect(() => {
     fetchObjectives();
@@ -116,7 +116,7 @@ export default function LearningObjectivesView({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          projectId,
+          courseId,
           context: contextInput.trim() || undefined,
           needsSummary: needsSummaryInput.trim() || undefined,
         }),
@@ -152,7 +152,7 @@ export default function LearningObjectivesView({
     setSaveMessage(null);
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/objectives`, {
+      const response = await fetch(`/api/courses/${courseId}/objectives`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -194,7 +194,7 @@ export default function LearningObjectivesView({
     setSaveMessage(null);
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/objectives`, {
+      const response = await fetch(`/api/courses/${courseId}/objectives`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -326,7 +326,7 @@ export default function LearningObjectivesView({
     setSaveMessage(null);
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/objectives`, {
+      const response = await fetch(`/api/courses/${courseId}/objectives`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

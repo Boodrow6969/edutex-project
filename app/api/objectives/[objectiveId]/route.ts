@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
 } from '@/lib/auth-helpers';
 import { toBloomLevel, isValidBloomLevel } from '@/lib/types/objectives';
@@ -26,7 +26,7 @@ async function getObjectiveWithAccess(
   const objective = await prisma.objective.findUnique({
     where: { id: objectiveId },
     include: {
-      project: {
+      course: {
         select: { id: true, workspaceId: true },
       },
     },
@@ -36,8 +36,8 @@ async function getObjectiveWithAccess(
     throw { status: 404, message: 'Objective not found' };
   }
 
-  // Verify user has access to the project's workspace
-  await assertProjectAccess(objective.projectId, userId, requiredRoles);
+  // Verify user has access to the course's workspace
+  await assertCourseAccess(objective.courseId, userId, requiredRoles);
 
   return objective;
 }
@@ -53,8 +53,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const objective = await getObjectiveWithAccess(objectiveId, user.id);
 
-    // Return without the project include
-    const { project: _project, ...objectiveData } = objective;
+    // Return without the course include
+    const { course: _course, ...objectiveData } = objective;
     return Response.json(objectiveData);
   } catch (error) {
     return errorResponse(error, 'Failed to fetch objective');

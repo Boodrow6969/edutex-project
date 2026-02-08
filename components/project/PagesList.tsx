@@ -14,7 +14,7 @@ interface PageSummary {
 interface PagesListProps {
   pages: PageSummary[];
   workspaceId: string;
-  projectId: string;
+  courseId: string;
   onCreatePage: () => void;
 }
 
@@ -54,7 +54,7 @@ const PAGE_TYPE_COLORS: Record<PageType, string> = {
 export default function PagesList({
   pages,
   workspaceId,
-  projectId,
+  courseId,
   onCreatePage,
 }: PagesListProps) {
   return (
@@ -103,7 +103,7 @@ export default function PagesList({
           pages.map((page) => (
             <Link
               key={page.id}
-              href={`/workspace/${workspaceId}/project/${projectId}/page/${page.id}`}
+              href={`/workspace/${workspaceId}/project/${courseId}/page/${page.id}`}
               className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group"
             >
               <div className="flex items-center gap-3 min-w-0">

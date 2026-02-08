@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 import {
   getCurrentUserOrThrow,
   assertCurriculumAccess,
-  assertProjectAccess,
+  assertCourseAccess,
   errorResponse,
   NotFoundError,
   AuthorizationError,
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         id: true,
         order: true,
         createdAt: true,
-        project: {
+        course: {
           select: {
             id: true,
             name: true,
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             phase: true,
             priority: true,
             clientName: true,
-            projectType: true,
+            courseType: true,
             targetGoLive: true,
             createdAt: true,
             updatedAt: true,
@@ -65,19 +65,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       linkId: cc.id,
       order: cc.order,
       linkedAt: cc.createdAt,
-      id: cc.project.id,
-      name: cc.project.name,
-      description: cc.project.description,
-      status: cc.project.status,
-      phase: cc.project.phase,
-      priority: cc.project.priority,
-      clientName: cc.project.clientName,
-      projectType: cc.project.projectType,
-      targetGoLive: cc.project.targetGoLive,
-      createdAt: cc.project.createdAt,
-      updatedAt: cc.project.updatedAt,
-      pageCount: cc.project._count.pages,
-      objectiveCount: cc.project._count.objectives,
+      id: cc.course.id,
+      name: cc.course.name,
+      description: cc.course.description,
+      status: cc.course.status,
+      phase: cc.course.phase,
+      priority: cc.course.priority,
+      clientName: cc.course.clientName,
+      courseType: cc.course.courseType,
+      targetGoLive: cc.course.targetGoLive,
+      createdAt: cc.course.createdAt,
+      updatedAt: cc.course.updatedAt,
+      pageCount: cc.course._count.pages,
+      objectiveCount: cc.course._count.objectives,
     }));
 
     return Response.json(result);
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  *
  * Request body for linking:
  * {
- *   projectId: string
+ *   courseId: string
  * }
  *
  * Request body for creating:
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  *   name: string,
  *   description?: string,
  *   clientName?: string,
- *   projectType?: string,
+ *   courseType?: string,
  *   phase?: string,
  *   priority?: string,
  *   status?: string,
@@ -140,13 +140,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
 
       const result = await prisma.$transaction(async (tx) => {
-        // Create the project (course)
-        const project = await tx.project.create({
+        // Create the course
+        const course = await tx.course.create({
           data: {
             name: body.name.trim(),
             description: body.description?.trim() || null,
             clientName: body.clientName?.trim() || null,
-            projectType: body.projectType?.trim() || null,
+            courseType: body.courseType?.trim() || null,
             phase: body.phase || 'intake',
             priority: body.priority || 'medium',
             status: body.status || 'draft',
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             title: page.title,
             type: page.type,
             order: page.order,
-            projectId: project.id,
+            courseId: course.id,
             createdById: user.id,
           })),
         });
@@ -178,11 +178,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const link = await tx.curriculumCourse.create({
           data: {
             curriculumId,
-            projectId: project.id,
+            courseId: course.id,
             order: nextOrder,
           },
           include: {
-            project: {
+            course: {
               select: {
                 id: true,
                 name: true,
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                 phase: true,
                 priority: true,
                 clientName: true,
-                projectType: true,
+                courseType: true,
                 targetGoLive: true,
                 createdAt: true,
                 updatedAt: true,
@@ -208,33 +208,33 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           linkId: result.id,
           order: result.order,
           linkedAt: result.createdAt,
-          id: result.project.id,
-          name: result.project.name,
-          description: result.project.description,
-          status: result.project.status,
-          phase: result.project.phase,
-          priority: result.project.priority,
-          clientName: result.project.clientName,
-          projectType: result.project.projectType,
-          targetGoLive: result.project.targetGoLive,
-          createdAt: result.project.createdAt,
-          updatedAt: result.project.updatedAt,
+          id: result.course.id,
+          name: result.course.name,
+          description: result.course.description,
+          status: result.course.status,
+          phase: result.course.phase,
+          priority: result.course.priority,
+          clientName: result.course.clientName,
+          courseType: result.course.courseType,
+          targetGoLive: result.course.targetGoLive,
+          createdAt: result.course.createdAt,
+          updatedAt: result.course.updatedAt,
           created: true,
         },
         { status: 201 }
       );
     } else {
       // Link an existing course
-      if (!body.projectId || typeof body.projectId !== 'string') {
+      if (!body.courseId || typeof body.courseId !== 'string') {
         return Response.json(
-          { error: 'projectId is required when linking an existing course' },
+          { error: 'courseId is required when linking an existing course' },
           { status: 400 }
         );
       }
 
-      // Verify the project exists and user has access to it
-      const project = await prisma.project.findUnique({
-        where: { id: body.projectId },
+      // Verify the course exists and user has access to it
+      const course = await prisma.course.findUnique({
+        where: { id: body.courseId },
         select: {
           id: true,
           name: true,
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           phase: true,
           priority: true,
           clientName: true,
-          projectType: true,
+          courseType: true,
           targetGoLive: true,
           workspaceId: true,
           createdAt: true,
@@ -251,21 +251,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         },
       });
 
-      if (!project) {
-        throw new NotFoundError('Project not found');
+      if (!course) {
+        throw new NotFoundError('Course not found');
       }
 
-      // Verify user has access to the project's workspace
-      if (project.workspaceId) {
-        await assertProjectAccess(body.projectId, user.id);
+      // Verify user has access to the course's workspace
+      if (course.workspaceId) {
+        await assertCourseAccess(body.courseId, user.id);
       }
 
       // Check if already linked
       const existingLink = await prisma.curriculumCourse.findUnique({
         where: {
-          curriculumId_projectId: {
+          curriculumId_courseId: {
             curriculumId,
-            projectId: body.projectId,
+            courseId: body.courseId,
           },
         },
       });
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       const link = await prisma.curriculumCourse.create({
         data: {
           curriculumId,
-          projectId: body.projectId,
+          courseId: body.courseId,
           order: nextOrder,
         },
       });
@@ -291,17 +291,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           linkId: link.id,
           order: link.order,
           linkedAt: link.createdAt,
-          id: project.id,
-          name: project.name,
-          description: project.description,
-          status: project.status,
-          phase: project.phase,
-          priority: project.priority,
-          clientName: project.clientName,
-          projectType: project.projectType,
-          targetGoLive: project.targetGoLive,
-          createdAt: project.createdAt,
-          updatedAt: project.updatedAt,
+          id: course.id,
+          name: course.name,
+          description: course.description,
+          status: course.status,
+          phase: course.phase,
+          priority: course.priority,
+          clientName: course.clientName,
+          courseType: course.courseType,
+          targetGoLive: course.targetGoLive,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt,
           created: false,
         },
         { status: 201 }
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
  *
  * Request body:
  * {
- *   projectId: string
+ *   courseId: string
  * }
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
@@ -335,9 +335,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
 
-    if (!body.projectId || typeof body.projectId !== 'string') {
+    if (!body.courseId || typeof body.courseId !== 'string') {
       return Response.json(
-        { error: 'projectId is required' },
+        { error: 'courseId is required' },
         { status: 400 }
       );
     }
@@ -345,9 +345,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Check if the link exists
     const link = await prisma.curriculumCourse.findUnique({
       where: {
-        curriculumId_projectId: {
+        curriculumId_courseId: {
           curriculumId,
-          projectId: body.projectId,
+          courseId: body.courseId,
         },
       },
     });

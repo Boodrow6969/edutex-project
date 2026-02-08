@@ -12,7 +12,7 @@ import StoryboardToolbar from '@/components/storyboard/StoryboardToolbar';
 
 interface StoryboardEditorProps {
   pageId: string;
-  projectId: string;
+  courseId: string;
   workspaceId: string;
   readOnly?: boolean;
 }
@@ -23,7 +23,7 @@ interface StoryboardEditorProps {
 
 export default function StoryboardEditor({
   pageId,
-  projectId,
+  courseId,
   workspaceId,
   readOnly = false,
 }: StoryboardEditorProps) {
@@ -129,7 +129,7 @@ export default function StoryboardEditor({
 
       {/* Bottom Toolbar */}
       {editor && !readOnly && (
-        <StoryboardToolbar editor={editor} projectId={projectId} />
+        <StoryboardToolbar editor={editor} courseId={courseId} />
       )}
 
       {/* Editor Styles */}

@@ -59,7 +59,7 @@ interface ContentScreenContent {
 
 /**
  * LEARNING_OBJECTIVES_IMPORT block content
- * From sync.ts: importedAt, objectives, displayMode, projectId
+ * From sync.ts: importedAt, objectives, displayMode, courseId
  */
 interface LearningObjectivesImportContent {
   importedAt?: string;
@@ -69,7 +69,7 @@ interface LearningObjectivesImportContent {
     bloomLevel?: string;
   }>;
   displayMode?: string;  // 'compact' | 'detailed'
-  projectId?: string;
+  courseId?: string;
 }
 
 /**

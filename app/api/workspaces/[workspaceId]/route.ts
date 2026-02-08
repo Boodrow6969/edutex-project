@@ -18,7 +18,7 @@ interface RouteParams {
 
 /**
  * GET /api/workspaces/[workspaceId]
- * Get workspace details including projects and member count.
+ * Get workspace details including courses and member count.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const workspace = await prisma.workspace.findUnique({
       where: { id: workspaceId },
       include: {
-        projects: {
+        courses: {
           select: {
             id: true,
             name: true,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         _count: {
           select: {
             members: true,
-            projects: true,
+            courses: true,
             curricula: true,
           },
         },
@@ -78,9 +78,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       updatedAt: workspace.updatedAt,
       role: membership.role,
       memberCount: workspace._count.members,
-      projectCount: workspace._count.projects,
+      courseCount: workspace._count.courses,
       curriculumCount: workspace._count.curricula,
-      projects: workspace.projects,
+      courses: workspace.courses,
       curricula: workspace.curricula,
     });
   } catch (error) {
@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id: workspaceId },
       data: updateData,
       include: {
-        projects: {
+        courses: {
           select: {
             id: true,
             name: true,
@@ -167,7 +167,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       createdAt: workspace.createdAt,
       updatedAt: workspace.updatedAt,
       role: workspace.members[0]?.role ?? null,
-      projects: workspace.projects,
+      courses: workspace.courses,
     });
   } catch (error) {
     return errorResponse(error, 'Failed to update workspace');
@@ -176,11 +176,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/workspaces/[workspaceId]
- * Delete a workspace and all its projects, pages, etc.
+ * Delete a workspace and all its courses, pages, etc.
  * Requires ADMINISTRATOR role.
  *
  * Note: This is a hard delete. The schema uses onDelete: Cascade,
- * so all related records (members, projects, pages, etc.) will be deleted.
+ * so all related records (members, courses, pages, etc.) will be deleted.
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {

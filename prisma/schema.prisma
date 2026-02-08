@@ -81,7 +81,7 @@ model Workspace {
   updatedAt   DateTime @updatedAt
 
   members   WorkspaceMember[]
-  projects  Project[]
+  courses   Course[]
   curricula Curriculum[]
   stakeholderTokens      StakeholderAccessToken[]
   stakeholderSubmissions StakeholderSubmission[]
@@ -111,13 +111,13 @@ enum WorkspaceRole {
   SME
 }
 
-model Project {
+model Course {
   id          String   @id @default(cuid())
   name        String
   description String?
   status      String   @default("draft")
   clientName  String?
-  projectType String?
+  courseType   String?    // was projectType
   phase       String   @default("intake")
   priority    String   @default("medium")
   targetGoLive DateTime?
@@ -125,15 +125,15 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace   Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  pages       Page[]
-  tasks       Task[]
-  objectives  Objective[]
+  workspace    Workspace?         @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  pages        Page[]
+  tasks        Task[]
+  objectives   Objective[]
   deliverables Deliverable[]
-  blueprints  LearningBlueprint[]
-  curricula   CurriculumCourse[]
+  blueprints   LearningBlueprint[]
+  curricula    CurriculumCourse[]
 
-  @@map("projects")
+  @@map("courses")
 }
 
 model Curriculum {
@@ -168,14 +168,14 @@ model CurriculumCourse {
   id           String     @id @default(cuid())
   curriculumId String
   curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  projectId    String     // Course is stored as Project
-  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   order Int @default(0) // Sequence within curriculum
 
   createdAt DateTime @default(now())
 
-  @@unique([curriculumId, projectId]) // Prevent duplicate links
+  @@unique([curriculumId, courseId])
   @@map("curriculum_courses")
 }
 
@@ -183,14 +183,14 @@ model Page {
   id          String   @id @default(cuid())
   title       String
   type        PageType @default(CUSTOM)
-  projectId   String?  // Optional: page belongs to either Project OR Curriculum
-  curriculumId String? // Optional: page belongs to either Project OR Curriculum
+  courseId     String?  // Optional: page belongs to either Course OR Curriculum
+  curriculumId String? // Optional: page belongs to either Course OR Curriculum
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   order       Int      @default(0)
 
-  project       Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  course        Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   curriculum    Curriculum?    @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
   createdBy     User           @relation(fields: [createdById], references: [id])
   blocks        Block[]
@@ -347,7 +347,7 @@ model Task {
   description   String?
   status        TaskStatus @default(TODO)
   priority      Priority   @default(MEDIUM)
-  projectId     String
+  courseId       String
   createdById   String
   assignedToId  String?
   dueDate       DateTime?
@@ -355,7 +355,7 @@ model Task {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  course       Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdBy    User         @relation(fields: [createdById], references: [id])
   assignedTo   User?        @relation("TaskAssignee", fields: [assignedToId], references: [id])
   deliverable  Deliverable? @relation(fields: [deliverableId], references: [id])
@@ -382,12 +382,12 @@ model Objective {
   title       String
   description String     @db.Text
   bloomLevel  BloomLevel
-  projectId   String
+  courseId     String
   tags        String[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@map("objectives")
 }
@@ -407,12 +407,12 @@ model Deliverable {
   description String?
   type        DeliverableType
   status      DeliverableStatus  @default(PLANNED)
-  projectId   String
+  courseId     String
   dueDate     DateTime?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
   tasks   Task[]
 
   @@map("deliverables")
@@ -442,7 +442,7 @@ enum DeliverableStatus {
 // LearningBlueprint Models
 model LearningBlueprint {
   id              String   @id @default(uuid())
-  projectId       String
+  courseId         String
   title           String
   audience        String
   deliveryMode    String
@@ -451,7 +451,7 @@ model LearningBlueprint {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
   performanceNeeds PerformanceNeed[]
   objectives       BlueprintObjective[]
   constraints      Constraint[]
@@ -474,7 +474,7 @@ model PerformanceNeed {
   @@map("performance_needs")
 }
 
-// Blueprint-level Objective (separate from Project-level Objective)
+// Blueprint-level Objective (separate from Course-level Objective)
 model BlueprintObjective {
   id                String   @id @default(uuid())
   blueprintId       String

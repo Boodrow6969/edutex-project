@@ -8,17 +8,17 @@ type ProjectBlueprintNewPageProps = {
 };
 
 /**
- * Diagnosis: This component was posting to literal /api/projects/[id]/blueprints instead of using params.id
- * 
- * Root cause: The params Promise wasn't being properly awaited, causing projectId to be null/undefined
+ * Diagnosis: This component was posting to literal /api/courses/[id]/blueprints instead of using params.id
+ *
+ * Root cause: The params Promise wasn't being properly awaited, causing courseId to be null/undefined
  * when the fetch call executed, which resulted in an invalid URL.
- * 
- * Fix: Properly await params Promise and add validation to ensure projectId is a valid string
- * before making API calls. Always use the resolved projectId value, never literal "[id]".
+ *
+ * Fix: Properly await params Promise and add validation to ensure courseId is a valid string
+ * before making API calls. Always use the resolved courseId value, never literal "[id]".
  */
 export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewPageProps) {
   const router = useRouter();
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<string | null>(null);
   const [screen, setScreen] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewP
   const [desiredBehavior, setDesiredBehavior] = useState('');
   const [consequences, setConsequences] = useState('');
 
-  // Resolve params Promise - CRITICAL: Must await params before using projectId in URLs
+  // Resolve params Promise - CRITICAL: Must await params before using courseId in URLs
   // In Next.js App Router, params is a Promise for client components
   useEffect(() => {
     let isMounted = true;
@@ -44,19 +44,19 @@ export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewP
         // Validate that we got a real ID, not a placeholder
         if (p.id && typeof p.id === 'string' && p.id.trim() !== '' && p.id !== '[id]') {
           if (isMounted) {
-            setProjectId(p.id.trim());
+            setCourseId(p.id.trim());
           }
         } else {
-          console.error('Invalid project ID from params:', p.id);
+          console.error('Invalid course ID from params:', p.id);
           if (isMounted) {
-            setError('Invalid project ID');
+            setError('Invalid course ID');
           }
         }
       })
       .catch((err) => {
         console.error('Failed to resolve params:', err);
         if (isMounted) {
-          setError('Failed to load project information');
+          setError('Failed to load course information');
         }
       });
 
@@ -102,18 +102,18 @@ export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewP
       return;
     }
 
-    // CRITICAL: Validate projectId before making API call
+    // CRITICAL: Validate courseId before making API call
     // Must be a non-empty string and not a placeholder like "[id]"
-    if (!projectId || typeof projectId !== 'string' || projectId.trim() === '' || projectId === '[id]') {
-      setError('Project ID is missing or invalid. Please refresh the page.');
-      console.error('Invalid projectId in handleSubmit:', projectId);
+    if (!courseId || typeof courseId !== 'string' || courseId.trim() === '' || courseId === '[id]') {
+      setError('Course ID is missing or invalid. Please refresh the page.');
+      console.error('Invalid courseId in handleSubmit:', courseId);
       return;
     }
 
-    // Ensure projectId is trimmed and valid
-    const validProjectId = projectId.trim();
-    if (!validProjectId) {
-      setError('Project ID is missing or invalid. Please refresh the page.');
+    // Ensure courseId is trimmed and valid
+    const validCourseId = courseId.trim();
+    if (!validCourseId) {
+      setError('Course ID is missing or invalid. Please refresh the page.');
       return;
     }
 
@@ -121,12 +121,12 @@ export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewP
     setError(null);
 
     try {
-      // IMPORTANT: Always use the resolved projectId value, never literal "[id]"
-      // The URL must be: /api/projects/<actual-project-id>/blueprints
-      const apiUrl = `/api/projects/${validProjectId}/blueprints`;
-      
-      // Temporary debug log to verify correct projectId
-      console.log('[Blueprint Create] Using projectId:', validProjectId, 'API URL:', apiUrl);
+      // IMPORTANT: Always use the resolved courseId value, never literal "[id]"
+      // The URL must be: /api/courses/<actual-course-id>/blueprints
+      const apiUrl = `/api/courses/${validCourseId}/blueprints`;
+
+      // Temporary debug log to verify correct courseId
+      console.log('[Blueprint Create] Using courseId:', validCourseId, 'API URL:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -150,15 +150,15 @@ export default function ProjectBlueprintNewPage({ params }: ProjectBlueprintNewP
       }
 
       const data = await response.json();
-      // Redirect to blueprint detail page - use validated projectId
-      router.push(`/projects/${validProjectId}/blueprints/${data.id}`);
+      // Redirect to blueprint detail page - use validated courseId
+      router.push(`/projects/${validCourseId}/blueprints/${data.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }
   };
 
-  if (!projectId) {
+  if (!courseId) {
     return <div>Loading...</div>;
   }
 

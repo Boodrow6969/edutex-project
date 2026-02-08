@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 import {
   getCurrentUserOrThrow,
-  assertProjectAccess,
+  assertCourseAccess,
   assertWorkspaceMember,
   errorResponse,
   NotFoundError,
@@ -14,23 +14,23 @@ import {
 import { WorkspaceRole } from '@prisma/client';
 
 interface RouteParams {
-  params: Promise<{ projectId: string }>;
+  params: Promise<{ courseId: string }>;
 }
 
 /**
- * GET /api/projects/[projectId]/curricula
- * List curricula this course (project) belongs to.
+ * GET /api/courses/[courseId]/curricula
+ * List curricula this course belongs to.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
-    // Verify access to the project
-    await assertProjectAccess(projectId, user.id);
+    // Verify access to the course
+    await assertCourseAccess(courseId, user.id);
 
     const curriculumLinks = await prisma.curriculumCourse.findMany({
-      where: { projectId },
+      where: { courseId },
       select: {
         id: true,
         order: true,
@@ -71,12 +71,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return Response.json(result);
   } catch (error) {
-    return errorResponse(error, 'Failed to fetch project curricula');
+    return errorResponse(error, 'Failed to fetch course curricula');
   }
 }
 
 /**
- * PUT /api/projects/[projectId]/curricula
+ * PUT /api/courses/[courseId]/curricula
  * Update which curricula this course belongs to.
  * Handles adding and removing links.
  *
@@ -88,10 +88,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUserOrThrow();
-    const { projectId } = await params;
+    const { courseId } = await params;
 
-    // Verify access to the project with edit permissions
-    const { workspaceId } = await assertProjectAccess(projectId, user.id, [
+    // Verify access to the course with edit permissions
+    const { workspaceId } = await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
@@ -148,7 +148,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Get current links
     const currentLinks = await prisma.curriculumCourse.findMany({
-      where: { projectId },
+      where: { courseId },
       select: { curriculumId: true },
     });
 
@@ -165,7 +165,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       if (toRemove.length > 0) {
         await tx.curriculumCourse.deleteMany({
           where: {
-            projectId,
+            courseId,
             curriculumId: { in: toRemove },
           },
         });
@@ -183,7 +183,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         await tx.curriculumCourse.create({
           data: {
             curriculumId,
-            projectId,
+            courseId,
             order: (maxOrder?.order ?? -1) + 1,
           },
         });
@@ -192,7 +192,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Fetch and return updated list
     const updatedLinks = await prisma.curriculumCourse.findMany({
-      where: { projectId },
+      where: { courseId },
       select: {
         id: true,
         order: true,
@@ -237,6 +237,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       removed: toRemove.length,
     });
   } catch (error) {
-    return errorResponse(error, 'Failed to update project curricula');
+    return errorResponse(error, 'Failed to update course curricula');
   }
 }

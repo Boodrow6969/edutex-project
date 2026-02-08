@@ -24,7 +24,7 @@ export default function CreateProjectModal({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [clientName, setClientName] = useState('');
-  const [projectType, setProjectType] = useState('');
+  const [courseType, setCourseType] = useState('');
   const [phase, setPhase] = useState('intake');
   const [priority, setPriority] = useState('medium');
   const [targetGoLive, setTargetGoLive] = useState('');
@@ -33,7 +33,7 @@ export default function CreateProjectModal({
     setName('');
     setDescription('');
     setClientName('');
-    setProjectType('');
+    setCourseType('');
     setPhase('intake');
     setPriority('medium');
     setTargetGoLive('');
@@ -61,7 +61,7 @@ export default function CreateProjectModal({
           name: name.trim(),
           description: description.trim() || null,
           clientName: clientName.trim() || null,
-          projectType: projectType.trim() || null,
+          courseType: courseType.trim() || null,
           phase,
           priority,
           targetGoLive: targetGoLive || null,
@@ -183,8 +183,8 @@ export default function CreateProjectModal({
               <input
                 id="project-type"
                 type="text"
-                value={projectType}
-                onChange={(e) => setProjectType(e.target.value)}
+                value={courseType}
+                onChange={(e) => setCourseType(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
                 placeholder="e.g., Course, Module, Job Aid"
               />

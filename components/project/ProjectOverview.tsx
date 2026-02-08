@@ -52,7 +52,7 @@ interface ProjectOverviewData {
 }
 
 interface ProjectOverviewProps {
-  projectId: string;
+  courseId: string;
   workspaceId: string;
   onCreatePage: () => void;
 }
@@ -76,7 +76,7 @@ const PAGE_TYPE_LABELS: Record<PageType, string> = {
  * Main project overview component that fetches and displays project summary data.
  */
 export default function ProjectOverview({
-  projectId,
+  courseId,
   workspaceId,
   onCreatePage,
 }: ProjectOverviewProps) {
@@ -87,7 +87,7 @@ export default function ProjectOverview({
   const fetchOverview = useCallback(async () => {
     try {
       setError(null);
-      const response = await fetch(`/api/projects/${projectId}/overview`);
+      const response = await fetch(`/api/courses/${courseId}/overview`);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -110,7 +110,7 @@ export default function ProjectOverview({
     } finally {
       setIsLoading(false);
     }
-  }, [projectId]);
+  }, [courseId]);
 
   useEffect(() => {
     fetchOverview();
@@ -200,7 +200,7 @@ export default function ProjectOverview({
           <label className="text-sm font-medium text-gray-700 block mb-1">Part of Curricula</label>
           <p className="text-xs text-gray-500 mb-2">This course is included in the following curricula</p>
           <CurriculaSelector
-            projectId={projectId}
+            courseId={courseId}
             workspaceId={workspaceId}
           />
         </div>
@@ -213,7 +213,7 @@ export default function ProjectOverview({
           <PagesList
             pages={data.pages}
             workspaceId={workspaceId}
-            projectId={projectId}
+            courseId={courseId}
             onCreatePage={onCreatePage}
           />
         </div>

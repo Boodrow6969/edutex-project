@@ -49,7 +49,7 @@ async function verifyBlockAccess(
       page: {
         select: {
           id: true,
-          projectId: true,
+          courseId: true,
           curriculumId: true,
         },
       },
@@ -65,7 +65,7 @@ async function verifyBlockAccess(
     throw new NotFoundError('Block not found on this page');
   }
 
-  // Verify workspace membership through page's parent (project or curriculum)
+  // Verify workspace membership through page's parent (course or curriculum)
   await assertPageAccess(pageId, userId, allowedRoles);
 
   return block;

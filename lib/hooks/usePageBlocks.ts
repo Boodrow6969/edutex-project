@@ -23,7 +23,7 @@ export interface PageData {
   title: string;
   type: PageType;
   order: number;
-  projectId: string;
+  courseId: string;
   workspaceId: string;
   createdById: string;
   createdAt: string;

@@ -9,14 +9,14 @@ interface Curriculum {
 }
 
 interface CurriculaSelectorProps {
-  projectId: string;
+  courseId: string;
   workspaceId: string;
   disabled?: boolean;
   onCurriculaChange?: (curriculumIds: string[]) => void;
 }
 
 export default function CurriculaSelector({
-  projectId,
+  courseId,
   workspaceId,
   disabled = false,
   onCurriculaChange,
@@ -57,11 +57,11 @@ export default function CurriculaSelector({
   // Fetch current curricula memberships for this project
   useEffect(() => {
     const fetchCurrentMemberships = async () => {
-      if (!projectId) return;
+      if (!courseId) return;
 
       try {
         setIsLoadingMemberships(true);
-        const response = await fetch(`/api/projects/${projectId}/curricula`);
+        const response = await fetch(`/api/courses/${courseId}/curricula`);
         if (response.ok) {
           const data = await response.json();
           // API returns array of curriculum objects directly
@@ -77,7 +77,7 @@ export default function CurriculaSelector({
     };
 
     fetchCurrentMemberships();
-  }, [projectId]);
+  }, [courseId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function CurriculaSelector({
     setError(null);
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/curricula`, {
+      const response = await fetch(`/api/courses/${courseId}/curricula`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ curriculumIds: newIds }),
