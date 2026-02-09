@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { WorkspaceRole } from '@prisma/client';
 
 /**
@@ -82,6 +83,7 @@ function getDeleteUrl(type: ArchiveItemType, id: string): string {
  * Provides functions for creating workspaces and courses.
  */
 export function useWorkspacesTree(): UseWorkspacesTreeReturn {
+  const pathname = usePathname();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +118,32 @@ export function useWorkspacesTree(): UseWorkspacesTreeReturn {
 
   useEffect(() => {
     fetchWorkspaces();
-  }, [fetchWorkspaces]);
+  }, [fetchWorkspaces, pathname]);
+
+  // Listen for 'course-created' events dispatched by components that
+  // create courses outside this hook (e.g. workspace detail page, CreateCourseModal).
+  // Uses synchronous optimistic state update (no async fetch) to avoid
+  // race conditions with router.push() navigation transitions.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { workspaceId, course } = (e as CustomEvent).detail;
+      setWorkspaces(prev =>
+        prev.map(ws => {
+          if (ws.id === workspaceId) {
+            return {
+              ...ws,
+              courses: [...ws.courses, course].sort((a, b) =>
+                a.name.localeCompare(b.name)
+              ),
+            };
+          }
+          return ws;
+        })
+      );
+    };
+    window.addEventListener('course-created', handler);
+    return () => window.removeEventListener('course-created', handler);
+  }, []);
 
   const createWorkspace = useCallback(
     async (name: string, description?: string): Promise<Workspace | null> => {

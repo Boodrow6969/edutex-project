@@ -196,7 +196,7 @@ export default function Sidebar() {
 
   const handleWorkspaceClick = (workspaceId: string) => {
     router.push(`/workspace/${workspaceId}`);
-    setExpandedWorkspaceId(workspaceId);
+    setExpandedWorkspaceId(prev => prev === workspaceId ? null : workspaceId);
   };
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {

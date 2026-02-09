@@ -194,13 +194,14 @@ export default function StoryboardEditor({
           list-style-type: square;
         }
 
-        .storyboard-editor .ProseMirror blockquote {   
+        .storyboard-editor .ProseMirror blockquote {
           border-left: 4px solid #d1d5db;
           padding: 0.75em 1em;
           margin: 1em 0;
           color: #4b5563;
           background-color: #f9fafb;
-          border-radius: 0 0.375rem 0.375rem 0;        
+          border-radius: 0 0.375rem 0.375rem 0;
+          font-style: italic;
         }
 
         .storyboard-editor .ProseMirror blockquote p { 

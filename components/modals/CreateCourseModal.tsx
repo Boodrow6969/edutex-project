@@ -80,11 +80,13 @@ export default function CreateCourseModal({
         onSuccess(course);
       }
 
-      // Reset and close modal
-      resetForm();
-      onClose();
+      // Synchronously update all useWorkspacesTree instances (including Sidebar)
+      window.dispatchEvent(new CustomEvent('course-created', {
+        detail: { workspaceId, course },
+      }));
 
-      // Navigate to the new course
+      // Navigate to the new course — navigation unmounts the modal,
+      // so no need to call onClose() first (which causes a flash)
       router.push(`/workspace/${workspaceId}/course/${course.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create course');

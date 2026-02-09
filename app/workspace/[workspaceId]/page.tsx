@@ -106,10 +106,19 @@ export default function WorkspacePage() {
         throw new Error(data.error || 'Failed to create course');
       }
 
+      const course = await response.json();
+
       setNewCourseName('');
       setNewCourseDescription('');
       setShowCreateCourse(false);
+
+      // Update the page's own data
       fetchWorkspace();
+
+      // Notify the sidebar's useWorkspacesTree to add the new course
+      window.dispatchEvent(new CustomEvent('course-created', {
+        detail: { workspaceId, course },
+      }));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create course';
       setError(message);
