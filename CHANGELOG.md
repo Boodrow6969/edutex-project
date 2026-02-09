@@ -12,7 +12,97 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Role-based navigation (ID/SME/Manager dashboards)
 - Course tasks and reminders system
 - GoLive schedule visualization
-- Custom delete confirmation modals
+
+---
+
+## [0.11.0] - 2026-02-09
+
+### Added
+- **Content Assets — Phase A (Backend + Components)**
+  - `ContentAsset` Prisma model with workspace scope, file metadata, tags, and alt text
+  - `LocalStorageService` in `lib/storage/` — stores files to `uploads/{YYYY}/{MM}/{uuid}-{name}`
+  - Upload + List API: `POST/GET /api/workspaces/[workspaceId]/assets`
+  - Single asset API: `GET/PUT/DELETE /api/workspaces/[workspaceId]/assets/[assetId]`
+  - File serving API: `GET /api/assets/[assetId]/file` (auth-checked, cached)
+  - `SlideOver` component (`components/ui/SlideOver.tsx`) — portal-based right-side panel with escape/backdrop close
+  - `AssetUploadZone` — drag-and-drop upload with client-side validation (10 MB, image types only)
+  - `WorkspaceAssetBrowser` — searchable thumbnail grid with tag filter chips, collapsible upload zone
+  - `AssetAttachment` — inline attach/detach control that opens SlideOver browser
+  - Test page at `/test-assets?workspaceId={id}` (to be removed before merge)
+
+### New Files
+- `lib/storage/storage-service.ts`
+- `lib/storage/index.ts`
+- `app/api/workspaces/[workspaceId]/assets/route.ts`
+- `app/api/workspaces/[workspaceId]/assets/[assetId]/route.ts`
+- `app/api/assets/[assetId]/file/route.ts`
+- `components/ui/SlideOver.tsx`
+- `components/assets/AssetUploadZone.tsx`
+- `components/assets/WorkspaceAssetBrowser.tsx`
+- `components/assets/AssetAttachment.tsx`
+- `components/assets/index.ts`
+- `app/test-assets/page.tsx`
+
+### Changed
+- `prisma/schema.prisma` — added ContentAsset model + reverse relations on Workspace and User
+- `.gitignore` — added `/uploads/`
+- `app/globals.css` — added slide-in-right animation for SlideOver
+
+---
+
+## [0.10.0] - 2026-02-08
+
+### Added
+- **Archive/Restore System**
+  - `archivedAt` filters on all list endpoints (workspaces, courses, curricula)
+  - `?includeArchived=true` query param to include archived items
+  - PATCH archive endpoints: `/api/workspaces/[id]/archive`, `/api/courses/[id]/archive`, `/api/curricula/[id]/archive`
+  - Body: `{ "action": "archive" | "restore" }`
+  - Workspace archive: any member; Course/Curriculum archive: ADMINISTRATOR or MANAGER
+- **Toast Notification System** (`components/Toast.tsx`)
+  - `ToastProvider` context with `useToast()` hook
+  - Auto-dismiss after 8 seconds, optional action button (Undo)
+  - `role="status"` and `aria-live="polite"` for accessibility
+  - CSS slide-up animation (`@keyframes toast-in` in globals.css)
+- **Sidebar Context Menus**
+  - Three-dot menu on hover for workspaces, courses, and curricula
+  - Archive/Restore option (toggles based on item state)
+  - Delete option (red, opens confirmation modal)
+  - Click-outside to close
+- **"Show Archived" Toggle**
+  - Toggle at bottom of workspace list in sidebar
+  - Archived items render with `opacity-60` + "Archived" badge
+  - Context menu shows "Restore" for archived items
+  - Archived items still navigable by click
+- **Delete Confirmation Modals**
+  - `DeleteWorkspaceModal` — requires typing workspace name to confirm; shows course/curriculum/member counts
+  - `DeleteCourseModal` — shows page/task/objective counts
+  - `DeleteCurriculumModal` — notes that linked courses are preserved
+  - `DeletePageModal` — shows block count
+  - All follow existing modal pattern (fixed overlay, white card, header/body/footer)
+- **Enhanced Workspace DELETE** (`app/api/workspaces/[workspaceId]/route.ts`)
+  - Requires `{ confirmName: string }` body matching workspace name exactly
+  - Uses `$transaction` to explicitly delete courses and curricula before workspace
+
+### Changed
+- `useWorkspacesTree` hook: added `archivedAt` to interfaces, `archiveItem()`, `deleteItem()`, `showArchived`/`setShowArchived` state
+- Workspace GET list endpoint now returns `curricula` alongside `courses`
+- `app/workspace/layout.tsx` wrapped with `<ToastProvider>`
+
+### Fixed
+- Context menu disappearing when hovering from three-dot button to dropdown (forced opacity-100 when menu is open)
+- Context menu appearing transparent on archived items (moved opacity-60 from parent container to visual element only)
+- Context menu rendering behind sibling items (added z-40 to item with open menu)
+
+### New Files
+- `app/api/workspaces/[workspaceId]/archive/route.ts`
+- `app/api/courses/[courseId]/archive/route.ts`
+- `app/api/curricula/[curriculumId]/archive/route.ts`
+- `components/Toast.tsx`
+- `components/modals/DeleteWorkspaceModal.tsx`
+- `components/modals/DeleteCourseModal.tsx`
+- `components/modals/DeleteCurriculumModal.tsx`
+- `components/modals/DeletePageModal.tsx`
 
 ---
 
@@ -239,6 +329,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 | Version | Date | Focus |
 |---------|------|-------|
+| 0.11.0 | Feb 2026 | Content Assets Phase A — backend + components |
+| 0.10.0 | Feb 2026 | Archive/restore, delete modals, toast system |
 | 0.9.1 | Feb 2026 | Project → Course rename |
 | 0.8.0 | Jan 2026 | Storyboard Export + CONTENT_SCREEN refactor |
 | 0.7.0 | Jan 2026 | TipTap Storyboard Editor (Milestone 2.5) - Media Support |

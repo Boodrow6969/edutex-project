@@ -47,3 +47,6 @@ nul
 
 # build artifacts
 files.zip
+
+# uploaded assets (local storage)
+/uploads/

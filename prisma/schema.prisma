@@ -28,6 +28,7 @@ model User {
   assignedTasks Task[]    @relation("TaskAssignee")
   createdTokens       StakeholderAccessToken[] @relation("TokenCreator")
   reviewedSubmissions StakeholderSubmission[]  @relation("SubmissionReviewer")
+  contentAssets       ContentAsset[]           @relation("UserAssets")
 
   @@map("users")
 }
@@ -77,6 +78,7 @@ model Workspace {
   name        String
   description String?
   stakeholders Json?   @default("[]")
+  archivedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -85,6 +87,7 @@ model Workspace {
   curricula Curriculum[]
   stakeholderTokens      StakeholderAccessToken[]
   stakeholderSubmissions StakeholderSubmission[]
+  contentAssets          ContentAsset[]
 
   @@map("workspaces")
 }
@@ -122,6 +125,7 @@ model Course {
   priority    String   @default("medium")
   targetGoLive DateTime?
   workspaceId String?
+  archivedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -157,7 +161,7 @@ model Curriculum {
 
   // Many-to-many with Courses via join table
   courses CurriculumCourse[]
-
+  archivedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -626,4 +630,27 @@ model StakeholderChangeLog {
   @@index([submissionId])
   @@index([submissionId, questionId])
   @@map("stakeholder_change_logs")
+}
+
+// Content Assets (workspace-scoped file storage for images)
+model ContentAsset {
+  id             String   @id @default(cuid())
+  workspaceId    String
+  uploadedById   String
+  filename       String
+  storageKey     String
+  mimeType       String
+  fileSizeBytes  Int
+  alt            String?
+  tags           String[] @default([])
+  sourceContext  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploadedBy     User      @relation("UserAssets", fields: [uploadedById], references: [id])
+
+  @@index([workspaceId])
+  @@index([workspaceId, mimeType])
+  @@map("content_assets")
 }

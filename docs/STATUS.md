@@ -1,21 +1,27 @@
 # EDUTex Project Status
 
-Last Updated: February 7, 2026
+Last Updated: February 9, 2026
 
 ---
 
-## Current Version: 0.9.0
+## Current Version: 0.11.0
 
 ---
+## To do
+- Storyboard needs testing and work
+- Job Aids Module needs to be Built
+- Content Assets Phase B — integrate AssetAttachment into storyboard Content Screens
+- Refer to the claude chat Next feature: Job Aids module....
 
 ## What's Built
 
 ### Core Platform
 - Authentication (NextAuth) — login, session management
-- Workspace management — create, switch workspaces
-- Course creation — standalone and curriculum-linked
-- Curriculum management — hierarchical structure with course linking
-- Sidebar navigation and TopBar
+- Workspace management — create, switch, archive/restore, delete (with name confirmation)
+- Course management — create, archive/restore, delete (cascade)
+- Curriculum management — hierarchical structure with course linking, archive/restore, delete
+- Sidebar navigation with context menus (archive, restore, delete) and "Show archived" toggle
+- Toast notification system with undo support
 - Global Figma design system (primary #03428e, consistent styling)
 
 ### Needs Analysis Module — Complete
@@ -29,6 +35,14 @@ Last Updated: February 7, 2026
 - Bloom's taxonomy alignment
 - Quick Add form
 - Links to needs analysis data
+
+### Content Assets — Phase A Complete
+- `ContentAsset` Prisma model (workspace-scoped, image metadata, tags, alt text)
+- Local file storage service (`lib/storage/`) with `uploads/{YYYY}/{MM}/` structure
+- Full CRUD API: upload, list (search/tag/mimeType filters), get, update metadata, delete
+- Auth-checked file serving route with caching
+- Reusable UI components: SlideOver, AssetUploadZone, WorkspaceAssetBrowser, AssetAttachment
+- Phase B (pending): integrate AssetAttachment into storyboard Content Screens
 
 ### Storyboard Editor (TipTap) — Complete
 - Rich text editor replacing old frame-based system
@@ -58,9 +72,14 @@ Last Updated: February 7, 2026
 2. DATE_WITH_TEXT component — hybrid text input with calendar toggle (Cursor prompt ready)
 3. Step 5: ID Review UI — wire stakeholder feature into workspace dashboard
 4. Quiz Builder — no dependencies, standalone module
-5. Content Assets — workspace-level asset management, cross-workspace sharing
+5. Content Assets Phase B — integrate AssetAttachment into storyboard Content Screens (ENH-012)
 6. Job Aids — uses Content Assets
 7. Evaluation Plan — standalone module
+
+## Recently Completed
+
+- **v0.11.0 (Feb 9, 2026):** Content Assets Phase A — ContentAsset model, local storage service, full CRUD API, reusable SlideOver/AssetUploadZone/WorkspaceAssetBrowser/AssetAttachment components.
+- **v0.10.0 (Feb 8, 2026):** Archive/restore for workspaces, courses, curricula. Delete confirmation modals. Toast notification system. Sidebar context menus. Enhanced workspace DELETE with name confirmation and transactional cascade.
 
 ---
 

@@ -2,13 +2,6 @@
 
 ## Bugs
 
-### BUG-001: Flash when creating new course
-- **Location:** `components/modals/CreateCourseModal.tsx` (renamed from CreateProjectModal)
-- **Issue:** Modal closes before navigation completes, causing brief flash of courses page
-- **Fix:** Keep modal open until `router.push()` completes, or remove `onClose()` call since page navigation unmounts modal anyway
-- **Priority:** Low (cosmetic)
-- **Status:** Open
-
 ### BUG-002: Objectives delete popup difficult to dismiss
 - **Location:** Objectives Tab
 - **Issue:** Deleting objectives triggers native JS confirm/alert window which is clunky and hard to click off
@@ -27,20 +20,6 @@
 - **Status:** Backlog
 - **Note:** Originally referenced StoryboardMetadataNode.ts, which was replaced by the CourseInfoHeader component in Phase 1. Bug may still apply to remaining custom block types.
 
-### BUG-005: Workspace sidebar toggle doesn't collapse on second click
-- **Location:** Sidebar workspace/course menu component
-- **Description:** Clicking a workspace in the sidebar expands it to show its courses, but clicking the same workspace again does not collapse it. The only way to collapse an expanded workspace is to click a different workspace, which expands the new one and collapses the previous. Expected behavior: clicking an expanded workspace should toggle it closed.
-- **Priority:** Low (UX)
-- **Status:** Open
-
-### BUG-006: Blockquote styling missing italics
-- **Location:** `components/tiptap/StoryboardEditor.tsx` — blockquote CSS styles
-- **Description:** After the list styling fix, blockquotes no longer default to italic text. The gray background and left border work, but the text appears in normal weight.
-- **Expected:** Blockquote text should be italicized by default (matching standard quote styling).
-- **Fix:** Add `font-style: italic` to the blockquote styles, or use Tailwind's `italic` class.
-- **Priority:** Low (cosmetic)
-- **Status:** Open
-
 ### BUG-012: Rapid block addition causes block overwrite (CRITICAL)
 - **Location:** lib/hooks/useStoryboardEditor.ts, lib/tiptap/sync.ts
 - **Severity:** High
@@ -55,11 +34,37 @@
 - **Affected Block Types:** All custom block types
 - **Note:** Originally documented as most noticeable with IMAGE and VIDEO blocks. IMAGE/VIDEO standalone extensions have since been removed, but the underlying race condition still applies to CONTENT_SCREEN and other blocks.
 
+---
+
+## Resolved Bugs
+
+### BUG-001: Flash when creating new course
+- **Location:** `components/modals/CreateCourseModal.tsx`
+- **Issue:** Modal closes before navigation completes, causing brief flash of courses page
+- **Priority:** Low (cosmetic)
+- **Status:** Resolved (February 8, 2026)
+- **Resolution:** Removed premature `onClose()` call before `router.push()`. Page navigation unmounts the modal automatically, so explicitly closing it first was unnecessary and caused the flash.
+
+### BUG-005: Workspace sidebar toggle doesn't collapse on second click
+- **Location:** `components/Sidebar.tsx` — `handleWorkspaceClick`
+- **Description:** Clicking a workspace in the sidebar expands it to show its courses, but clicking the same workspace again does not collapse it.
+- **Priority:** Low (UX)
+- **Status:** Resolved (February 8, 2026)
+- **Resolution:** Changed `setExpandedWorkspaceId` to toggle: checks if already expanded and sets to `null` if so, instead of always setting.
+
+### BUG-006: Blockquote styling missing italics
+- **Location:** `components/tiptap/StoryboardEditor.tsx` — blockquote CSS styles
+- **Description:** After the list styling fix, blockquotes no longer default to italic text. The gray background and left border work, but the text appears in normal weight.
+- **Priority:** Low (cosmetic)
+- **Status:** Resolved (February 8, 2026)
+- **Resolution:** Added `font-style: italic` to the `.ProseMirror blockquote` CSS rule.
+
 ### BUG-013: Course created from Dashboard "+Add Course" does not appear in sidebar
-- **Location:** Workspace Dashboard (`app/workspace/[workspaceId]/workspace-detail-page.tsx`) and sidebar (`components/Sidebar.tsx` / `lib/hooks/useWorkspacesTree.ts`)
-- **Description:** Creating a course via the "+Add Course" button on the Workspace Dashboard successfully creates the course and displays it on the dashboard, but the sidebar workspace tree does not update to show the new course. Creating a course via the sidebar "+ New Course" link works correctly and appears immediately. The dashboard creation path likely does not trigger the sidebar's data refresh/mutation.
+- **Location:** `app/workspace/[workspaceId]/page.tsx` (workspace detail page), `lib/hooks/useWorkspacesTree.ts`
+- **Description:** Creating a course via the "New Course" button on the workspace detail page successfully creates the course but the sidebar workspace tree does not update. The workspace detail page had its own inline course creation form that bypassed the sidebar's `useWorkspacesTree` hook entirely.
 - **Priority:** High (functional)
-- **Status:** Open
+- **Status:** Resolved (February 8, 2026)
+- **Resolution:** Added `CustomEvent('course-created')` dispatch with course data from the workspace detail page after creation. Added optimistic event listener in `useWorkspacesTree` that synchronously updates state via `setWorkspaces(prev => ...)` — same pattern the sidebar's own `createCourse` uses. Also added `pathname`-triggered refetch as a fallback. Fix applied to workspace detail page (`app/workspace/[workspaceId]/page.tsx`), not the `CreateCourseModal` which was initially misidentified as the source.
 
 ---
 
@@ -135,11 +140,11 @@
 - **Status:** Backlog
 
 ### ENH-012: Access Content Assets from Storyboard editor
-- **Location:** components/tiptap/nodes/ContentScreenComponent.tsx, new Content Assets module
-- **Description:** Allow designers to browse and insert media (images, videos, audio files) from a Content Assets folder/library directly into Content Screen blocks. Assets could populate the visuals field or be attached to the block. Requires Content Assets module to be built first.
-- **Dependencies:** Content Assets module (not yet built)
+- **Location:** components/tiptap/nodes/ContentScreenComponent.tsx, components/assets/
+- **Description:** Allow designers to browse and insert media (images, videos, audio files) from a Content Assets folder/library directly into Content Screen blocks. Assets could populate the visuals field or be attached to the block.
+- **Dependencies:** Content Assets Phase A (complete as of v0.11.0). Phase B: wire AssetAttachment into ContentScreenComponent.
 - **Priority:** Medium (workflow)
-- **Status:** Backlog
+- **Status:** In Progress (Phase A complete, Phase B pending)
 
 ### ENH-013: Workspace Chevron Toggle Collapse
 - **Location:** Sidebar workspace/course menu component
@@ -222,7 +227,13 @@
 - **Priority:** Medium (Feature)
 - **Status:** Backlog
 
-### ENH-025: Add description field to sidebar course creation
+### ENH-025: Workspace context menu button overlaps chevron
+- **Location:** `components/Sidebar.tsx` — workspace row in `renderWorkspaceTree`
+- **Description:** The three-dot context menu button for workspaces is positioned at `right-8` which can overlap with the chevron expand/collapse icon on short workspace names. Consider repositioning the button or showing it only when the workspace row is not hovered over the chevron area.
+- **Priority:** Low (cosmetic)
+- **Status:** Backlog
+
+### ENH-026: Add description field to sidebar course creation
 - **Location:** `components/Sidebar.tsx`
 - **Description:** The sidebar "+ New Course" inline creation only captures a course name. Add an optional description field or a follow-up prompt/modal that allows entering a description at creation time.
 - **Priority:** Low (UX)
@@ -276,6 +287,10 @@
 - **Status:** Complete (January 22, 2026)
 - **Description:** Export storyboard to .docx via `lib/export/storyboard-to-docx.ts` and API route `app/api/pages/[pageId]/export/route.ts`. Produces formatted Word document with metadata, learning objectives, and content screens.
 
+### Archive/Restore + Delete System
+- **Status:** Complete (February 8, 2026)
+- **Description:** Full archive/restore functionality for workspaces, courses, and curricula via sidebar context menus with undo toast. Delete confirmation modals for all entity types. Enhanced workspace DELETE with name-confirmation and transactional cascade. Toast notification system. "Show archived" toggle in sidebar.
+
 ---
 
 ## Schema Cleanup Notes
@@ -300,4 +315,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: February 8, 2026*
+*Last updated: February 9, 2026 (v0.11.0 — Content Assets Phase A; ENH-012 partially addressed)*

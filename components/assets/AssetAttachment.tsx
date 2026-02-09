@@ -1,0 +1,86 @@
+'use client';
+
+import { useState } from 'react';
+import SlideOver from '@/components/ui/SlideOver';
+import WorkspaceAssetBrowser from './WorkspaceAssetBrowser';
+import type { ContentAssetResponse } from './AssetUploadZone';
+
+interface AssetAttachmentProps {
+  workspaceId: string;
+  value: ContentAssetResponse | null;
+  onChange: (asset: ContentAssetResponse | null) => void;
+  label?: string;
+}
+
+export default function AssetAttachment({
+  workspaceId,
+  value,
+  onChange,
+  label = 'Reference Image',
+}: AssetAttachmentProps) {
+  const [browserOpen, setBrowserOpen] = useState(false);
+
+  const handleSelect = (asset: ContentAssetResponse) => {
+    onChange(asset);
+    setBrowserOpen(false);
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+
+      {value ? (
+        /* Attached state: thumbnail + remove */
+        <div className="flex items-start gap-3 p-2 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={value.url}
+              alt={value.alt || value.filename}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-700 truncate">{value.filename}</p>
+            <p className="text-xs text-gray-400">{value.mimeType}</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={() => setBrowserOpen(true)}
+              className="text-xs text-blue-600 hover:text-blue-800"
+            >
+              Change
+            </button>
+            <button
+              onClick={() => onChange(null)}
+              className="text-xs text-red-500 hover:text-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Empty state: attach button */
+        <button
+          onClick={() => setBrowserOpen(true)}
+          className="w-full py-3 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
+        >
+          + Attach image
+        </button>
+      )}
+
+      <SlideOver
+        isOpen={browserOpen}
+        onClose={() => setBrowserOpen(false)}
+        title="Select Image"
+      >
+        <WorkspaceAssetBrowser
+          workspaceId={workspaceId}
+          onSelect={handleSelect}
+        />
+      </SlideOver>
+    </div>
+  );
+}
