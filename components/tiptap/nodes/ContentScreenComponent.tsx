@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
 import { Monitor, ChevronDown, ChevronUp, Trash2, Plus, X } from 'lucide-react';
+import { AssetAttachment } from '@/components/assets';
 
 // =============================================================================
 // Types
@@ -16,6 +17,7 @@ interface Scene {
   visualDescription: string;
   voiceover: string;
   onScreenText: string;
+  assetId?: string | null;
 }
 
 interface ScenarioOption {
@@ -104,10 +106,11 @@ function AutoExpandTextarea({ value, onChange, placeholder, className = '', minH
 interface FieldProps {
   attrs: Record<string, unknown>;
   updateAttributes: (attrs: Record<string, unknown>) => void;
+  workspaceId: string;
 }
 
 // Title/Intro Fields
-function TitleIntroFields({ attrs, updateAttributes }: FieldProps) {
+function TitleIntroFields({ attrs, updateAttributes, workspaceId }: FieldProps) {
   return (
     <div className="p-4 space-y-4">
       <div>
@@ -145,12 +148,22 @@ function TitleIntroFields({ attrs, updateAttributes }: FieldProps) {
           minHeight={60}
         />
       </div>
+
+      {workspaceId && (
+        <AssetAttachment
+          workspaceId={workspaceId}
+          assetId={(attrs.backgroundAssetId as string) || null}
+          onAttach={(assetId) => updateAttributes({ backgroundAssetId: assetId })}
+          onRemove={() => updateAttributes({ backgroundAssetId: null })}
+          label="Background image"
+        />
+      )}
     </div>
   );
 }
 
 // Content Fields (Default Layout)
-function ContentFields({ attrs, updateAttributes }: FieldProps) {
+function ContentFields({ attrs, updateAttributes, workspaceId }: FieldProps) {
   return (
     <>
       <div className="grid grid-cols-2 divide-x divide-gray-200">
@@ -165,6 +178,17 @@ function ContentFields({ attrs, updateAttributes }: FieldProps) {
             placeholder="Describe what appears on screen: graphics, animations, characters, backgrounds, UI elements..."
             minHeight={120}
           />
+          {workspaceId && (
+            <div className="mt-3">
+              <AssetAttachment
+                workspaceId={workspaceId}
+                assetId={(attrs.visualsAssetId as string) || null}
+                onAttach={(assetId) => updateAttributes({ visualsAssetId: assetId })}
+                onRemove={() => updateAttributes({ visualsAssetId: null })}
+                label="Reference screenshot"
+              />
+            </div>
+          )}
         </div>
 
         {/* Right Column: On-Screen Text + Voiceover Script */}
@@ -236,7 +260,7 @@ function ContentFields({ attrs, updateAttributes }: FieldProps) {
 }
 
 // Video Fields
-function VideoFields({ attrs, updateAttributes }: FieldProps) {
+function VideoFields({ attrs, updateAttributes, workspaceId }: FieldProps) {
   const scenes = (attrs.scenes as Scene[]) || [];
 
   const addScene = () => {
@@ -332,6 +356,25 @@ function VideoFields({ attrs, updateAttributes }: FieldProps) {
                     minHeight={30}
                   />
                 </div>
+                {workspaceId && (
+                  <div className="mt-2">
+                    <AssetAttachment
+                      workspaceId={workspaceId}
+                      assetId={scene.assetId || null}
+                      onAttach={(assetId) => {
+                        const updated = [...scenes];
+                        updated[index] = { ...updated[index], assetId };
+                        updateAttributes({ scenes: updated });
+                      }}
+                      onRemove={() => {
+                        const updated = [...scenes];
+                        updated[index] = { ...updated[index], assetId: null };
+                        updateAttributes({ scenes: updated });
+                      }}
+                      label="Scene reference"
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -864,21 +907,26 @@ export default function ContentScreenComponent({ node, updateAttributes, deleteN
   const screenType = (attrs.screenType as ScreenType) || 'content';
   const [notesExpanded, setNotesExpanded] = useState(false);
 
+  // Extract workspaceId from the URL path
+  const workspaceId = typeof window !== 'undefined'
+    ? window.location.pathname.split('/workspace/')[1]?.split('/')[0] ?? ''
+    : '';
+
   const renderBody = () => {
     switch (screenType) {
       case 'title_intro':
-        return <TitleIntroFields attrs={attrs} updateAttributes={updateAttributes} />;
+        return <TitleIntroFields attrs={attrs} updateAttributes={updateAttributes} workspaceId={workspaceId} />;
       case 'video':
-        return <VideoFields attrs={attrs} updateAttributes={updateAttributes} />;
+        return <VideoFields attrs={attrs} updateAttributes={updateAttributes} workspaceId={workspaceId} />;
       case 'practice':
-        return <PracticeFields attrs={attrs} updateAttributes={updateAttributes} />;
+        return <PracticeFields attrs={attrs} updateAttributes={updateAttributes} workspaceId={workspaceId} />;
       case 'assessment':
-        return <AssessmentFields attrs={attrs} updateAttributes={updateAttributes} />;
+        return <AssessmentFields attrs={attrs} updateAttributes={updateAttributes} workspaceId={workspaceId} />;
       case 'scenario':
-        return <ScenarioFields attrs={attrs} updateAttributes={updateAttributes} />;
+        return <ScenarioFields attrs={attrs} updateAttributes={updateAttributes} workspaceId={workspaceId} />;
       case 'content':
       default:
-        return <ContentFields attrs={attrs} updateAttributes={updateAttributes} />;
+        return <ContentFields attrs={attrs} updateAttributes={updateAttributes} workspaceId={workspaceId} />;
     }
   };
 

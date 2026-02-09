@@ -10,7 +10,6 @@ Last Updated: February 9, 2026
 ## To do
 - Storyboard needs testing and work
 - Job Aids Module needs to be Built
-- Content Assets Phase B — integrate AssetAttachment into storyboard Content Screens
 - Refer to the claude chat Next feature: Job Aids module....
 
 ## What's Built
@@ -42,7 +41,7 @@ Last Updated: February 9, 2026
 - Full CRUD API: upload, list (search/tag/mimeType filters), get, update metadata, delete
 - Auth-checked file serving route with caching
 - Reusable UI components: SlideOver, AssetUploadZone, WorkspaceAssetBrowser, AssetAttachment
-- Phase B (pending): integrate AssetAttachment into storyboard Content Screens
+- Phase B (complete): AssetAttachment integrated into Content, Title/Intro, and Video screen types in storyboard editor
 
 ### Storyboard Editor (TipTap) — Complete
 - Rich text editor replacing old frame-based system
@@ -72,13 +71,12 @@ Last Updated: February 9, 2026
 2. DATE_WITH_TEXT component — hybrid text input with calendar toggle (Cursor prompt ready)
 3. Step 5: ID Review UI — wire stakeholder feature into workspace dashboard
 4. Quiz Builder — no dependencies, standalone module
-5. Content Assets Phase B — integrate AssetAttachment into storyboard Content Screens (ENH-012)
-6. Job Aids — uses Content Assets
+5. Job Aids — uses Content Assets
 7. Evaluation Plan — standalone module
 
 ## Recently Completed
 
-- **v0.11.0 (Feb 9, 2026):** Content Assets Phase A — ContentAsset model, local storage service, full CRUD API, reusable SlideOver/AssetUploadZone/WorkspaceAssetBrowser/AssetAttachment components.
+- **v0.11.0 (Feb 9, 2026):** Content Assets Phase A+B — ContentAsset model, local storage service, full CRUD API, reusable components, storyboard integration (Content, Title/Intro, Video screens).
 - **v0.10.0 (Feb 8, 2026):** Archive/restore for workspaces, courses, curricula. Delete confirmation modals. Toast notification system. Sidebar context menus. Enhanced workspace DELETE with name confirmation and transactional cascade.
 
 ---

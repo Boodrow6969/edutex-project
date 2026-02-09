@@ -27,8 +27,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - `SlideOver` component (`components/ui/SlideOver.tsx`) — portal-based right-side panel with escape/backdrop close
   - `AssetUploadZone` — drag-and-drop upload with client-side validation (10 MB, image types only)
   - `WorkspaceAssetBrowser` — searchable thumbnail grid with tag filter chips, collapsible upload zone
-  - `AssetAttachment` — inline attach/detach control that opens SlideOver browser
+  - `AssetAttachment` — inline attach/detach control with ID-based API (fetches metadata on mount)
   - Test page at `/test-assets?workspaceId={id}` (to be removed before merge)
+- **Content Assets — Storyboard Integration (Phase B)**
+  - `visualsAssetId` and `backgroundAssetId` attributes on ContentScreenNode
+  - AssetAttachment wired into Content, Title/Intro, and Video screen types
+  - Video scenes support per-scene `assetId` for scene reference images
+  - Sync layer updated for bidirectional persistence of asset IDs
+  - workspaceId extracted from URL path for TipTap NodeView context
 
 ### New Files
 - `lib/storage/storage-service.ts`
@@ -47,6 +53,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `prisma/schema.prisma` — added ContentAsset model + reverse relations on Workspace and User
 - `.gitignore` — added `/uploads/`
 - `app/globals.css` — added slide-in-right animation for SlideOver
+- `lib/tiptap/extensions/ContentScreenNode.ts` — added `visualsAssetId` and `backgroundAssetId` attributes
+- `lib/tiptap/sync.ts` — asset ID fields in both blockToNode and nodeToBlock; scenes preserve `assetId`
+- `components/tiptap/nodes/ContentScreenComponent.tsx` — AssetAttachment in Content, Title/Intro, Video fields
+- `components/assets/AssetAttachment.tsx` — changed to ID-based API (`assetId`/`onAttach`/`onRemove`)
 
 ---
 

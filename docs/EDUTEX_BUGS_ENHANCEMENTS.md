@@ -141,10 +141,9 @@
 
 ### ENH-012: Access Content Assets from Storyboard editor
 - **Location:** components/tiptap/nodes/ContentScreenComponent.tsx, components/assets/
-- **Description:** Allow designers to browse and insert media (images, videos, audio files) from a Content Assets folder/library directly into Content Screen blocks. Assets could populate the visuals field or be attached to the block.
-- **Dependencies:** Content Assets Phase A (complete as of v0.11.0). Phase B: wire AssetAttachment into ContentScreenComponent.
-- **Priority:** Medium (workflow)
-- **Status:** In Progress (Phase A complete, Phase B pending)
+- **Description:** Allow designers to browse and insert media from Content Assets library into Content Screen blocks.
+- **Status:** Complete (v0.11.0)
+- **Resolution:** AssetAttachment integrated into Content (visualsAssetId), Title/Intro (backgroundAssetId), and Video (per-scene assetId) screen types. IDs persisted via TipTap node attrs and synced bidirectionally.
 
 ### ENH-013: Workspace Chevron Toggle Collapse
 - **Location:** Sidebar workspace/course menu component
@@ -287,6 +286,10 @@
 - **Status:** Complete (January 22, 2026)
 - **Description:** Export storyboard to .docx via `lib/export/storyboard-to-docx.ts` and API route `app/api/pages/[pageId]/export/route.ts`. Produces formatted Word document with metadata, learning objectives, and content screens.
 
+### ENH-012: Content Assets in Storyboard Editor
+- **Status:** Complete (February 9, 2026)
+- **Description:** AssetAttachment integrated into Content (Reference screenshot), Title/Intro (Background image), and Video (Scene reference) screen types. Asset IDs stored in TipTap node attrs and synced bidirectionally through the block sync layer.
+
 ### Archive/Restore + Delete System
 - **Status:** Complete (February 8, 2026)
 - **Description:** Full archive/restore functionality for workspaces, courses, and curricula via sidebar context menus with undo toast. Delete confirmation modals for all entity types. Enhanced workspace DELETE with name-confirmation and transactional cascade. Toast notification system. "Show archived" toggle in sidebar.
@@ -315,4 +318,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: February 9, 2026 (v0.11.0 — Content Assets Phase A; ENH-012 partially addressed)*
+*Last updated: February 9, 2026 (v0.11.0 — Content Assets Phase A+B; ENH-012 complete)*

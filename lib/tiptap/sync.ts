@@ -180,6 +180,10 @@ function blockToNode(block: Block): JSONContent | null {
           designerNotes: getString(blockContent, 'designerNotes') || getString(blockContent, 'notes'),
           developerNotes: getString(blockContent, 'developerNotes'),
 
+          // Asset references
+          visualsAssetId: getString(blockContent, 'visualsAssetId') || null,
+          backgroundAssetId: getString(blockContent, 'backgroundAssetId') || null,
+
           // Content type fields
           visuals: getString(blockContent, 'visuals'),
           onScreenText: getString(blockContent, 'onScreenText'),
@@ -194,7 +198,15 @@ function blockToNode(block: Block): JSONContent | null {
 
           // Video type fields
           videoSource: getString(blockContent, 'videoSource'),
-          scenes: blockContent.scenes || [],
+          scenes: Array.isArray(blockContent.scenes)
+            ? (blockContent.scenes as Record<string, unknown>[]).map((s) => ({
+                timecode: s.timecode || '',
+                visualDescription: s.visualDescription || '',
+                voiceover: s.voiceover || '',
+                onScreenText: s.onScreenText || '',
+                assetId: s.assetId || null,
+              }))
+            : [],
 
           // Practice type fields
           activityType: getString(blockContent, 'activityType') || 'other',
@@ -389,6 +401,10 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
           designerNotes: (node.attrs?.designerNotes as string) || '',
           developerNotes: (node.attrs?.developerNotes as string) || '',
 
+          // Asset references
+          visualsAssetId: (node.attrs?.visualsAssetId as string) || null,
+          backgroundAssetId: (node.attrs?.backgroundAssetId as string) || null,
+
           // Content type fields
           visuals: (node.attrs?.visuals as string) || '',
           onScreenText: (node.attrs?.onScreenText as string) || '',
@@ -403,7 +419,15 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
 
           // Video type fields
           videoSource: (node.attrs?.videoSource as string) || '',
-          scenes: node.attrs?.scenes || [],
+          scenes: Array.isArray(node.attrs?.scenes)
+            ? (node.attrs.scenes as Record<string, unknown>[]).map((s) => ({
+                timecode: s.timecode || '',
+                visualDescription: s.visualDescription || '',
+                voiceover: s.voiceover || '',
+                onScreenText: s.onScreenText || '',
+                assetId: s.assetId || null,
+              }))
+            : [],
 
           // Practice type fields
           activityType: (node.attrs?.activityType as string) || 'other',

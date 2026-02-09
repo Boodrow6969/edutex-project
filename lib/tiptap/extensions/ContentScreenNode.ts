@@ -39,6 +39,12 @@ export const ContentScreenNode = Node.create<ContentScreenOptions>({
       designerNotes: { default: '' },
       developerNotes: { default: '' },
 
+      // Reference image for the visuals description (Content type)
+      visualsAssetId: { default: null },
+
+      // Reference image for Title/Intro background
+      backgroundAssetId: { default: null },
+
       // Content type fields (default layout)
       visuals: { default: '' },
       onScreenText: { default: '' },
