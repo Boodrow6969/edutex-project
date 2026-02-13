@@ -393,6 +393,15 @@ model NeedsAnalysis {
   level3Behavior String @default("")
   level4Results  String @default("")
 
+  // Training-as-solution decision
+  isTrainingSolution    Boolean?
+  nonTrainingFactors    String?    @db.Text
+  solutionRationale     String?    @db.Text
+
+  // AI analysis capture
+  aiAnalysis            String?    @db.Text
+  aiRecommendations     String[]   @default([])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -433,6 +442,10 @@ model Storyboard {
   title           String @default("")
   duration        String @default("")
   deliveryMethod  String @default("eLearning")
+
+  // Design rationale
+  designApproach        String?    @db.Text
+  mediaSelectionNotes   String?    @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
