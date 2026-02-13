@@ -170,6 +170,84 @@ enum BlueprintPriority {
   NICE_TO_HAVE
 }
 
+enum TaskFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+  RARELY
+}
+
+enum TaskCriticality {
+  CRITICAL
+  IMPORTANT
+  SUPPORTIVE
+}
+
+enum TaskComplexity {
+  SIMPLE
+  MODERATE
+  COMPLEX
+}
+
+enum KnowledgeType {
+  DECLARATIVE
+  PROCEDURAL
+  CONDITIONAL
+  METACOGNITIVE
+}
+
+model LearningTask {
+  id              String            @id @default(cuid())
+  courseId         String
+
+  // Core identification
+  title           String
+  description     String?           @db.Text
+
+  // Task analysis attributes (all enum-typed)
+  frequency       TaskFrequency     @default(WEEKLY)
+  criticality     TaskCriticality   @default(IMPORTANT)
+  complexity      TaskComplexity    @default(MODERATE)
+  knowledgeType   KnowledgeType     @default(PROCEDURAL)
+
+  // Standardization
+  isStandardized  Boolean           @default(true)
+  variationNotes  String?           @db.Text
+  isFeasibleToTrain Boolean         @default(true)
+  feasibilityNotes  String?         @db.Text
+
+  // External taxonomy mapping
+  externalId      String?
+  externalSource  String?
+
+  // Hierarchical task analysis
+  parentTaskId    String?
+  order           Int               @default(0)
+
+  // Design decision capture
+  rationale       String?           @db.Text
+  aiGenerated     Boolean           @default(false)
+  aiReasoning     String?           @db.Text
+
+  // Link to TaskAnalysis page (for migration from JSON blob)
+  taskAnalysisId  String?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  parentTask      LearningTask?     @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
+  childTasks      LearningTask[]    @relation("TaskHierarchy")
+  taskAnalysis    TaskAnalysis?     @relation(fields: [taskAnalysisId], references: [id])
+
+  @@index([courseId])
+  @@index([externalId])
+  @@index([taskAnalysisId])
+  @@map("learning_tasks")
+}
+
 model Course {
   id          String   @id @default(cuid())
   name        String
@@ -192,6 +270,7 @@ model Course {
   deliverables Deliverable[]
   blueprints   LearningBlueprint[]
   curricula    CurriculumCourse[]
+  learningTasks  LearningTask[]
 
   @@map("courses")
 }
@@ -305,6 +384,7 @@ model TaskAnalysis {
 
   // Tasks stored as JSON (array of TaskItem objects)
   tasks Json @default("[]")
+  learningTasks  LearningTask[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
