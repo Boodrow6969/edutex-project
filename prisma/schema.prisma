@@ -198,6 +198,18 @@ enum KnowledgeType {
   METACOGNITIVE
 }
 
+enum AssessmentType {
+  MULTIPLE_CHOICE
+  MULTIPLE_SELECT
+  TRUE_FALSE
+  SHORT_ANSWER
+  MATCHING
+  ORDERING
+  SCENARIO_BASED
+  PERFORMANCE_CHECKLIST
+  ESSAY
+}
+
 model LearningTask {
   id              String            @id @default(cuid())
   courseId         String
@@ -241,6 +253,7 @@ model LearningTask {
   parentTask      LearningTask?     @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
   childTasks      LearningTask[]    @relation("TaskHierarchy")
   taskAnalysis    TaskAnalysis?     @relation(fields: [taskAnalysisId], references: [id])
+  objectives      ObjectiveTaskLink[]
 
   @@index([courseId])
   @@index([externalId])
@@ -260,6 +273,11 @@ model Course {
   targetGoLive DateTime?
   workspaceId String?
   archivedAt   DateTime?
+
+  // External mapping
+  externalId      String?
+  externalSource  String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -271,7 +289,9 @@ model Course {
   blueprints   LearningBlueprint[]
   curricula    CurriculumCourse[]
   learningTasks  LearningTask[]
+  assessmentItems AssessmentItem[]
 
+  @@index([externalId])
   @@map("courses")
 }
 
@@ -297,9 +317,15 @@ model Curriculum {
   // Many-to-many with Courses via join table
   courses CurriculumCourse[]
   archivedAt DateTime?
+
+  // External mapping
+  externalId      String?
+  externalSource  String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([externalId])
   @@map("curricula")
 }
 
@@ -524,12 +550,94 @@ model Objective {
   bloomLevel  BloomLevel
   courseId     String
   tags        String[]
+
+  // Mager's ABCD components
+  condition      String?    @db.Text
+  criteria       String?    @db.Text
+
+  // External taxonomy mapping
+  externalId     String?
+  externalSource String?
+
+  // Design decision capture
+  rationale      String?    @db.Text
+  aiGenerated    Boolean    @default(false)
+  aiReasoning    String?    @db.Text
+
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
+  // Explicit relationships for adaptive engine consumption
+  taskLinks       ObjectiveTaskLink[]
+  assessmentLinks ObjectiveAssessmentLink[]
+
+  @@index([externalId])
   @@map("objectives")
+}
+
+model AssessmentItem {
+  id            String          @id @default(cuid())
+  courseId       String
+  type          AssessmentType
+
+  // Content
+  stem          String          @db.Text
+  options       Json?
+  correctAnswer Json?
+  feedback      Json?
+
+  // Classification
+  bloomLevel    BloomLevel
+  difficulty    Int             @default(2)
+
+  // External mapping
+  externalId    String?
+
+  // Design decisions
+  rationale     String?         @db.Text
+  aiGenerated   Boolean         @default(false)
+  aiReasoning   String?         @db.Text
+
+  order         Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  course        Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  objectives    ObjectiveAssessmentLink[]
+
+  @@index([courseId])
+  @@index([courseId, bloomLevel])
+  @@map("assessment_items")
+}
+
+model ObjectiveTaskLink {
+  id             String       @id @default(cuid())
+  objectiveId    String
+  learningTaskId String
+  relationship   String?
+
+  objective      Objective    @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  learningTask   LearningTask @relation(fields: [learningTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([objectiveId, learningTaskId])
+  @@map("objective_task_links")
+}
+
+model ObjectiveAssessmentLink {
+  id                 String         @id @default(cuid())
+  objectiveId        String
+  assessmentItemId   String
+  bloomLevelAssessed BloomLevel
+  isAligned          Boolean        @default(true)
+  alignmentNotes     String?
+
+  objective          Objective          @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  assessmentItem     AssessmentItem     @relation(fields: [assessmentItemId], references: [id], onDelete: Cascade)
+
+  @@unique([objectiveId, assessmentItemId])
+  @@map("objective_assessment_links")
 }
 
 enum BloomLevel {
