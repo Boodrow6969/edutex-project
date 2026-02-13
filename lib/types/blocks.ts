@@ -10,19 +10,23 @@ import { BlockType } from '@prisma/client';
 // =============================================================================
 
 export interface ParagraphContent {
+  _type: 'paragraph';
   text: string;
 }
 
 export interface HeadingContent {
+  _type: 'heading';
   text: string;
   level: 1 | 2 | 3;
 }
 
 export interface ListContent {
+  _type: 'list';
   items: string[];
 }
 
 export interface CalloutContent {
+  _type: 'callout';
   text: string;
   variant: 'info' | 'tip' | 'warning' | 'important' | 'example';
   title?: string;
@@ -33,6 +37,7 @@ export interface CalloutContent {
 // =============================================================================
 
 export interface StoryboardMetadataContent {
+  _type: 'storyboardMetadata';
   courseTitle: string;
   audienceDescription: string;
   estimatedDuration: string;
@@ -42,21 +47,95 @@ export interface StoryboardMetadataContent {
   status: 'DRAFT' | 'REVIEW' | 'APPROVED';
 }
 
-export interface ContentScreenContent {
+interface ContentScreenBase {
+  _type: 'contentScreen';
   screenId: string;
   screenTitle: string;
   screenType: 'content' | 'video' | 'practice' | 'assessment' | 'scenario' | 'title_intro';
+  duration: string;
+  designerNotes: string;
+  developerNotes: string;
+  visualsAssetId?: string | null;
+  backgroundAssetId?: string | null;
+}
+
+export interface ContentScreen_Content extends ContentScreenBase {
+  screenType: 'content';
   visuals: string;
   onScreenText: string;
   voiceoverScript: string;
   interactionType: 'none' | 'click_reveal' | 'drag_drop' | 'multiple_choice' | 'branching' | 'discussion' | 'exercise' | 'video_playback' | 'other';
   interactionDetails: string;
-  designerNotes: string;
-  developerNotes: string;
-  duration: string;
 }
 
+export interface ContentScreen_Video extends ContentScreenBase {
+  screenType: 'video';
+  videoSource: string;
+  scenes: Array<{
+    timecode: string;
+    visualDescription: string;
+    voiceover: string;
+    onScreenText: string;
+    assetId?: string | null;
+  }>;
+}
+
+export interface ContentScreen_Practice extends ContentScreenBase {
+  screenType: 'practice';
+  activityType: string;
+  activityDescription: string;
+  instructions: string;
+  hints: string;
+  correctFeedback: string;
+  incorrectFeedback: string;
+}
+
+export interface ContentScreen_Assessment extends ContentScreenBase {
+  screenType: 'assessment';
+  assessmentPurpose: string;
+  assessmentFormat: string;
+  assessmentFormatOther: string;
+  linkedObjectiveIds: string[];
+  cognitiveDemand: string;
+  assessmentRationale: string[];
+  assessmentRationaleOther: string;
+  estimatedDuration: string;
+  attemptsAllowed: string;
+  gradedWeighted: string;
+  dynamicScopeValue: string;
+  feedbackStrategy: string;
+  passingCriteria: string;
+}
+
+export interface ContentScreen_Scenario extends ContentScreenBase {
+  screenType: 'scenario';
+  scenarioSetup: string;
+  decisionPrompt: string;
+  scenarioOptions: Array<{
+    label: string;
+    consequence: string;
+    isCorrect: boolean;
+  }>;
+  debrief: string;
+}
+
+export interface ContentScreen_TitleIntro extends ContentScreenBase {
+  screenType: 'title_intro';
+  titleCardText: string;
+  briefVoiceover: string;
+  backgroundNotes: string;
+}
+
+export type ContentScreenContent =
+  | ContentScreen_Content
+  | ContentScreen_Video
+  | ContentScreen_Practice
+  | ContentScreen_Assessment
+  | ContentScreen_Scenario
+  | ContentScreen_TitleIntro;
+
 export interface LearningObjectivesImportContent {
+  _type: 'learningObjectivesImport';
   importedAt: string;
   objectives: Array<{
     id: string;
@@ -67,6 +146,7 @@ export interface LearningObjectivesImportContent {
 }
 
 export interface ChecklistContent {
+  _type: 'checklist';
   title: string;
   items: Array<{
     id: string;
@@ -79,6 +159,7 @@ export interface ChecklistContent {
 }
 
 export interface TableContent {
+  _type: 'table';
   title: string;
   columns: Array<{
     id: string;
@@ -94,6 +175,7 @@ export interface TableContent {
 }
 
 export interface FacilitatorNotesContent {
+  _type: 'facilitatorNotes';
   sectionTitle: string;
   timing: string;
   activityType: 'lecture' | 'discussion' | 'activity' | 'break' | 'assessment';
@@ -104,6 +186,7 @@ export interface FacilitatorNotesContent {
 }
 
 export interface MaterialsListContent {
+  _type: 'materialsList';
   title: string;
   categories: Array<{
     name: string;
@@ -118,6 +201,7 @@ export interface MaterialsListContent {
 }
 
 export interface ImageContent {
+  _type: 'image';
   src: string;
   alt: string;
   title: string;
@@ -127,6 +211,7 @@ export interface ImageContent {
 }
 
 export interface VideoContent {
+  _type: 'video';
   src: string;
   videoType: 'youtube' | 'vimeo' | 'file';
   title: string;
@@ -139,6 +224,7 @@ export interface VideoContent {
 // =============================================================================
 
 export interface StoryboardFrameContent {
+  _type: 'storyboardFrame';
   sceneTitle: string;
   durationSeconds: number;
   script: string;
@@ -169,6 +255,26 @@ export type BlockContent =
   | VideoContent
   | StoryboardFrameContent
   | Record<string, unknown>; // Fallback for unknown content
+
+// =============================================================================
+// Type guards
+// =============================================================================
+
+export function isContentScreen(content: BlockContent): content is ContentScreenContent {
+  return typeof content === 'object' && content !== null && '_type' in content && (content as any)._type === 'contentScreen';
+}
+
+export function isVideoScreen(content: BlockContent): content is ContentScreen_Video {
+  return isContentScreen(content) && content.screenType === 'video';
+}
+
+export function isAssessmentScreen(content: BlockContent): content is ContentScreen_Assessment {
+  return isContentScreen(content) && content.screenType === 'assessment';
+}
+
+export function isScenarioScreen(content: BlockContent): content is ContentScreen_Scenario {
+  return isContentScreen(content) && content.screenType === 'scenario';
+}
 
 // =============================================================================
 // Block interface matching database model
@@ -239,35 +345,37 @@ export const BLOCK_TYPE_TO_TIPTAP_NODE: Record<string, string> = {
 // =============================================================================
 
 export function createDefaultParagraphContent(): ParagraphContent {
-  return { text: '' };
+  return { _type: 'paragraph', text: '' };
 }
 
 export function createDefaultHeadingContent(level: 1 | 2 | 3 = 1): HeadingContent {
-  return { text: '', level };
+  return { _type: 'heading', text: '', level };
 }
 
 export function createDefaultCalloutContent(): CalloutContent {
-  return { text: '', variant: 'info' };
+  return { _type: 'callout', text: '', variant: 'info' };
 }
 
-export function createDefaultContentScreenContent(screenNumber: number): ContentScreenContent {
+export function createDefaultContentScreenContent(screenNumber: number): ContentScreen_Content {
   return {
+    _type: 'contentScreen',
     screenId: `SCR-${String(screenNumber).padStart(3, '0')}`,
     screenTitle: '',
     screenType: 'content',
+    duration: '',
+    designerNotes: '',
+    developerNotes: '',
     visuals: '',
     onScreenText: '',
     voiceoverScript: '',
     interactionType: 'none',
     interactionDetails: '',
-    designerNotes: '',
-    developerNotes: '',
-    duration: '',
   };
 }
 
 export function createDefaultStoryboardMetadataContent(): StoryboardMetadataContent {
   return {
+    _type: 'storyboardMetadata',
     courseTitle: '',
     audienceDescription: '',
     estimatedDuration: '',
@@ -280,6 +388,7 @@ export function createDefaultStoryboardMetadataContent(): StoryboardMetadataCont
 
 export function createDefaultChecklistContent(): ChecklistContent {
   return {
+    _type: 'checklist',
     title: 'Checklist',
     items: [],
   };
@@ -287,6 +396,7 @@ export function createDefaultChecklistContent(): ChecklistContent {
 
 export function createDefaultTableContent(): TableContent {
   return {
+    _type: 'table',
     title: 'Table',
     columns: [
       { id: 'col1', header: 'Column 1', type: 'text' },
@@ -298,6 +408,7 @@ export function createDefaultTableContent(): TableContent {
 
 export function createDefaultImageContent(): ImageContent {
   return {
+    _type: 'image',
     src: '',
     alt: '',
     title: '',
@@ -306,6 +417,7 @@ export function createDefaultImageContent(): ImageContent {
 
 export function createDefaultVideoContent(): VideoContent {
   return {
+    _type: 'video',
     src: '',
     videoType: 'youtube',
     title: '',

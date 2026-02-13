@@ -349,7 +349,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       const text = extractTextFromNode(node);
       return {
         type: 'PARAGRAPH',
-        content: { text },
+        content: { _type: 'paragraph', text },
       };
     }
 
@@ -359,7 +359,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       const type: BlockType = level === 1 ? 'HEADING_1' : level === 2 ? 'HEADING_2' : 'HEADING_3';
       return {
         type,
-        content: { text, level },
+        content: { _type: 'heading', text, level },
       };
     }
 
@@ -367,7 +367,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       const items = extractListItems(node);
       return {
         type: 'BULLETED_LIST',
-        content: { items },
+        content: { _type: 'list', items },
       };
     }
 
@@ -375,7 +375,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       const items = extractListItems(node);
       return {
         type: 'NUMBERED_LIST',
-        content: { items },
+        content: { _type: 'list', items },
       };
     }
 
@@ -384,7 +384,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       const variant = (node.attrs?.variant as string) || 'info';
       return {
         type: 'CALLOUT',
-        content: { text, variant },
+        content: { _type: 'callout', text, variant },
       };
     }
 
@@ -393,6 +393,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       return {
         type: 'CONTENT_SCREEN',
         content: {
+          _type: 'contentScreen',
           // Core fields
           screenId: (node.attrs?.screenId as string) || '',
           screenTitle: (node.attrs?.screenTitle as string) || '',
@@ -466,6 +467,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       return {
         type: 'LEARNING_OBJECTIVES_IMPORT',
         content: {
+          _type: 'learningObjectivesImport',
           importedAt: (node.attrs?.importedAt as string) || '',
           objectives: Array.isArray(objectives) ? objectives : [],
           displayMode: (node.attrs?.displayMode as string) || 'detailed',
@@ -478,7 +480,7 @@ function nodeToBlock(node: JSONContent): { type: BlockType; content: Record<stri
       // Fallback to paragraph
       return {
         type: 'PARAGRAPH',
-        content: { text: extractTextFromNode(node) },
+        content: { _type: 'paragraph', text: extractTextFromNode(node) },
       };
   }
 }
