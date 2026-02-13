@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CoursePhase, CourseType, Priority } from '@prisma/client';
 
 interface CreateCourseModalProps {
   isOpen: boolean;
@@ -25,8 +26,8 @@ export default function CreateCourseModal({
   const [description, setDescription] = useState('');
   const [clientName, setClientName] = useState('');
   const [courseType, setCourseType] = useState('');
-  const [phase, setPhase] = useState('intake');
-  const [priority, setPriority] = useState('medium');
+  const [phase, setPhase] = useState(CoursePhase.INTAKE as string);
+  const [priority, setPriority] = useState(Priority.MEDIUM as string);
   const [targetGoLive, setTargetGoLive] = useState('');
 
   const resetForm = () => {
@@ -34,8 +35,8 @@ export default function CreateCourseModal({
     setDescription('');
     setClientName('');
     setCourseType('');
-    setPhase('intake');
-    setPriority('medium');
+    setPhase(CoursePhase.INTAKE);
+    setPriority(Priority.MEDIUM);
     setTargetGoLive('');
     setError(null);
   };
@@ -182,14 +183,21 @@ export default function CreateCourseModal({
               <label className="text-sm font-medium text-gray-700" htmlFor="course-type">
                 Course type
               </label>
-              <input
+              <select
                 id="course-type"
-                type="text"
                 value={courseType}
                 onChange={(e) => setCourseType(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
-                placeholder="e.g., Course, Module, Job Aid"
-              />
+              >
+                <option value="">Select type (optional)</option>
+                <option value={CourseType.PERFORMANCE_PROBLEM}>Performance Problem</option>
+                <option value={CourseType.NEW_SYSTEM}>New System</option>
+                <option value={CourseType.COMPLIANCE}>Compliance</option>
+                <option value={CourseType.ROLE_CHANGE}>Role Change</option>
+                <option value={CourseType.ONBOARDING}>Onboarding</option>
+                <option value={CourseType.PROFESSIONAL_DEVELOPMENT}>Professional Development</option>
+                <option value={CourseType.OTHER}>Other</option>
+              </select>
             </div>
 
             {/* Phase and Priority - side by side */}
@@ -204,11 +212,12 @@ export default function CreateCourseModal({
                   onChange={(e) => setPhase(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
                 >
-                  <option value="intake">Intake</option>
-                  <option value="design">Design</option>
-                  <option value="build">Build</option>
-                  <option value="pilot">Pilot</option>
-                  <option value="live">Live</option>
+                  <option value={CoursePhase.INTAKE}>Intake</option>
+                  <option value={CoursePhase.ANALYSIS}>Analysis</option>
+                  <option value={CoursePhase.DESIGN}>Design</option>
+                  <option value={CoursePhase.DEVELOPMENT}>Development</option>
+                  <option value={CoursePhase.IMPLEMENTATION}>Implementation</option>
+                  <option value={CoursePhase.EVALUATION}>Evaluation</option>
                 </select>
               </div>
 
@@ -222,9 +231,10 @@ export default function CreateCourseModal({
                   onChange={(e) => setPriority(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  <option value={Priority.LOW}>Low</option>
+                  <option value={Priority.MEDIUM}>Medium</option>
+                  <option value={Priority.HIGH}>High</option>
+                  <option value={Priority.URGENT}>Urgent</option>
                 </select>
               </div>
             </div>

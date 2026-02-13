@@ -48,9 +48,9 @@ export default function StoryboardHeader({
                   }
                   className={`text-xs font-medium px-2 py-1 rounded border-0 cursor-pointer ${currentStatus.bgColor} ${currentStatus.color}`}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="review">In Review</option>
-                  <option value="approved">Approved</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="REVIEW">In Review</option>
+                  <option value="APPROVED">Approved</option>
                 </select>
 
                 {/* Frame Count */}

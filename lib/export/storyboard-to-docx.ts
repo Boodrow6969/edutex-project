@@ -509,11 +509,11 @@ export async function storyboardToDocx(
   }
   if (storyboardMetadata?.status || includeEmptyFields) {
     const statusLabels: Record<string, string> = {
-      'draft': 'Draft',
-      'review': 'In Review',
-      'approved': 'Approved',
+      'DRAFT': 'Draft',
+      'REVIEW': 'In Review',
+      'APPROVED': 'Approved',
     };
-    const statusLabel = statusLabels[storyboardMetadata?.status || 'draft'] || storyboardMetadata?.status || 'Draft';
+    const statusLabel = statusLabels[storyboardMetadata?.status || 'DRAFT'] || storyboardMetadata?.status || 'Draft';
     metadataRows.push(createMetadataRow('Status', statusLabel));
   }
   if (storyboardMetadata?.version) {

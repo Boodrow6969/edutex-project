@@ -34,6 +34,12 @@
 - **Affected Block Types:** All custom block types
 - **Note:** Originally documented as most noticeable with IMAGE and VIDEO blocks. IMAGE/VIDEO standalone extensions have since been removed, but the underlying race condition still applies to CONTENT_SCREEN and other blocks.
 
+### BUG-014: Needs Analysis dashboard badge shows "Not Started" when links are active
+- **Location:** Workspace Dashboard → Needs Analysis Card
+- **Description:** The Needs Analysis status badge on the Workspace Dashboard shows "Not Started" even after a stakeholder link has been created and sent. It remains "Not Started" until a stakeholder submits the form, then jumps directly to "Pending Review" — skipping the "Active" state entirely. The Needs Analysis management screen correctly shows "Active" when links exist, and the dashboard card itself shows "1 active link" while the badge still says "Not Started," which is contradictory. The dashboard status logic likely only checks for submitted responses rather than also checking for active tokens/links.
+- **Priority:** Medium (functional inconsistency)
+- **Status:** Open
+
 ---
 
 ## Resolved Bugs

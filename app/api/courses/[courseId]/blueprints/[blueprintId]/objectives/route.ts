@@ -10,7 +10,7 @@ import {
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole } from '@prisma/client';
+import { WorkspaceRole, BloomLevel, BlueprintPriority } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{ courseId: string; blueprintId: string }>;
@@ -127,8 +127,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       data: {
         blueprintId,
         text: body.text.trim(),
-        bloomLevel: body.bloomLevel.trim(),
-        priority: body.priority.trim(),
+        bloomLevel: body.bloomLevel.trim() as BloomLevel,
+        priority: body.priority.trim() as BlueprintPriority,
         requiresAssessment: body.requiresAssessment,
       },
     });

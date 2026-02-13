@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import { CourseStatus, CoursePhase, CourseType, Priority } from "@prisma/client";
 
 async function createCourse(formData: FormData) {
   "use server";
@@ -9,8 +10,8 @@ async function createCourse(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const clientName = String(formData.get("clientName") || "").trim();
   const courseType = String(formData.get("courseType") || "").trim();
-  const phase = String(formData.get("phase") || "").trim() || "intake";
-  const priority = String(formData.get("priority") || "").trim() || "medium";
+  const phase = String(formData.get("phase") || "").trim() || CoursePhase.INTAKE;
+  const priority = String(formData.get("priority") || "").trim() || Priority.MEDIUM;
   const targetGoLiveStr = String(formData.get("targetGoLive") || "").trim();
 
   if (!name) {
@@ -30,9 +31,9 @@ async function createCourse(formData: FormData) {
       name,
       description: description || null,
       clientName: clientName || null,
-      courseType: courseType || null,
-      phase,
-      priority,
+      courseType: (courseType || null) as CourseType | null,
+      phase: phase as CoursePhase,
+      priority: priority as Priority,
       targetGoLive,
     },
   });
@@ -99,12 +100,21 @@ export default async function CoursesPage() {
             <label className="text-sm font-medium" htmlFor="courseType">
               Course type
             </label>
-            <input
+            <select
               id="courseType"
               name="courseType"
+              defaultValue=""
               className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="e.g., Course, Module, Job Aid"
-            />
+            >
+              <option value="">Select type (optional)</option>
+              <option value={CourseType.PERFORMANCE_PROBLEM}>Performance Problem</option>
+              <option value={CourseType.NEW_SYSTEM}>New System</option>
+              <option value={CourseType.COMPLIANCE}>Compliance</option>
+              <option value={CourseType.ROLE_CHANGE}>Role Change</option>
+              <option value={CourseType.ONBOARDING}>Onboarding</option>
+              <option value={CourseType.PROFESSIONAL_DEVELOPMENT}>Professional Development</option>
+              <option value={CourseType.OTHER}>Other</option>
+            </select>
           </div>
 
           <div className="space-y-1">
@@ -114,14 +124,15 @@ export default async function CoursesPage() {
             <select
               id="phase"
               name="phase"
-              defaultValue="intake"
+              defaultValue={CoursePhase.INTAKE}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="intake">Intake</option>
-              <option value="design">Design</option>
-              <option value="build">Build</option>
-              <option value="pilot">Pilot</option>
-              <option value="live">Live</option>
+              <option value={CoursePhase.INTAKE}>Intake</option>
+              <option value={CoursePhase.ANALYSIS}>Analysis</option>
+              <option value={CoursePhase.DESIGN}>Design</option>
+              <option value={CoursePhase.DEVELOPMENT}>Development</option>
+              <option value={CoursePhase.IMPLEMENTATION}>Implementation</option>
+              <option value={CoursePhase.EVALUATION}>Evaluation</option>
             </select>
           </div>
 
@@ -132,12 +143,13 @@ export default async function CoursesPage() {
             <select
               id="priority"
               name="priority"
-              defaultValue="medium"
+              defaultValue={Priority.MEDIUM}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value={Priority.LOW}>Low</option>
+              <option value={Priority.MEDIUM}>Medium</option>
+              <option value={Priority.HIGH}>High</option>
+              <option value={Priority.URGENT}>Urgent</option>
             </select>
           </div>
 

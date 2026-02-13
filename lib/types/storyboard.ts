@@ -1,7 +1,7 @@
 // Storyboard Types for Video Storyboard Designer
 
 export type TransitionType = 'cut' | 'fade' | 'dissolve' | 'wipe' | 'none';
-export type StoryboardStatus = 'draft' | 'review' | 'approved';
+export type StoryboardStatus = 'DRAFT' | 'REVIEW' | 'APPROVED';
 
 // Block.content JSON structure for STORYBOARD_FRAME blocks
 export interface StoryboardFrameContent {
@@ -53,7 +53,7 @@ export const createEmptyFrameContent = (): StoryboardFrameContent => ({
 // Default metadata for new storyboards
 export const defaultMetadata: StoryboardMetadata = {
   targetAudience: '',
-  status: 'draft',
+  status: 'DRAFT',
   linkedObjectiveIds: [],
   version: 1,
 };
@@ -75,17 +75,17 @@ export const statusConfig: Record<
   StoryboardStatus,
   { label: string; color: string; bgColor: string }
 > = {
-  draft: {
+  DRAFT: {
     label: 'Draft',
     color: 'text-gray-700',
     bgColor: 'bg-gray-100',
   },
-  review: {
+  REVIEW: {
     label: 'In Review',
     color: 'text-yellow-700',
     bgColor: 'bg-yellow-100',
   },
-  approved: {
+  APPROVED: {
     label: 'Approved',
     color: 'text-green-700',
     bgColor: 'bg-green-100',

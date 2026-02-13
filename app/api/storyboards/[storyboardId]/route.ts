@@ -6,7 +6,7 @@ import {
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole } from '@prisma/client';
+import { WorkspaceRole, StoryboardStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
 
     // Validate status if provided
-    const validStatuses = ['draft', 'review', 'approved'];
+    const validStatuses = Object.values(StoryboardStatus);
     if (body.status && !validStatuses.includes(body.status)) {
       return Response.json(
         { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },

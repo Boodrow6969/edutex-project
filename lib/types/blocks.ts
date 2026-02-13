@@ -39,7 +39,7 @@ export interface StoryboardMetadataContent {
   deliveryMechanism: 'elearning' | 'ilt' | 'vilt' | 'blended';
   linkedObjectiveIds: string[];
   version: number;
-  status: 'draft' | 'review' | 'approved';
+  status: 'DRAFT' | 'REVIEW' | 'APPROVED';
 }
 
 export interface ContentScreenContent {
@@ -274,7 +274,7 @@ export function createDefaultStoryboardMetadataContent(): StoryboardMetadataCont
     deliveryMechanism: 'elearning',
     linkedObjectiveIds: [],
     version: 1,
-    status: 'draft',
+    status: 'DRAFT',
   };
 }
 

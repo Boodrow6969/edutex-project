@@ -114,15 +114,71 @@ enum WorkspaceRole {
   SME
 }
 
+enum CourseStatus {
+  DRAFT
+  ACTIVE
+  IN_REVIEW
+  APPROVED
+  ARCHIVED
+}
+
+enum CoursePhase {
+  INTAKE
+  ANALYSIS
+  DESIGN
+  DEVELOPMENT
+  IMPLEMENTATION
+  EVALUATION
+}
+
+enum CourseType {
+  PERFORMANCE_PROBLEM
+  NEW_SYSTEM
+  COMPLIANCE
+  ROLE_CHANGE
+  ONBOARDING
+  PROFESSIONAL_DEVELOPMENT
+  OTHER
+}
+
+enum StoryboardStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+}
+
+enum CurriculumStatus {
+  DRAFT
+  IN_PROGRESS
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ConstraintType {
+  TIME
+  BUDGET
+  TECHNOLOGY
+  AUDIENCE
+  REGULATORY
+  ORGANIZATIONAL
+  OTHER
+}
+
+enum BlueprintPriority {
+  MUST_HAVE
+  SHOULD_HAVE
+  NICE_TO_HAVE
+}
+
 model Course {
   id          String   @id @default(cuid())
   name        String
   description String?
-  status      String   @default("draft")
+  status      CourseStatus  @default(DRAFT)
   clientName  String?
-  courseType   String?    // was projectType
-  phase       String   @default("intake")
-  priority    String   @default("medium")
+  courseType   CourseType?    // was projectType
+  phase       CoursePhase   @default(INTAKE)
+  priority    Priority      @default(MEDIUM)
   targetGoLive DateTime?
   workspaceId String?
   archivedAt   DateTime?
@@ -146,7 +202,7 @@ model Curriculum {
   description String?  @db.Text
 
   // Program metadata
-  status              String  @default("draft") // draft, in_progress, published
+  status              CurriculumStatus  @default(DRAFT)
   programDuration     String? // e.g., "12 weeks", "6 months"
   totalHours          Int?
   certificationName   String?
@@ -263,7 +319,7 @@ model Storyboard {
 
   // Page-level metadata
   targetAudience     String   @default("")
-  status             String   @default("draft") // draft | review | approved
+  status             StoryboardStatus @default(DRAFT)
   linkedObjectiveIds String[] @default([])
   version            Int      @default(1)
 
@@ -483,8 +539,8 @@ model BlueprintObjective {
   id                String   @id @default(uuid())
   blueprintId       String
   text              String   @db.Text
-  bloomLevel        String
-  priority          String
+  bloomLevel        BloomLevel
+  priority          BlueprintPriority
   requiresAssessment Boolean
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -498,7 +554,7 @@ model BlueprintObjective {
 model Constraint {
   id          String   @id @default(uuid())
   blueprintId String
-  type        String
+  type        ConstraintType
   description String   @db.Text
   value       String?
   createdAt   DateTime @default(now())

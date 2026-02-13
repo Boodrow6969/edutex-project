@@ -9,7 +9,7 @@ import {
   assertWorkspaceMember,
   errorResponse,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole, PageType } from '@prisma/client';
+import { WorkspaceRole, PageType, CurriculumStatus } from '@prisma/client';
 
 /**
  * GET /api/curricula?workspaceId=xxx
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
           workspaceId: body.workspaceId,
           name: body.name.trim(),
           description: body.description?.trim() || null,
-          status: body.status || 'draft',
+          status: (body.status || CurriculumStatus.DRAFT) as CurriculumStatus,
           programDuration: body.programDuration?.trim() || null,
           totalHours: body.totalHours ? Number(body.totalHours) : null,
           certificationName: body.certificationName?.trim() || null,

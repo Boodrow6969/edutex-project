@@ -9,7 +9,7 @@ import {
   assertWorkspaceMember,
   errorResponse,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole, PageType } from '@prisma/client';
+import { WorkspaceRole, PageType, CoursePhase, CourseType, Priority } from '@prisma/client';
 
 /**
  * GET /api/courses?workspaceId=123
@@ -134,8 +134,8 @@ export async function POST(request: NextRequest) {
     const description = body.description?.trim() || null;
     const clientName = body.clientName?.trim() || null;
     const courseType = body.courseType?.trim() || null;
-    const phase = body.phase?.trim() || 'intake';
-    const priority = body.priority?.trim() || 'medium';
+    const phase = body.phase?.trim() || CoursePhase.INTAKE;
+    const priority = body.priority?.trim() || Priority.MEDIUM;
     const targetGoLive = body.targetGoLive ? new Date(body.targetGoLive) : null;
 
     // Verify user has permission to create courses in this workspace
@@ -154,9 +154,9 @@ export async function POST(request: NextRequest) {
           name,
           description,
           clientName,
-          courseType,
-          phase,
-          priority,
+          courseType: courseType as CourseType | null,
+          phase: phase as CoursePhase,
+          priority: priority as Priority,
           targetGoLive,
           workspaceId,
         },

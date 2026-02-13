@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CurriculumStatus } from '@prisma/client';
 
 interface CreateCurriculumModalProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ export default function CreateCurriculumModal({
   // Form state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState('draft');
+  const [status, setStatus] = useState(CurriculumStatus.DRAFT as string);
   const [programDuration, setProgramDuration] = useState('');
   const [totalHours, setTotalHours] = useState('');
   const [certificationName, setCertificationName] = useState('');
@@ -32,7 +33,7 @@ export default function CreateCurriculumModal({
   const resetForm = () => {
     setName('');
     setDescription('');
-    setStatus('draft');
+    setStatus(CurriculumStatus.DRAFT);
     setProgramDuration('');
     setTotalHours('');
     setCertificationName('');
@@ -172,9 +173,9 @@ export default function CreateCurriculumModal({
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
                 >
-                  <option value="draft">Draft</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="published">Published</option>
+                  <option value={CurriculumStatus.DRAFT}>Draft</option>
+                  <option value={CurriculumStatus.IN_PROGRESS}>In Progress</option>
+                  <option value={CurriculumStatus.PUBLISHED}>Published</option>
                 </select>
               </div>
 

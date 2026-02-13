@@ -6,7 +6,7 @@ import {
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole } from '@prisma/client';
+import { WorkspaceRole, StoryboardStatus } from '@prisma/client';
 import { defaultMetadata } from '@/lib/types/storyboard';
 
 export const dynamic = 'force-dynamic';
@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
 
     // Validate status if provided
-    const validStatuses = ['draft', 'review', 'approved'];
+    const validStatuses = Object.values(StoryboardStatus);
     if (body.status && !validStatuses.includes(body.status)) {
       return Response.json(
         { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       create: {
         pageId,
         targetAudience: body.targetAudience ?? '',
-        status: body.status ?? 'draft',
+        status: body.status ?? StoryboardStatus.DRAFT,
         linkedObjectiveIds: body.linkedObjectiveIds ?? [],
         version: body.version ?? 1,
       },

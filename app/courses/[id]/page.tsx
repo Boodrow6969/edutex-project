@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import { CourseStatus, CoursePhase, Priority } from "@prisma/client";
 
 type CourseDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -22,9 +23,9 @@ async function updateCourse(formData: FormData) {
   await prisma.course.update({
     where: { id },
     data: {
-      status,
-      phase,
-      priority,
+      status: status as CourseStatus,
+      phase: phase as CoursePhase,
+      priority: priority as Priority,
     },
   });
 
@@ -95,13 +96,14 @@ export default async function CourseDetailPage(
             <select
               id="status"
               name="status"
-              defaultValue={course.status || "draft"}
+              defaultValue={course.status || CourseStatus.DRAFT}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="draft">Draft</option>
-              <option value="in_progress">In Progress</option>
-              <option value="on_hold">On Hold</option>
-              <option value="complete">Complete</option>
+              <option value={CourseStatus.DRAFT}>Draft</option>
+              <option value={CourseStatus.ACTIVE}>Active</option>
+              <option value={CourseStatus.IN_REVIEW}>In Review</option>
+              <option value={CourseStatus.APPROVED}>Approved</option>
+              <option value={CourseStatus.ARCHIVED}>Archived</option>
             </select>
           </div>
 
@@ -112,14 +114,15 @@ export default async function CourseDetailPage(
             <select
               id="phase"
               name="phase"
-              defaultValue={course.phase || "intake"}
+              defaultValue={course.phase || CoursePhase.INTAKE}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="intake">Intake</option>
-              <option value="design">Design</option>
-              <option value="build">Build</option>
-              <option value="pilot">Pilot</option>
-              <option value="live">Live</option>
+              <option value={CoursePhase.INTAKE}>Intake</option>
+              <option value={CoursePhase.ANALYSIS}>Analysis</option>
+              <option value={CoursePhase.DESIGN}>Design</option>
+              <option value={CoursePhase.DEVELOPMENT}>Development</option>
+              <option value={CoursePhase.IMPLEMENTATION}>Implementation</option>
+              <option value={CoursePhase.EVALUATION}>Evaluation</option>
             </select>
           </div>
 
@@ -130,12 +133,13 @@ export default async function CourseDetailPage(
             <select
               id="priority"
               name="priority"
-              defaultValue={course.priority || "medium"}
+              defaultValue={course.priority || Priority.MEDIUM}
               className="w-full border rounded px-3 py-2 text-sm"
             >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value={Priority.LOW}>Low</option>
+              <option value={Priority.MEDIUM}>Medium</option>
+              <option value={Priority.HIGH}>High</option>
+              <option value={Priority.URGENT}>Urgent</option>
             </select>
           </div>
 

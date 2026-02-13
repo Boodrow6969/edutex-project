@@ -12,7 +12,7 @@ import {
   NotFoundError,
   AuthorizationError,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole, PageType } from '@prisma/client';
+import { WorkspaceRole, PageType, CourseStatus, CoursePhase, CourseType, Priority } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{ curriculumId: string }>;
@@ -146,10 +146,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             name: body.name.trim(),
             description: body.description?.trim() || null,
             clientName: body.clientName?.trim() || null,
-            courseType: body.courseType?.trim() || null,
-            phase: body.phase || 'intake',
-            priority: body.priority || 'medium',
-            status: body.status || 'draft',
+            courseType: (body.courseType?.trim() || null) as CourseType | null,
+            phase: (body.phase || CoursePhase.INTAKE) as CoursePhase,
+            priority: (body.priority || Priority.MEDIUM) as Priority,
+            status: (body.status || CourseStatus.DRAFT) as CourseStatus,
             targetGoLive: body.targetGoLive ? new Date(body.targetGoLive) : null,
             workspaceId,
           },

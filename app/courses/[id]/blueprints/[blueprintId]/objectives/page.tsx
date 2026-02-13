@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { BloomLevel, BlueprintPriority } from '@prisma/client';
 
 type ProjectBlueprintObjectivesPageProps = {
   params: Promise<{ id: string; blueprintId: string }>;
@@ -307,15 +308,21 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
               <label className="text-sm font-medium" htmlFor="bloomLevel">
                 Bloom Level *
               </label>
-              <input
+              <select
                 id="bloomLevel"
-                type="text"
                 value={bloomLevel}
                 onChange={(e) => setBloomLevel(e.target.value)}
                 className="w-full border rounded px-3 py-2 text-sm"
-                placeholder="e.g., REMEMBER, UNDERSTAND, APPLY, ANALYZE, EVALUATE, CREATE"
                 required
-              />
+              >
+                <option value="">Select Bloom level</option>
+                <option value={BloomLevel.REMEMBER}>Remember</option>
+                <option value={BloomLevel.UNDERSTAND}>Understand</option>
+                <option value={BloomLevel.APPLY}>Apply</option>
+                <option value={BloomLevel.ANALYZE}>Analyze</option>
+                <option value={BloomLevel.EVALUATE}>Evaluate</option>
+                <option value={BloomLevel.CREATE}>Create</option>
+              </select>
             </div>
 
             <div className="space-y-2">
@@ -330,9 +337,9 @@ export default function ProjectBlueprintObjectivesPage({ params }: ProjectBluepr
                 required
               >
                 <option value="">Select priority</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value={BlueprintPriority.MUST_HAVE}>Must Have</option>
+                <option value={BlueprintPriority.SHOULD_HAVE}>Should Have</option>
+                <option value={BlueprintPriority.NICE_TO_HAVE}>Nice to Have</option>
               </select>
             </div>
 

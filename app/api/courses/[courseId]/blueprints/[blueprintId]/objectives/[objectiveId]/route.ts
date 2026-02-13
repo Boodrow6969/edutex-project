@@ -10,7 +10,7 @@ import {
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole } from '@prisma/client';
+import { WorkspaceRole, BloomLevel, BlueprintPriority } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{ courseId: string; blueprintId: string; objectiveId: string }>;
@@ -74,8 +74,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Build update data
     const updateData: {
       text?: string;
-      bloomLevel?: string;
-      priority?: string;
+      bloomLevel?: BloomLevel;
+      priority?: BlueprintPriority;
       requiresAssessment?: boolean;
     } = {};
 
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         );
       }
-      updateData.bloomLevel = body.bloomLevel.trim();
+      updateData.bloomLevel = body.bloomLevel.trim() as BloomLevel;
     }
 
     if (body.priority !== undefined) {
@@ -106,7 +106,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         );
       }
-      updateData.priority = body.priority.trim();
+      updateData.priority = body.priority.trim() as BlueprintPriority;
     }
 
     if (body.requiresAssessment !== undefined) {

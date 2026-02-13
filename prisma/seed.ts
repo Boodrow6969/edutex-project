@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PageType, WorkspaceRole } from '@prisma/client';
+import { PageType, WorkspaceRole, CourseStatus, CoursePhase, CourseType, Priority } from '@prisma/client';
 import prisma from '../lib/prisma';
 
 async function main() {
@@ -58,12 +58,12 @@ async function main() {
       id: 'demo-course-id',
       name: 'Sales Onboarding Program',
       description: 'A comprehensive onboarding program for new sales representatives',
-      status: 'IN_PROGRESS',
+      status: CourseStatus.ACTIVE,
       workspaceId: workspace.id,
       clientName: 'Acme Corp',
-      courseType: 'onboarding',
-      phase: 'design',
-      priority: 'high',
+      courseType: CourseType.ONBOARDING,
+      phase: CoursePhase.DESIGN,
+      priority: Priority.HIGH,
     },
   });
   console.log(`Course created: ${course.name}`);

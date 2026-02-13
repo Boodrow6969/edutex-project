@@ -166,7 +166,7 @@ export function useStoryboardEditor({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   targetAudience: '',
-                  status: 'draft',
+                  status: 'DRAFT',
                 }),
               });
               if (createResponse.ok) {
@@ -177,7 +177,7 @@ export function useStoryboardEditor({
                   targetAudience: createdStoryboard.targetAudience || '',
                   duration: createdStoryboard.duration || '',
                   deliveryMethod: createdStoryboard.deliveryMethod || 'eLearning',
-                  status: createdStoryboard.status || 'draft',
+                  status: createdStoryboard.status || 'DRAFT',
                 });
               }
             } else {
@@ -187,7 +187,7 @@ export function useStoryboardEditor({
                 targetAudience: storyboard.targetAudience || '',
                 duration: storyboard.duration || '',
                 deliveryMethod: storyboard.deliveryMethod || 'eLearning',
-                status: storyboard.status || 'draft',
+                status: storyboard.status || 'DRAFT',
               });
             }
           }

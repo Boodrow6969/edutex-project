@@ -10,7 +10,7 @@ import {
   errorResponse,
   NotFoundError,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole } from '@prisma/client';
+import { WorkspaceRole, CurriculumStatus } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{ curriculumId: string }>;
@@ -126,7 +126,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const updateData: {
       name?: string;
       description?: string | null;
-      status?: string;
+      status?: CurriculumStatus;
       programDuration?: string | null;
       totalHours?: number | null;
       certificationName?: string | null;
@@ -148,7 +148,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     if (body.status !== undefined) {
-      updateData.status = body.status;
+      updateData.status = body.status as CurriculumStatus;
     }
 
     if (body.programDuration !== undefined) {

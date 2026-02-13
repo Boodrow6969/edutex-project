@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CurriculumStatus } from '@prisma/client';
 
 interface Curriculum {
   id: string;
@@ -32,7 +33,7 @@ export default function EditCurriculumModal({
   // Form state - initialized from curriculum prop
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState('draft');
+  const [status, setStatus] = useState(CurriculumStatus.DRAFT as string);
   const [programDuration, setProgramDuration] = useState('');
   const [totalHours, setTotalHours] = useState('');
   const [certificationName, setCertificationName] = useState('');
@@ -43,7 +44,7 @@ export default function EditCurriculumModal({
     if (isOpen && curriculum) {
       setName(curriculum.name || '');
       setDescription(curriculum.description || '');
-      setStatus(curriculum.status || 'draft');
+      setStatus(curriculum.status || CurriculumStatus.DRAFT);
       setProgramDuration(curriculum.programDuration || '');
       setTotalHours(curriculum.totalHours?.toString() || '');
       setCertificationName(curriculum.certificationName || '');
@@ -174,9 +175,9 @@ export default function EditCurriculumModal({
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#03428e]/20 focus:border-[#03428e]"
                 >
-                  <option value="draft">Draft</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="published">Published</option>
+                  <option value={CurriculumStatus.DRAFT}>Draft</option>
+                  <option value={CurriculumStatus.IN_PROGRESS}>In Progress</option>
+                  <option value={CurriculumStatus.PUBLISHED}>Published</option>
                 </select>
               </div>
 
