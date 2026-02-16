@@ -5,11 +5,11 @@ Run these steps EVERY TIME you open Cursor or start a Claude Code session.
 ## 1. Confirm You're in the Right Folder
 
 ```powershell
-cd D:\Dropbox\Dropbox\EduTex\app
+cd C:\Dev\edutex 
 pwd
 ```
 
-You should see `D:\Dropbox\Dropbox\EduTex\app`. If not, you're in the wrong directory.
+You should see `C:\Dev\edutex`. If not, you're in the wrong directory.
 
 ## 2. Check Git Status
 

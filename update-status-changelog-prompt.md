@@ -1,3 +1,7 @@
+Read the file docs/STATUS.md. Then make these two updates:
+
+FILE 1: Create a new file CHANGELOG.md in the project root with this content:
+
 # EDUTex Changelog
 
 ## v0.12.0 — February 13, 2026: Machine-Consumability Migration
@@ -51,3 +55,27 @@ Content Assets Phase A+B — ContentAsset model, local storage service, full CRU
 
 ## v0.10.0 — February 8, 2026
 Archive/restore for workspaces, courses, curricula. Delete confirmation modals. Toast notification system. Sidebar context menus. Enhanced workspace DELETE with name confirmation and transactional cascade.
+
+
+FILE 2: Update docs/STATUS.md with these changes:
+
+1. Change "Last Updated" to: February 13, 2026
+2. Change "Current Version" to: 0.12.0
+3. In the "What's Built" section, add a new subsection after "Stakeholder Needs Analysis" and before the "---" separator:
+
+### Machine-Consumable Data Layer — Complete (v0.12.0)
+- 9 string fields converted to proper Prisma enums across 5 models
+- LearningTask model with enum-typed task analysis attributes and hierarchical decomposition
+- AssessmentItem model with 9 assessment types (Quiz Builder foundation)
+- Objective to LearningTask and Objective to AssessmentItem join tables with alignment tracking
+- Objective extended with Mager's ABCD components, external taxonomy mapping, design rationale
+- External ID fields on Course, Curriculum, Objective, LearningTask for LMS/taxonomy integration
+- Block content _type discriminators on all 13 content interfaces
+- ContentScreen split into 6 typed sub-interfaces matching sync.ts field sets
+- Design rationale fields on NeedsAnalysis and Storyboard
+- 4 database migrations, zero breaking changes
+
+4. In "Recently Completed", add this line at the top (before the v0.11.0 entry):
+- **v0.12.0 (Feb 13, 2026):** Machine-consumability migration — 7 new enums, LearningTask model, AssessmentItem model, Objective link tables, block content contracts with _type discriminators, design rationale fields. 4 schema migrations, 5 workstreams, zero breaking changes.
+
+Do not change anything else in STATUS.md.

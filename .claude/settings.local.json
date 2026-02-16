@@ -47,7 +47,8 @@
       "Bash(npx prisma db execute:*)",
       "Bash(git mv:*)",
       "Bash(findstr:*)",
-      "Bash(powershell -Command \"npx tsc --noEmit 2>&1 | Select-String ''projectId|prisma\\\\.project|Project''\")"
+      "Bash(powershell -Command \"npx tsc --noEmit 2>&1 | Select-String ''projectId|prisma\\\\.project|Project''\")",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

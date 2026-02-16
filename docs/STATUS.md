@@ -1,10 +1,10 @@
 # EDUTex Project Status
 
-Last Updated: February 9, 2026
+Last Updated: February 13, 2026
 
 ---
 
-## Current Version: 0.11.0
+## Current Version: 0.12.0
 
 ---
 ## To do
@@ -63,6 +63,18 @@ Last Updated: February 9, 2026
 - All endpoints verified: GET form, POST identify, PUT responses, POST submit return 200
 - Pending: Browser testing with real token, Step 5 (ID Review UI + dashboard integration)
 
+### Machine-Consumable Data Layer — Complete (v0.12.0)
+- 9 string fields converted to proper Prisma enums across 5 models
+- LearningTask model with enum-typed task analysis attributes and hierarchical decomposition
+- AssessmentItem model with 9 assessment types (Quiz Builder foundation)
+- Objective to LearningTask and Objective to AssessmentItem join tables with alignment tracking
+- Objective extended with Mager's ABCD components, external taxonomy mapping, design rationale
+- External ID fields on Course, Curriculum, Objective, LearningTask for LMS/taxonomy integration
+- Block content _type discriminators on all 13 content interfaces
+- ContentScreen split into 6 typed sub-interfaces matching sync.ts field sets
+- Design rationale fields on NeedsAnalysis and Storyboard
+- 4 database migrations, zero breaking changes
+
 ---
 
 ## What's Next (In Priority Order)
@@ -76,6 +88,7 @@ Last Updated: February 9, 2026
 
 ## Recently Completed
 
+- **v0.12.0 (Feb 13, 2026):** Machine-consumability migration — 7 new enums, LearningTask model, AssessmentItem model, Objective link tables, block content contracts with _type discriminators, design rationale fields. 4 schema migrations, 5 workstreams, zero breaking changes.
 - **v0.11.0 (Feb 9, 2026):** Content Assets Phase A+B — ContentAsset model, local storage service, full CRUD API, reusable components, storyboard integration (Content, Title/Intro, Video screens).
 - **v0.10.0 (Feb 8, 2026):** Archive/restore for workspaces, courses, curricula. Delete confirmation modals. Toast notification system. Sidebar context menus. Enhanced workspace DELETE with name confirmation and transactional cascade.
 
