@@ -10,7 +10,6 @@ import LearningObjectivesView from '@/components/pages/LearningObjectivesView';
 import StoryboardEditor from '@/components/tiptap/StoryboardEditor';
 import { PageType } from '@prisma/client';
 import { NeedsAnalysisFormData } from '@/lib/types/needsAnalysis';
-import { TaskAnalysisFormData } from '@/lib/types/taskAnalysis';
 // StoryboardEditor handles its own data fetching internally
 
 interface PageMetadata {
@@ -37,7 +36,6 @@ export default function PageEditorPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [needsAnalysisData, setNeedsAnalysisData] = useState<Partial<NeedsAnalysisFormData> | null>(null);
-  const [taskAnalysisData, setTaskAnalysisData] = useState<Partial<TaskAnalysisFormData> | null>(null);
 
   useEffect(() => {
     if (!pageId) return;
@@ -78,14 +76,7 @@ export default function PageEditorPage() {
           }
         }
 
-        // If this is a task analysis page, fetch the saved data
-        if (data.type === 'TASK_ANALYSIS') {
-          const taResponse = await fetch(`/api/pages/${pageId}/task-analysis`);
-          if (taResponse.ok) {
-            const taData = await taResponse.json();
-            setTaskAnalysisData(taData);
-          }
-        }
+        // TASK_ANALYSIS: TaskAnalysisView handles its own data fetching
 
         // STORYBOARD pages: StoryboardEditor handles its own data fetching
       } catch (err) {
@@ -115,24 +106,6 @@ export default function PageEditorPage() {
     // Update local state with saved data
     const savedData = await response.json();
     setNeedsAnalysisData(savedData);
-  }, [pageId]);
-
-  // Save handler for task analysis
-  const handleSaveTaskAnalysis = useCallback(async (data: TaskAnalysisFormData) => {
-    const response = await fetch(`/api/pages/${pageId}/task-analysis`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to save');
-    }
-
-    // Update local state with saved data
-    const savedData = await response.json();
-    setTaskAnalysisData(savedData);
   }, [pageId]);
 
   if (!pageId) {
@@ -214,8 +187,7 @@ export default function PageEditorPage() {
         <TaskAnalysisView
           pageId={pageId}
           courseId={courseId}
-          initialData={taskAnalysisData ?? undefined}
-          onSave={handleSaveTaskAnalysis}
+          workspaceId={workspaceId}
         />
       );
     }

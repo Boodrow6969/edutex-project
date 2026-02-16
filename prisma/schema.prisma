@@ -198,6 +198,26 @@ enum KnowledgeType {
   METACOGNITIVE
 }
 
+// Why aren't they doing it correctly?
+enum GapType {
+  KNOWLEDGE
+  SKILL
+  MOTIVATION
+  ENVIRONMENT
+  MIXED
+}
+
+// What's the recommended fix?
+enum InterventionType {
+  TRAINING
+  JOB_AID
+  PRACTICE
+  PROCESS_CHANGE
+  TOOL_IMPROVEMENT
+  COACHING
+  NONE
+}
+
 enum AssessmentType {
   MULTIPLE_CHOICE
   MULTIPLE_SELECT
@@ -229,6 +249,16 @@ model LearningTask {
   variationNotes  String?           @db.Text
   isFeasibleToTrain Boolean         @default(true)
   feasibilityNotes  String?         @db.Text
+
+  // Gap analysis — why aren't they doing it?
+  gapType           GapType?
+
+  // Recommended intervention
+  intervention      InterventionType?
+  interventionNotes String?           @db.Text
+
+  // Impact documentation for non-training findings
+  impactNote        String?           @db.Text
 
   // External taxonomy mapping
   externalId      String?

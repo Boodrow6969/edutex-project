@@ -48,7 +48,8 @@
       "Bash(git mv:*)",
       "Bash(findstr:*)",
       "Bash(powershell -Command \"npx tsc --noEmit 2>&1 | Select-String ''projectId|prisma\\\\.project|Project''\")",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

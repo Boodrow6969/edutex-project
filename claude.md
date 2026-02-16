@@ -14,6 +14,11 @@
 - Library: `lib/courses/getCourseOverview` (was `lib/projects/getProjectOverview`)
 - If you see any remaining `Project` model references in code, they are stale and should be updated.
 
+## Rules for Conceptualizing UI
+- Instead of the ID needing to know the theory to fill out the form, the form teaches the theory by walking through the decision.
+- A junior ID can follow the prompts and arrive at the right completed design.
+- An experienced ID moves through it fast because the cards are quick to click.
+
 ## Absolute Rules — Never Break These
 
 ### File Safety

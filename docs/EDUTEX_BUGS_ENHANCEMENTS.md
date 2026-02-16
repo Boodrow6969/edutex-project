@@ -72,6 +72,14 @@
 - **Status:** Resolved (February 8, 2026)
 - **Resolution:** Added `CustomEvent('course-created')` dispatch with course data from the workspace detail page after creation. Added optimistic event listener in `useWorkspacesTree` that synchronously updates state via `setWorkspaces(prev => ...)` — same pattern the sidebar's own `createCourse` uses. Also added `pathname`-triggered refetch as a fallback. Fix applied to workspace detail page (`app/workspace/[workspaceId]/page.tsx`), not the `CreateCourseModal` which was initially misidentified as the source.
 
+### BUG-014: Copy Findings Summary button only visible in Non-Training filter
+- **Location:** components/pages/TaskAnalysisView.tsx
+- **Issue:** The Copy Findings Summary button only appears when the "Non-Training Findings" filter is active. It should be visible in the summary stats bar at all times when non-training findings count > 0, next to the "X non-training findings" text.
+- **Fix:** Move FindingsSummary button into the stats bar, render conditionally on nonTrainingCount > 0 instead of filter === 'non-training'
+- **Priority:** Low (UX polish)
+- **Status:** Open
+
+
 ---
 
 ## Enhancements
@@ -243,6 +251,20 @@
 - **Description:** The sidebar "+ New Course" inline creation only captures a course name. Add an optional description field or a follow-up prompt/modal that allows entering a description at creation time.
 - **Priority:** Low (UX)
 - **Status:** Backlog
+
+### ENH-027 Needs Analysis reference panel should pull from stakeholder submissions
+- **Location:** components/pages/task-analysis/NeedsAnalysisPanel.tsx
+- **Issue:** Currently pulls from the NeedsAnalysis model (old system). Should pull from StakeholderSubmission/StakeholderResponse data (the token-based forms) which is the actual source of needs analysis data in production workflows.
+- **Fix:** Update NeedsAnalysisPanel to fetch approved stakeholder submissions and format the responses by question category. Defer until NA page redesign is scoped.
+- **Priority:** Medium (data accuracy)
+- **Status:** Open — blocked by NA redesign
+
+### ENH-028: Needs Analysis page redesign
+- **Location:** components/pages/NeedsAnalysisView.tsx
+- **Issue:** NA page needs redesign — scope - Meld the nice look of the NA Page in Course, but with the info from the token Submission
+- **Priority:** Medium
+- **Status:** Open — awaiting design decisions
+
 
 ---
 

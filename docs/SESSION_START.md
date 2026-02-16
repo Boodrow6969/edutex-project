@@ -23,6 +23,7 @@ Look for:
 - Any untracked files that shouldn't be there?
 
 If there are leftover changes from a previous session, commit or stash them before starting new work.
+check git-session-start-instructions.md for instructions
 
 ## 3. Verify the Dev Server Starts
 
