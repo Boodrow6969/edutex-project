@@ -1,24 +1,38 @@
 import { FieldType, TrainingType } from "../types/stakeholderAnalysis";
 import { QuestionDefinition } from "../types/questionDefinition";
 
-export const performanceQuestions: QuestionDefinition[] = [
+/**
+ * Dynamic questions for PERFORMANCE_PROBLEM training type only.
+ *
+ * Sections covered:
+ *   "Performance & Impact" (displayOrder 200–205) — 6 questions
+ *   "Success Criteria" (displayOrder 206–207) — 2 questions
+ *
+ * 8 questions total.
+ */
+
+export const performanceProblemQuestions: QuestionDefinition[] = [
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION: Performance & Impact
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     id: "PERF_01",
-    section: "Performance Problem",
+    section: "Performance & Impact",
     questionText:
       "What specific problem are you trying to solve, or what opportunity are you trying to capture?",
     idNotes:
       'This is the "why are we doing this?" question. You\'re looking for a business problem, not a training request. If the answer is "we need a course on X," that\'s a solution masquerading as a problem — note it and dig into the actual business impact during review. The answer here feeds directly into the Business Challenge/Opportunity field in your Design Strategy document.',
     stakeholderGuidance:
-      'Describe the business situation driving this request. Focus on what\'s going wrong (or what opportunity exists), not on the training itself.\n*Examples: "Customer satisfaction scores dropped 15% after the last product update," "We\'re losing deals because reps can\'t articulate the new pricing model," "Three safety incidents in the last quarter were caused by the same procedural error"*',
+      'Describe the business situation driving this request. Focus on what\'s going wrong (or what opportunity exists), not on the training itself.\n\n*Examples: "Customer satisfaction scores dropped 15% after the last product update," "We\'re losing deals because reps can\'t articulate the new pricing model," "Three safety incidents in the last quarter were caused by the same procedural error"*',
     fieldType: FieldType.LONG_TEXT,
     required: true,
-    displayOrder: 20,
+    displayOrder: 200,
     appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
   },
   {
     id: "PERF_02",
-    section: "Performance Problem",
+    section: "Performance & Impact",
     questionText:
       "What are people doing now, and what should they be doing instead?",
     idNotes:
@@ -36,29 +50,29 @@ export const performanceQuestions: QuestionDefinition[] = [
       '**The acid test:** If you can\'t observe it, you can\'t measure it. If you can\'t measure it, you can\'t assess whether training worked. Every gap description should pass this test: *"Could a manager walk past someone\'s desk and see whether they\'re doing this correctly?"*\n\n' +
       "**When stakeholders resist:** Some stakeholders genuinely can't describe the gap in behavioral terms — especially for soft skills or decision-making. In those cases, ask for *critical incidents*: \"Tell me about a recent time when someone handled this poorly. What happened?\" Stories surface behaviors naturally.",
     stakeholderGuidance:
-      'Describe the gap between current and desired performance in terms of what people actually *do* on the job. Try to be specific about actions, not just knowledge.\n*Examples: "Currently: Reps quote prices from memory and often get it wrong. Desired: Reps use the pricing configurator and verify before quoting." / "Currently: Technicians skip the lockout/tagout step when they\'re in a hurry. Desired: Lockout/tagout is completed 100% of the time, no exceptions."*',
+      'Describe the gap between current and desired performance in terms of what people actually *do* on the job. Try to be specific about actions, not just knowledge.\n\n*Examples: "Currently: Reps quote prices from memory and often get it wrong. Desired: Reps use the pricing configurator and verify before quoting." / "Currently: Technicians skip the lockout/tagout step when they\'re in a hurry. Desired: Lockout/tagout is completed 100% of the time, no exceptions."*',
     fieldType: FieldType.LONG_TEXT,
     required: true,
-    displayOrder: 21,
+    displayOrder: 201,
     appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
   },
   {
     id: "PERF_03",
-    section: "Performance Problem",
+    section: "Performance & Impact",
     questionText:
       "What is the measurable impact of this problem on the business?",
     idNotes:
       'You need numbers or at least quantifiable consequences. "It\'s costing us money" isn\'t enough. This answer defines your ROI story and establishes the business-level metrics you\'ll use to evaluate whether the training moved the needle. If they can\'t quantify the impact, it may signal that the problem isn\'t well-understood or isn\'t as critical as presented. That\'s a legitimate finding — document it.',
     stakeholderGuidance:
-      'Help us understand the scale of this problem using numbers where possible. Think about costs, time, quality, customer impact, risk, or lost revenue.\n*Examples: "We\'ve had $200K in billing errors this quarter," "Average handle time is 40% above benchmark," "We\'ve received 3 regulatory warnings in 12 months," "Employee turnover in this role is 2x the company average"*',
+      'Help us understand the scale of this problem using numbers where possible. Think about costs, time, quality, customer impact, risk, or lost revenue.\n\n*Examples: "We\'ve had $200K in billing errors this quarter," "Average handle time is 40% above benchmark," "We\'ve received 3 regulatory warnings in 12 months," "Employee turnover in this role is 2x the company average"*',
     fieldType: FieldType.LONG_TEXT,
     required: true,
-    displayOrder: 22,
+    displayOrder: 202,
     appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
   },
   {
     id: "PERF_04",
-    section: "Performance Problem",
+    section: "Performance & Impact",
     questionText:
       "Why do you think people aren't performing as expected? What's getting in the way?",
     idNotes:
@@ -82,30 +96,30 @@ export const performanceQuestions: QuestionDefinition[] = [
       "| Learned it but can't transfer (context changed) | Bridging training: connect old skill to new context |\n" +
       "| Partially skilled (can do basics, not advanced) | Targeted upskilling: skip what they know, build on it |\n\n" +
       "**How to use the stakeholder's answer:**\n\n" +
-      'Read their root cause hypothesis through this lens. If they say "they know the process but skip steps when they\'re busy," that\'s a *motivation/consequence* problem — training alone won\'t fix it. If they say "they were never shown the updated procedure," that\'s a genuine skill gap. Most real-world problems are a mix — document the training and non-training components separately, and use that to frame "training as % of solution" in your design strategy.',
+      'Read their root cause hypothesis through this lens. If they say "they know the process but skip steps when they\'re busy," that\'s a *motivation/consequence* problem — training alone won\'t fix it. If they say "they were never shown the updated procedure," that\'s a genuine skill gap. Most real-world problems are a mix — document the training and non-training components separately.',
     stakeholderGuidance:
-      'In your opinion, what\'s causing the performance gap? Think broadly — it might not be a knowledge issue. Consider whether people have the right tools, clear expectations, enough time, proper feedback, or organizational support.\n*Examples: "They were never trained on the updated procedure," "The old software made it easy — the new interface is confusing," "They know the process but skip steps when they\'re under time pressure," "There\'s no consequence for doing it wrong, so people take shortcuts"*',
+      'In your opinion, what\'s causing the performance gap? Think broadly — it might not be a knowledge issue. Consider whether people have the right tools, clear expectations, enough time, proper feedback, or organizational support.\n\n*Examples: "They were never trained on the updated procedure," "The old software made it easy — the new interface is confusing," "They know the process but skip steps when they\'re under time pressure," "There\'s no consequence for doing it wrong, so people take shortcuts"*',
     fieldType: FieldType.LONG_TEXT,
     required: true,
-    displayOrder: 23,
+    displayOrder: 203,
     appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
   },
   {
     id: "PERF_05",
-    section: "Performance Problem",
+    section: "Performance & Impact",
     questionText: "What has already been done to address this problem?",
     idNotes:
       "This prevents you from recommending something that already failed. It also reveals the organizational appetite for solutions — have they tried coaching? New tools? Policy changes? Nothing? If training was already tried and didn't work, that's critical context: either the training was bad, or training isn't the solution. Either way, you need to know before you design.",
     stakeholderGuidance:
-      'List any steps already taken to fix this problem — training, coaching, new tools, process changes, communications, etc. Include what worked partially and what didn\'t work at all.\n*Examples: "We sent a reminder email but nothing changed," "The vendor did a 1-hour webinar but it was too high-level," "We updated the SOP but people aren\'t reading it," "This is the first time we\'re addressing it formally"*',
+      'List any steps already taken to fix this problem — training, coaching, new tools, process changes, communications, etc. Include what worked partially and what didn\'t work at all.\n\n*Examples: "We sent a reminder email but nothing changed," "The vendor did a 1-hour webinar but it was too high-level," "We updated the SOP but people aren\'t reading it," "This is the first time we\'re addressing it formally"*',
     fieldType: FieldType.LONG_TEXT,
     required: false,
-    displayOrder: 24,
+    displayOrder: 204,
     appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
   },
   {
     id: "PERF_06",
-    section: "Performance Problem",
+    section: "Performance & Impact",
     questionText:
       "Are there factors outside of training that contribute to this problem?",
     idNotes:
@@ -134,13 +148,58 @@ export const performanceQuestions: QuestionDefinition[] = [
       "| The CRM interface is confusing and requires too many clicks | Tool redesign | 25% |\n" +
       "| Managers aren't monitoring CRM usage or coaching reps | Management intervention | 20% |\n" +
       "| Reps are evaluated on call volume, not CRM accuracy | KPI realignment | 15% |\n\n" +
-      '**Training = 40% of the solution.** This means even perfect training will only close 40% of the gap. Present this to the stakeholder during design review — it sets realistic expectations and positions you as a strategic partner, not just a course builder.\n\n' +
-      '**How to present this finding:** Frame it positively. Don\'t say "training won\'t work." Say "Training will address the skill gap, which is about 40% of the problem. For the full impact you\'re looking for, here are the complementary actions that will close the other 60%." Then list the non-training recommendations. Stakeholders respect this — it shows you understand the business problem, not just the training request.',
+      '**Training = 40% of the solution.** Present this to the stakeholder during design review — it sets realistic expectations and positions you as a strategic partner, not just a course builder.',
     stakeholderGuidance:
-      'Training is often just one part of the solution. Are there other factors that need to be addressed alongside the training for it to be effective? Be honest — identifying these now saves time and money later.\n*Examples: "The software interface is genuinely confusing — a redesign is also needed," "Managers don\'t follow up or hold people accountable," "We\'re understaffed, so people rush through procedures," "The current KPIs actually reward the wrong behavior"*',
+      'Training is often just one part of the solution. Are there other factors that need to be addressed alongside the training for it to be effective? Be honest — identifying these now saves time and money later.\n\n*Examples: "The software interface is genuinely confusing — a redesign is also needed," "Managers don\'t follow up or hold people accountable," "We\'re understaffed, so people rush through procedures," "The current KPIs actually reward the wrong behavior"*',
     fieldType: FieldType.LONG_TEXT,
     required: false,
-    displayOrder: 25,
+    displayOrder: 205,
+    appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION: SUCCESS CRITERIA
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: "PERF_07",
+    section: "Success Criteria",
+    questionText:
+      "What are the most complex or high-stakes situations where this performance gap shows up?",
+    idNotes:
+      "High-stakes situations are where training must be strongest. These scenarios get the most practice time, the most realistic simulations, and the most rigorous assessments. For performance problems specifically, this question surfaces the moments where failure is most costly — which directly informs your scenario-based design and assessment priorities.\n\nIf the stakeholder can describe specific situations where errors are visible or damaging, those become your anchor scenarios for practice activities. Build training backward from these critical moments.",
+    stakeholderGuidance:
+      "Where does this problem cause the most damage? Describe the situations, tasks, or moments where getting it wrong is most costly or visible.\n\n*Examples: \"During live customer demos — a botched pricing quote costs us the deal,\" \"When handling escalated complaints — one wrong response turns a complaint into a legal issue,\" \"End-of-month reporting — errors cascade and take days to untangle\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: true,
+    displayOrder: 206,
+    appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
+  },
+  {
+    id: "PERF_08",
+    section: "Success Criteria",
+    questionText:
+      "How will you measure success? What specific metrics or observable changes would tell you this problem is fixed?",
+    idNotes:
+      "This directly feeds your evaluation plan and KPI definitions. Push for specific, quantifiable metrics — not \"people will do it right\" but \"billing error rate drops from 8% to under 2%.\" Each metric should connect back to the business impact described in PERF_03. If they can articulate the problem in numbers (PERF_03) but can't articulate success in numbers, surface that gap during review.\n\nThis is the bookend to PERF_03: that question measured the size of the problem, this one defines what \"fixed\" looks like.",
+    idNotesExtended:
+      "**Measuring Training Impact — The Four Levels**\n\n" +
+      "**Level 1 — Reaction:** Did learners like the training? Easy to measure but tells you almost nothing about effectiveness.\n\n" +
+      "**Level 2 — Learning:** Did learners acquire the knowledge or skill? Better, but still measures classroom outcomes, not job performance.\n\n" +
+      "**Level 3 — Behavior:** Are learners doing things differently on the job? This is the first level that measures real impact. For performance problems, this is your primary target.\n\n" +
+      "**Level 4 — Results:** Did business metrics improve? Connect back to PERF_03 — the metrics they cited as the problem should be the metrics they cite as success.\n\n" +
+      "| Stakeholder Answer | Level | What to Do |\n" +
+      "|---|---|---|\n" +
+      "| \"People will feel more confident\" | Reaction | Push for observable behaviors |\n" +
+      "| \"They'll pass the assessment\" | Learning | Ask what changes on the job after |\n" +
+      "| \"Billing error rate drops from 8% to under 2%\" | Behavior/Results | Strong — measurable and directly tied to the problem |\n" +
+      "| \"Customer satisfaction scores return to pre-change levels\" | Results | Good — clarify timeline and attribution |\n" +
+      "| \"I'll know it when I see it\" | None | Define success *before* design begins |",
+    stakeholderGuidance:
+      "Think about the numbers you cited when describing the problem. What would those numbers look like when the problem is fixed? Be as specific as possible.\n\n*Examples: \"Billing error rate drops from 8% to under 2%,\" \"Average handle time returns to the 8-minute benchmark,\" \"Zero safety incidents related to this procedure for 6 consecutive months,\" \"Customer satisfaction scores return to 85%+\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: true,
+    displayOrder: 207,
     appliesTo: [TrainingType.PERFORMANCE_PROBLEM],
   },
 ];

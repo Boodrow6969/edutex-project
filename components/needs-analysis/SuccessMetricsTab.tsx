@@ -1,11 +1,11 @@
 'use client';
 
 import GuidancePanel from '@/components/ui/GuidancePanel';
-import { NeedsAnalysisFormData } from '@/lib/types/needsAnalysis';
+import { CourseAnalysisFormData } from '@/lib/types/courseAnalysis';
 
 interface SuccessMetricsTabProps {
-  data: NeedsAnalysisFormData;
-  onChange: (updates: Partial<NeedsAnalysisFormData>) => void;
+  data: CourseAnalysisFormData;
+  onChange: (updates: Partial<CourseAnalysisFormData>) => void;
 }
 
 export default function SuccessMetricsTab({ data, onChange }: SuccessMetricsTabProps) {

@@ -20,6 +20,7 @@ export interface QuestionDefinition {
   fieldType: FieldType;
   required: boolean;
   options?: string[];
+  tableColumns?: { key: string; label: string }[];
   displayOrder: number;
   appliesTo: TrainingType[] | "ALL";
   conditional?: ConditionalRule;

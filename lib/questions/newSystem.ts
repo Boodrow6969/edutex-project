@@ -1,168 +1,211 @@
 import { FieldType, TrainingType } from "../types/stakeholderAnalysis";
 import { QuestionDefinition } from "../types/questionDefinition";
 
+/**
+ * Dynamic questions for NEW_SYSTEM training type only.
+ *
+ * Sections covered:
+ *   2. About the System (displayOrder 200–203)
+ *   3. Business Justification (displayOrder 300–303)
+ *   4. What Users Need to Do (displayOrder 400–403)
+ *
+ * 12 questions total.
+ */
+
 export const newSystemQuestions: QuestionDefinition[] = [
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION 2: ABOUT THE SYSTEM
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     id: "SYS_01",
-    section: "New System / Software Deployment",
+    section: "About the System",
     questionText:
-      "What system, software, or tool is being introduced?",
+      "What system, software, or tool is being introduced? In one or two sentences, what is its main purpose?",
     idNotes:
       "Get the exact product name and version. This determines whether vendor training exists, what documentation is available, and whether you can get sandbox/demo access for your own analysis. Also ask about the deployment model (cloud vs. on-prem, SaaS vs. custom) during review — it affects how quickly the interface might change after training goes live.",
     stakeholderGuidance:
-      "Provide the name of the system or software being deployed, including version if known. If it's a custom-built tool, describe what it does.\n*Examples: \"Salesforce Lightning — migrating from Classic,\" \"Workday HCM — new implementation,\" \"Custom warehouse management app built by our internal dev team\"*",
+      "Provide the name of the system being deployed, including version if known. If it's custom-built, describe what it does.\n\n*Examples: \"Salesforce Lightning — migrating from Classic,\" \"Workday HCM — new implementation,\" \"Custom warehouse management app built by our internal dev team\"*",
     fieldType: FieldType.SHORT_TEXT,
     required: true,
-    displayOrder: 30,
+    displayOrder: 200,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
   {
     id: "SYS_02",
-    section: "New System / Software Deployment",
+    section: "About the System",
+    questionText:
+      "What are the system's main functions or capabilities? List the key things people can do in it.",
+    idNotes:
+      "This establishes the system's overall capability set *before* narrowing to specific tasks. The distinction matters: capabilities are what the system can do; tasks (Section 4) are what specific people *must* do. A system might have 50 capabilities but only 15 are relevant to training. This list becomes your universe — Section 4 narrows it to what matters for each role.\n\nThe reference analysis captured a rich capability list (self-service payments, autopay enrollment, document retrieval, etc.) that informed every downstream design decision. Push for specifics — not feature names but actions.",
+    stakeholderGuidance:
+      "Think about what the system lets users accomplish — not feature names, but actions. List as many as you can.\n\n*Examples: \"Create and assign support tickets, run weekly performance reports, update customer records after calls\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: true,
+    displayOrder: 201,
+    appliesTo: [TrainingType.NEW_SYSTEM],
+  },
+  {
+    id: "SYS_03",
+    section: "About the System",
     questionText:
       "What existing tools, systems, or processes does this replace? If it's entirely new functionality, describe what people do today without it.",
     idNotes:
       "The replacement context is your bridge to learner analysis. If they're moving from System A to System B, you can do a comparative task analysis. If it's net-new, you need to understand the manual/workaround processes that exist today. Either way, this gives you the \"from → to\" narrative that anchors the training. Also flags potential resistance: replacing a beloved tool is different from replacing a hated one.",
     stakeholderGuidance:
-      "Help us understand what changes for the learners. Are they switching from one system to another, or learning something entirely new?\n*Examples: \"Replacing our legacy Excel-based tracking with a proper CRM,\" \"This is an addition — they'll keep using the current tools but add this for reporting,\" \"Currently this process is done manually with paper forms\"*",
+      "Help us understand what changes for the learners. Are they switching from one system to another, or learning something entirely new?\n\n*Examples: \"Replacing our legacy Excel-based tracking with a proper CRM,\" \"This is an addition — they'll keep using current tools but add this for reporting,\" \"Currently done manually with paper forms\"*",
     fieldType: FieldType.LONG_TEXT,
     required: true,
-    displayOrder: 31,
-    appliesTo: [TrainingType.NEW_SYSTEM],
-  },
-  {
-    id: "SYS_03",
-    section: "New System / Software Deployment",
-    questionText:
-      "What are the main tasks or workflows people will need to perform in the new system?",
-    idNotes:
-      "This is your task analysis seed. Stakeholders for new systems often dump feature lists here instead of tasks — \"they'll use the dashboard, the reporting module, the admin panel.\" Translate feature lists into action-oriented tasks during review. What does someone actually *do* with the dashboard? What reports do they run, and when, and why? This feeds directly into your objective writing and activity design.",
-    stakeholderGuidance:
-      "List the key things people will need to *do* in the new system — not features, but actual tasks. Think about a typical day or week.\n*Examples: \"Create and assign support tickets, run weekly performance reports, update customer records after calls, escalate cases that meet certain criteria\" / \"Enter time daily, submit expense reports, approve direct reports' requests, run headcount reports monthly\"*",
-    fieldType: FieldType.LONG_TEXT,
-    required: true,
-    displayOrder: 32,
+    displayOrder: 202,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
   {
     id: "SYS_04",
-    section: "New System / Software Deployment",
+    section: "About the System",
     questionText:
-      "What does \"proficient use\" look like by the go-live date? What should people be able to do independently?",
+      "What other systems does this connect to or interact with?",
     idNotes:
-      "This is the \"success criteria\" question reframed for system deployments. It forces the stakeholder to define the minimum viable competency — not \"knows the system\" but \"can independently perform X, Y, Z without calling the help desk.\" This defines your training scope: everything above this line is in scope, everything below is a nice-to-have or Phase 2. Connect this to your objective writing and assessment design.",
+      "Integration points create training scope boundaries and potential error zones. The reference analysis captured critical integration points (defi Servicing, Repay, EDW, EDMS) that directly shaped training scope — the Repay integration alone became a separate training track. Each connected system is a potential handoff point where errors can occur, and those handoffs often need to be taught explicitly.",
     stakeholderGuidance:
-      "By go-live day, what should people be able to do on their own? Be realistic — we can always build advanced training later. Focus on the must-haves for Day 1.\n*Examples: \"Create, edit, and close a support ticket. Search for existing tickets. Run the daily queue report. That's it for go-live — advanced reporting can wait.\" / \"Complete the full onboarding workflow for a new hire, including document generation and benefits enrollment\"*",
+      "List any systems that send data to or receive data from the new system. This helps us understand the broader workflow and identify where handoffs or errors might occur.\n\n*Examples: \"Salesforce connects to our ERP for order data and to Marketo for marketing automation,\" \"The portal pulls from the servicing system and sends payments through a third-party processor\"*",
     fieldType: FieldType.LONG_TEXT,
-    required: true,
-    displayOrder: 33,
+    required: false,
+    displayOrder: 203,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION 3: BUSINESS JUSTIFICATION
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     id: "SYS_05",
-    section: "New System / Software Deployment",
+    section: "Business Justification",
     questionText:
-      "What is the deployment timeline? Is it a phased rollout or big-bang?",
+      "What business problem does this system solve? What inefficiency, cost, or limitation does it address?",
     idNotes:
-      "Phased rollouts let you iterate on training between waves — huge advantage. Big-bang means everyone needs to be trained simultaneously, which limits format options and requires more robust support materials (job aids, help desk prep). The timeline also tells you when you need sandbox access, how much content might change before go-live, and whether a pilot group is available for testing.",
+      "This was the biggest gap in the previous form. Without business justification, you're designing training in a vacuum. The answer here tells you *why* the organization is spending money on this system, which determines what the training needs to emphasize. If the system solves a customer satisfaction problem, training should prioritize customer-facing workflows. If it solves an efficiency problem, training should emphasize speed and accuracy.\n\nThe reference analysis captured critical context (low customer satisfaction, lack of payment options, no lease-end visibility) that shaped the entire training strategy. Push for specifics during review.",
     stakeholderGuidance:
-      "Describe the rollout plan. Will everyone switch at once, or will it roll out in phases across teams, locations, or dates?\n*Examples: \"Big-bang: All 500 users switch on April 1,\" \"Phase 1: Pilot with 30 users in March. Phase 2: Full rollout in May.\" / \"Region by region over 6 months, starting with NA in Q2\"*",
+      "Help us understand why this system matters. What's broken, slow, expensive, or missing today that this system fixes?\n\n*Examples: \"Customer satisfaction is low because they can only pay by one method,\" \"We're spending 40 hours/week on manual data entry that this automates,\" \"We have no visibility into field operations without this dashboard\"*",
     fieldType: FieldType.LONG_TEXT,
     required: true,
-    displayOrder: 34,
+    displayOrder: 300,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
   {
     id: "SYS_06",
-    section: "New System / Software Deployment",
+    section: "Business Justification",
     questionText:
-      "Can the training team get access to a demo environment or sandbox of the system?",
+      "What are the consequences if employees struggle to use this system effectively?",
     idNotes:
-      "If yes, this is your most valuable resource — you can do your own task analysis, capture screenshots/recordings, and build realistic practice activities. If no, you're designing blind based on vendor docs and SME descriptions, which is risky. Flag \"no access\" as a project risk during review. Ask about the timeline for when access becomes available.",
+      "Failure consequences directly inform training priority and risk assessment. High-consequence scenarios (payment processing errors, compliance violations, customer-facing failures) need more training depth, more practice, and more rigorous assessment than low-consequence scenarios. This answer feeds your training decision (Section 4) and helps justify investment in simulation or hands-on practice.\n\nThe reference analysis surfaced increased support calls and downstream payment processing impacts — both informed the decision to include extensive practice scenarios.",
     stakeholderGuidance:
-      "Will the instructional design team be able to log into a test or demo version of the system to explore it and capture training content?",
-    fieldType: FieldType.SINGLE_SELECT,
+      "Think about what happens to the business if your internal team can't use the system well after launch. Consider impact on customers, call volume, processing times, errors, and compliance.\n\n*Examples: \"Delayed customer service, increased call times,\" \"Payment processing errors that affect revenue,\" \"Compliance findings in the next audit\"*",
+    fieldType: FieldType.LONG_TEXT,
     required: true,
-    options: [
-      "Yes — sandbox/demo access is available now",
-      "Yes — but not until a future date (please specify below)",
-      "No — we'll need to work from documentation and demos",
-      "Unsure — I need to check with IT/the vendor",
-    ],
-    displayOrder: 35,
+    displayOrder: 301,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
   {
     id: "SYS_07",
-    section: "New System / Software Deployment",
+    section: "Business Justification",
     questionText:
-      "When will sandbox or demo access be available?",
+      "If this system has external users (customers, partners, vendors), what are the consequences if they struggle to use it?",
     idNotes:
-      "Critical for your project plan. Training development can't meaningfully start without system access (for screenshots, task walkthroughs, assessment scenarios). If this date is close to go-live, flag the compressed timeline as a risk.",
+      "Not all systems have external users — this question is optional for that reason. When external users exist, their adoption failures create different problems than internal failures: increased support calls to *your* team, abandoned transactions, customer churn, partner dissatisfaction. This often reveals a need for customer-facing training materials (help articles, walkthrough videos) in addition to employee training.\n\nThe reference analysis asked this separately from employee consequences and got different, actionable info. Internal failure = operational delays. External failure = customer frustration and support volume spikes.",
     stakeholderGuidance:
-      "Provide the expected date or timeframe when the training team can access the demo environment.",
-    fieldType: FieldType.DATE_WITH_TEXT,
-    required: true,
-    displayOrder: 36,
+      "Not all systems have external users — skip this if yours is internal only. If there are external users, think about what happens when they get stuck.\n\n*Examples: \"Increased support calls, customer frustration, abandoned transactions,\" \"Partners stop using the portal and revert to email/phone\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: false,
+    displayOrder: 302,
     appliesTo: [TrainingType.NEW_SYSTEM],
-    conditional: {
-      questionId: "SYS_06",
-      operator: "includes",
-      value: "Yes — but not until a future date",
-    },
   },
   {
     id: "SYS_08",
-    section: "New System / Software Deployment",
+    section: "Business Justification",
     questionText:
-      "Does the vendor provide any training, documentation, or learning resources?",
+      "How will you measure success after launch? What specific metrics or observable changes would tell you this worked?",
     idNotes:
-      "Vendor training is almost never sufficient by itself — it's generic, not tailored to your workflows, and usually too feature-focused. But it's a useful starting point for content analysis and can supplement your custom training for advanced topics. Also check: is vendor training *required* before your training (e.g., certification prerequisites), or is it optional?",
+      "This is the single most important question for new system deployments. The answer (or lack of one) tells you whether the stakeholder is thinking in terms of measurable outcomes or just wants a checkbox. Push for specific, quantifiable metrics — not \"people will use the system\" but \"self-service portal usage reaches 60% within 90 days.\"\n\nThis directly feeds your evaluation plan, KPI definitions, and objective writing. Each metric should map to a training outcome you can influence.",
+    idNotesExtended:
+      "**Measuring Training Impact — The Four Levels**\n\n" +
+      "**Level 1 — Reaction:** Did learners like the training? Easy to measure but tells you almost nothing about effectiveness.\n\n" +
+      "**Level 2 — Learning:** Did learners acquire the knowledge or skill? Better, but still measures classroom outcomes, not job performance.\n\n" +
+      "**Level 3 — Behavior:** Are learners doing things differently on the job? This is the first level that measures real impact.\n\n" +
+      "**Level 4 — Results:** Did business metrics improve? This is what the sponsor cares about.\n\n" +
+      "| Stakeholder Answer | Level | What to Do |\n" +
+      "|---|---|---|\n" +
+      "| \"People will feel more confident\" | Reaction | Push for observable behaviors |\n" +
+      "| \"They'll pass the assessment\" | Learning | Ask what changes on the job after |\n" +
+      "| \"Call resolution time drops from 12 to 8 min\" | Behavior | Strong — observable and measurable |\n" +
+      "| \"Self-service usage reaches 60% in 90 days\" | Results | Excellent — clarify attribution |\n" +
+      "| \"I don't know — just train them\" | None | Define success *before* design begins |",
     stakeholderGuidance:
-      "List any training resources the software vendor provides — webinars, help articles, certification courses, videos, user guides, etc. We can build on these rather than duplicating them.\n*Examples: \"The vendor offers a 3-day admin certification course,\" \"There's an online help center with how-to articles,\" \"They offered a 1-hour recorded demo — I can share the link,\" \"Nothing useful — their documentation is written for developers, not end users\"*",
+      "Think beyond \"people completed the training.\" What business metric would improve? What would you see people doing differently? Be as specific as you can.\n\n*Examples: \"Call resolution time drops from 12 minutes to 8 minutes,\" \"Self-service portal usage reaches 60% within 90 days,\" \"Autopay enrollment increases by 25%,\" \"Zero payment processing errors in the first 30 days\"*",
     fieldType: FieldType.LONG_TEXT,
-    required: false,
-    displayOrder: 37,
+    required: true,
+    displayOrder: 303,
+    appliesTo: [TrainingType.NEW_SYSTEM],
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION 4: WHAT USERS NEED TO DO
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: "SYS_09",
+    section: "What Users Need to Do",
+    questionText:
+      "What are the main tasks or workflows people will need to perform in the new system?",
+    idNotes:
+      "This is your task analysis seed. Stakeholders for new systems often dump feature lists here instead of tasks — \"they'll use the dashboard, the reporting module, the admin panel.\" Translate feature lists into action-oriented tasks during review. What does someone actually *do* with the dashboard? What reports do they run, and when, and why?\n\nIf different roles do different things, the stakeholder should list them separately. Cross-reference with the audience table (Section 5) to build role-task matrices.",
+    stakeholderGuidance:
+      "Think about a typical day or week. What does someone actually do in this system? If different roles do different things, list them separately.\n\n*Examples: \"Create and assign support tickets, run weekly performance reports, update customer records after calls, escalate cases that meet certain criteria\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: true,
+    displayOrder: 400,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
   {
-    id: "SYS_09",
-    section: "New System / Software Deployment",
+    id: "SYS_10",
+    section: "What Users Need to Do",
     questionText:
-      "What support will be available to users after go-live? Will there be designated Change Champions, super users, or floor support — and if so, have they been identified yet?",
+      "What are the most complex or high-stakes situations? Where would mistakes be costly or visible?",
     idNotes:
-      "This defines what training *doesn't* need to cover and shapes your job aid / performance support recommendations. If there's robust help desk support, you can focus training on workflows and decision-making rather than step-by-step procedures. If support is thin, your training needs to be more comprehensive and your job aids more detailed.\n\nPay close attention to whether they mention Change Champions, super users, or floor walkers. These people are your force multipliers — but only if they're prepared. If the plan includes designated support people, that's a separate training workstream: those individuals need deeper system knowledge *and* the skills to coach others through problems, which is a different skillset than just being a proficient user. Flag this as a train-the-trainer need during your review if it hasn't already been scoped.",
-    idNotesExtended:
-      "**Change Champions & Train-the-Trainer**\n\n" +
-      "A Change Champion (also called super user, floor walker, or go-live buddy) is someone embedded in the team who provides real-time support during and after the transition. This model is one of the most effective go-live strategies — but it introduces a second audience with different training needs.\n\n" +
-      "**Why Change Champions need their own training:**\n\n" +
-      "A good end-user can follow the process. A good Change Champion can diagnose *why someone else is stuck* and walk them through it without doing it for them. Those are fundamentally different skills:\n\n" +
-      "| End-User Training | Change Champion Training |\n" +
-      "|---|---|\n" +
-      "| Perform standard workflows correctly | Perform standard *and* advanced workflows, including workarounds |\n" +
-      "| Know where to find help | *Be* the help — troubleshoot common errors live |\n" +
-      "| Follow the process | Explain *why* the process works this way |\n" +
-      "| Complete their own tasks | Coach someone through a task while that person does it |\n" +
-      "| Recognize when to escalate | Know the difference between a user error, a configuration issue, and a system bug |\n\n" +
-      "**Train-the-trainer scoping checklist — raise these during review:**\n\n" +
-      "- **Who are they?** Have specific people been identified, or is the plan still \"we'll figure it out\"? Vague plans often mean no one is actually prepared when go-live hits.\n" +
-      "- **When do they train?** Change Champions need training *before* the general population — ideally 2-4 weeks ahead so they can practice and build confidence.\n" +
-      "- **What's their time commitment?** During go-live week, are they fully released from normal duties to support others, or expected to do both? If both, the support will be thin regardless of how well they're trained.\n" +
-      "- **How many per location/team?** A common ratio is 1 Change Champion per 15-25 end users, but it depends on complexity. For complex systems, closer to 1:10.\n" +
-      "- **What resources do they get?** Change Champions need different materials than end users — troubleshooting guides, escalation paths, FAQ documents based on common issues from pilot, and a direct channel to IT support.\n" +
-      "- **What happens after go-live stabilizes?** Do they return to normal duties? Stay as ongoing system experts? This affects whether you're building a temporary support model or a permanent one.\n\n" +
-      "**Impact on your training plan:**\n\n" +
-      "If Change Champions are part of the support model, your project now has two training tracks:\n\n" +
-      "| Track | Audience | Content | Timing |\n" +
-      "|---|---|---|---|\n" +
-      "| **Track 1: Change Champion** | Designated super users (small group) | Deep system training + coaching skills + troubleshooting + escalation procedures | 2-4 weeks before general rollout |\n" +
-      "| **Track 2: End-User** | General population | Standard workflows + where to get help (including \"ask your Change Champion\") | Per rollout schedule |\n\n" +
-      "The Change Champion training is often best delivered as a hands-on workshop (live, not eLearning) because it needs to include practice coaching scenarios — not just system skills. Budget and scope this as a separate deliverable.",
+      "High-stakes situations are where your training needs to be strongest. These scenarios get the most practice time, the most realistic simulations, and the most rigorous assessments. They're also prime candidates for job aids — decision support tools that help people navigate complex situations in real time.\n\nThe reference analysis surfaced payment processing risk as a high-stakes area. That single finding drove the decision to include extensive practice scenarios and a dedicated job aid for the payment workflow.",
     stakeholderGuidance:
-      "What resources will users have after training when they get stuck? Think about help desks, Change Champions or super users, floor walkers, chat support, internal documentation, etc.\n\nIf you're planning to designate Change Champions or super users — people in each team who provide hands-on support during the transition — let us know who they are and when they'll be available. These individuals typically need their own training ahead of the general rollout so they're prepared to coach others, not just use the system themselves.\n\n*Examples: \"We're designating 5 Change Champions per department — they'll be fully released from normal duties during go-live week,\" \"IT help desk will have a dedicated queue for the first 30 days,\" \"No dedicated support planned — they'll need to figure it out from training and job aids,\" \"The vendor offers 24/7 chat support for the first 90 days,\" \"We have super users in mind but haven't formalized anything yet\"*",
+      "Help us identify where we need to focus extra training attention. What tasks, if done wrong, would cause the most damage?\n\n*Examples: \"Processing a payment incorrectly could result in double-charges,\" \"Approving the wrong access level could create a security breach,\" \"Submitting incorrect regulatory data triggers an audit\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: true,
+    displayOrder: 401,
+    appliesTo: [TrainingType.NEW_SYSTEM],
+  },
+  {
+    id: "SYS_11",
+    section: "What Users Need to Do",
+    questionText:
+      "What does \"proficient use\" look like by the go-live date? What should people be able to do independently?",
+    idNotes:
+      "This defines the minimum viable competency — not \"knows the system\" but \"can independently perform X, Y, Z without calling the help desk.\" This defines your training scope: everything above this line is in scope, everything below is a nice-to-have or Phase 2. Connect this to your objective writing and assessment design.",
+    stakeholderGuidance:
+      "Be realistic — we can always build advanced training later. Focus on the must-haves for Day 1.\n\n*Examples: \"Create, edit, and close a support ticket. Search for existing tickets. Run the daily queue report. That's it for go-live — advanced reporting can wait.\"*",
+    fieldType: FieldType.LONG_TEXT,
+    required: true,
+    displayOrder: 402,
+    appliesTo: [TrainingType.NEW_SYSTEM],
+  },
+  {
+    id: "SYS_12",
+    section: "What Users Need to Do",
+    questionText:
+      "What does proficient performance look like 30 days after launch? What additional capabilities should people have by then?",
+    idNotes:
+      "The reference analysis split launch performance from 30-day performance and got meaningfully different answers. This is critical for phasing training delivery: Day 1 training covers the basics, then follow-up training (advanced modules, performance support updates, coaching) builds toward 30-day proficiency.\n\nIf the stakeholder's 30-day expectations are significantly beyond Day 1, that's your cue to plan a phased training delivery rather than trying to cram everything into a single pre-launch session.",
+    stakeholderGuidance:
+      "After a month of use, what should people be able to do beyond the Day 1 basics? This helps us plan follow-up training, advanced modules, or performance support.\n\n*Examples: \"Handle edge cases without escalating,\" \"Run and interpret advanced reports,\" \"Troubleshoot common errors independently\"*",
     fieldType: FieldType.LONG_TEXT,
     required: false,
-    displayOrder: 38,
+    displayOrder: 403,
     appliesTo: [TrainingType.NEW_SYSTEM],
   },
 ];

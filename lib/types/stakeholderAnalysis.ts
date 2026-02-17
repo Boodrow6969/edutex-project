@@ -33,4 +33,5 @@ export enum FieldType {
   DATE_WITH_TEXT = "DATE_WITH_TEXT",
   NUMBER = "NUMBER",
   SCALE = "SCALE",
+  REPEATING_TABLE = "REPEATING_TABLE",
 }

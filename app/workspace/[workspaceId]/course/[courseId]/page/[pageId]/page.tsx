@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import BlockEditor from '@/components/editor/BlockEditor';
 import NeedsAnalysisView from '@/components/pages/NeedsAnalysisView';
@@ -9,7 +9,6 @@ import TaskAnalysisView from '@/components/pages/TaskAnalysisView';
 import LearningObjectivesView from '@/components/pages/LearningObjectivesView';
 import StoryboardEditor from '@/components/tiptap/StoryboardEditor';
 import { PageType } from '@prisma/client';
-import { NeedsAnalysisFormData } from '@/lib/types/needsAnalysis';
 // StoryboardEditor handles its own data fetching internally
 
 interface PageMetadata {
@@ -35,8 +34,6 @@ export default function PageEditorPage() {
   const [pageMetadata, setPageMetadata] = useState<PageMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [needsAnalysisData, setNeedsAnalysisData] = useState<Partial<NeedsAnalysisFormData> | null>(null);
-
   useEffect(() => {
     if (!pageId) return;
 
@@ -67,15 +64,6 @@ export default function PageEditorPage() {
           workspaceId: data.workspaceId,
         });
 
-        // If this is a needs analysis page, fetch the saved data
-        if (data.type === 'NEEDS_ANALYSIS') {
-          const naResponse = await fetch(`/api/pages/${pageId}/needs-analysis`);
-          if (naResponse.ok) {
-            const naData = await naResponse.json();
-            setNeedsAnalysisData(naData);
-          }
-        }
-
         // TASK_ANALYSIS: TaskAnalysisView handles its own data fetching
 
         // STORYBOARD pages: StoryboardEditor handles its own data fetching
@@ -90,23 +78,6 @@ export default function PageEditorPage() {
     fetchPageMetadata();
   }, [pageId]);
 
-  // Save handler for needs analysis
-  const handleSaveNeedsAnalysis = useCallback(async (data: NeedsAnalysisFormData) => {
-    const response = await fetch(`/api/pages/${pageId}/needs-analysis`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to save');
-    }
-
-    // Update local state with saved data
-    const savedData = await response.json();
-    setNeedsAnalysisData(savedData);
-  }, [pageId]);
 
   if (!pageId) {
     return (
@@ -177,8 +148,7 @@ export default function PageEditorPage() {
         <NeedsAnalysisView
           pageId={pageId}
           courseId={courseId}
-          initialData={needsAnalysisData ?? undefined}
-          onSave={handleSaveNeedsAnalysis}
+          workspaceId={workspaceId}
         />
       );
     }

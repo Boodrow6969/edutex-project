@@ -1,13 +1,14 @@
 import { TrainingType } from "../types/stakeholderAnalysis";
 import { QuestionDefinition } from "../types/questionDefinition";
 import { sharedQuestions } from "./shared";
-import { performanceQuestions } from "./performance";
+import { performanceProblemQuestions } from "./performanceProblem";
 import { newSystemQuestions } from "./newSystem";
 import { complianceQuestions } from "./compliance";
 import { roleChangeQuestions } from "./roleChange";
+import { learnerProfileQuestions } from "./learnerProfiles";
 
 const TYPE_QUESTIONS: Record<TrainingType, QuestionDefinition[]> = {
-  [TrainingType.PERFORMANCE_PROBLEM]: performanceQuestions,
+  [TrainingType.PERFORMANCE_PROBLEM]: performanceProblemQuestions,
   [TrainingType.NEW_SYSTEM]: newSystemQuestions,
   [TrainingType.COMPLIANCE]: complianceQuestions,
   [TrainingType.ROLE_CHANGE]: roleChangeQuestions,
@@ -15,10 +16,11 @@ const TYPE_QUESTIONS: Record<TrainingType, QuestionDefinition[]> = {
 
 export const ALL_QUESTIONS: QuestionDefinition[] = [
   ...sharedQuestions,
-  ...performanceQuestions,
+  ...performanceProblemQuestions,
   ...newSystemQuestions,
   ...complianceQuestions,
   ...roleChangeQuestions,
+  ...learnerProfileQuestions,
 ];
 
 export const QUESTION_MAP: Record<string, QuestionDefinition> = Object.fromEntries(
@@ -29,7 +31,12 @@ export function getQuestionsForType(trainingType: TrainingType): QuestionDefinit
   const shared = sharedQuestions.filter(
     (q) => q.appliesTo === "ALL" || q.appliesTo.includes(trainingType)
   );
+  const learnerProfile = learnerProfileQuestions.filter(
+    (q) => q.appliesTo === "ALL" || q.appliesTo.includes(trainingType)
+  );
   const typeSpecific = TYPE_QUESTIONS[trainingType] ?? [];
 
-  return [...shared, ...typeSpecific].sort((a, b) => a.displayOrder - b.displayOrder);
+  return [...shared, ...learnerProfile, ...typeSpecific].sort(
+    (a, b) => a.displayOrder - b.displayOrder
+  );
 }

@@ -390,6 +390,7 @@ model Page {
   createdBy     User           @relation(fields: [createdById], references: [id])
   blocks        Block[]
   needsAnalysis NeedsAnalysis?
+  courseAnalysis CourseAnalysis?
   taskAnalysis  TaskAnalysis?
   storyboard    Storyboard?
 
@@ -436,6 +437,91 @@ model NeedsAnalysis {
   updatedAt DateTime @updatedAt
 
   @@map("needs_analyses")
+}
+
+model CourseAnalysis {
+  id        String @id @default(cuid())
+  pageId    String @unique
+  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // ID-authored analysis fields
+  problemSummary       String   @default("")
+  currentStateSummary  String   @default("")
+  desiredStateSummary  String   @default("")
+  constraints          String[] @default([])
+  assumptions          String[] @default([])
+
+  // Course-specific stakeholders
+  learnerPersonas  String[] @default([])
+  stakeholders     String[] @default([])
+  smes             String[] @default([])
+
+  // Training decision
+  isTrainingSolution    Boolean?
+  nonTrainingFactors    String?    @db.Text
+  solutionRationale     String?    @db.Text
+
+  // Success Metrics (Kirkpatrick)
+  level1Reaction String @default("")
+  level2Learning String @default("")
+  level3Behavior String @default("")
+  level4Results  String @default("")
+
+  // Delivery & materials (v2)
+  deliveryNotes      String   @default("") @db.Text
+  existingMaterials  String   @default("") @db.Text
+
+  // AI analysis capture
+  aiAnalysis            String?    @db.Text
+  aiRecommendations     String[]   @default([])
+
+  // Relations (v2)
+  audiences  AudienceProfile[]
+  tasks      AnalysisTask[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("course_analyses")
+}
+
+model AudienceProfile {
+  id              String   @id @default(cuid())
+  courseAnalysisId String
+  courseAnalysis   CourseAnalysis @relation(fields: [courseAnalysisId], references: [id], onDelete: Cascade)
+
+  role            String
+  headcount       String   @default("")
+  frequency       String   @default("Daily")
+  techComfort     String   @default("Moderate")
+  trainingFormat  String   @default("")
+  notes           String   @default("") @db.Text
+  order           Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("audience_profiles")
+}
+
+model AnalysisTask {
+  id              String   @id @default(cuid())
+  courseAnalysisId String
+  courseAnalysis   CourseAnalysis @relation(fields: [courseAnalysisId], references: [id], onDelete: Cascade)
+
+  task            String   @db.Text
+  audience        String   @default("")
+  source          String   @default("ID-added")
+  complexity      String   @default("Medium")
+  intervention    String   @default("training")
+  priority        String   @default("Medium")
+  notes           String   @default("") @db.Text
+  order           Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("analysis_tasks")
 }
 
 model TaskAnalysis {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { NeedsAnalysisFormData } from '@/lib/types/needsAnalysis';
+import { AnalysisContext } from '@/lib/types/courseAnalysis';
 
 interface NeedsAnalysisPanelProps {
   courseId: string;
@@ -33,8 +33,16 @@ function ListBlock({ items }: { items: string[] }) {
   );
 }
 
+const INTERVENTION_COLORS: Record<string, string> = {
+  training: 'bg-blue-100 text-blue-700',
+  'job-aid': 'bg-amber-100 text-amber-700',
+  awareness: 'bg-purple-100 text-purple-700',
+  'not-training': 'bg-red-100 text-red-700',
+  existing: 'bg-gray-100 text-gray-700',
+};
+
 export default function NeedsAnalysisPanel({ courseId, workspaceId }: NeedsAnalysisPanelProps) {
-  const [data, setData] = useState<NeedsAnalysisFormData | null>(null);
+  const [context, setContext] = useState<AnalysisContext | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef(false);
@@ -45,24 +53,11 @@ export default function NeedsAnalysisPanel({ courseId, workspaceId }: NeedsAnaly
 
     const fetchData = async () => {
       try {
-        // Step 1: Find the NEEDS_ANALYSIS page for this course
-        const pagesRes = await fetch(`/api/courses/${courseId}/pages`);
-        if (!pagesRes.ok) throw new Error('Failed to fetch course pages');
+        const response = await fetch(`/api/courses/${courseId}/analysis-context`);
+        if (!response.ok) throw new Error('Failed to fetch analysis context');
 
-        const pages: Array<{ id: string; type: string }> = await pagesRes.json();
-        const naPage = pages.find((p) => p.type === 'NEEDS_ANALYSIS');
-
-        if (!naPage) {
-          setError('no-needs-analysis');
-          return;
-        }
-
-        // Step 2: Fetch the needs analysis data
-        const naRes = await fetch(`/api/pages/${naPage.id}/needs-analysis`);
-        if (!naRes.ok) throw new Error('Failed to fetch needs analysis');
-
-        const naData: NeedsAnalysisFormData = await naRes.json();
-        setData(naData);
+        const data: AnalysisContext = await response.json();
+        setContext(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load');
       } finally {
@@ -87,11 +82,25 @@ export default function NeedsAnalysisPanel({ courseId, workspaceId }: NeedsAnaly
     );
   }
 
-  if (error === 'no-needs-analysis') {
+  if (error || !context) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-sm text-red-500">{error || 'Failed to load analysis context'}</p>
+      </div>
+    );
+  }
+
+  const ca = context.courseAnalysis;
+  const hasAudiences = ca.audiences && ca.audiences.length > 0;
+  const hasTasks = ca.tasks && ca.tasks.length > 0;
+  const hasIdContent = ca.problemSummary || ca.currentStateSummary || ca.desiredStateSummary || hasAudiences || hasTasks;
+  const hasStakeholderData = context.submissions.length > 0;
+
+  if (!hasIdContent && !hasStakeholderData) {
     return (
       <div className="text-center py-8">
         <p className="text-sm text-gray-500 mb-3">
-          No approved needs analysis found. Complete the Needs Analysis page first.
+          No analysis data found. Complete the Needs Analysis page first.
         </p>
         {workspaceId && (
           <a
@@ -105,116 +114,119 @@ export default function NeedsAnalysisPanel({ courseId, workspaceId }: NeedsAnaly
     );
   }
 
-  if (error || !data) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-red-500">{error || 'Failed to load needs analysis'}</p>
-      </div>
-    );
-  }
-
-  const hasContent = data.problemStatement || data.businessNeed || data.currentState || data.desiredState;
-
-  if (!hasContent) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-gray-500">
-          The Needs Analysis page exists but has no content yet. Fill it out to see reference data here.
-        </p>
-      </div>
-    );
-  }
+  const trainingTasks = ca.tasks?.filter((t) => t.intervention === 'training') ?? [];
 
   return (
     <div className="space-y-1">
-      {/* Problem / Business Need */}
-      {(data.problemStatement || data.businessNeed) && (
-        <Section title="Problem & Business Need">
-          {data.problemStatement && (
-            <div className="mb-2">
-              <span className="text-xs font-medium text-gray-600">Problem: </span>
-              <TextBlock value={data.problemStatement} />
-            </div>
-          )}
-          {data.businessNeed && (
-            <div>
-              <span className="text-xs font-medium text-gray-600">Business Need: </span>
-              <TextBlock value={data.businessNeed} />
-            </div>
-          )}
+      {/* Audience Profiles (v2) */}
+      {hasAudiences && (
+        <Section title={`Audiences (${ca.audiences.length})`}>
+          <div className="space-y-2">
+            {ca.audiences.map((aud) => (
+              <div key={aud.id || aud.order} className="text-sm">
+                <span className="font-medium text-gray-700">{aud.role}</span>
+                {aud.headcount && <span className="text-gray-400 ml-1">({aud.headcount})</span>}
+                {aud.trainingFormat && (
+                  <span className="text-xs text-gray-500 ml-2">{aud.trainingFormat}</span>
+                )}
+              </div>
+            ))}
+          </div>
         </Section>
       )}
 
-      {/* Performance Gap */}
-      {(data.currentState || data.desiredState) && (
-        <Section title="Performance Gap">
-          {data.currentState && (
-            <div className="mb-2">
-              <span className="text-xs font-medium text-gray-600">Current State: </span>
-              <TextBlock value={data.currentState} />
-            </div>
-          )}
-          {data.desiredState && (
-            <div>
-              <span className="text-xs font-medium text-gray-600">Desired State: </span>
-              <TextBlock value={data.desiredState} />
-            </div>
-          )}
+      {/* Tasks & Competencies (v2) */}
+      {hasTasks && (
+        <Section title={`Tasks (${ca.tasks.length} total, ${trainingTasks.length} training)`}>
+          <div className="space-y-1.5">
+            {ca.tasks.map((task) => (
+              <div key={task.id || task.order} className="flex items-start gap-2 text-sm">
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 mt-0.5 ${
+                    INTERVENTION_COLORS[task.intervention] || 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {task.intervention}
+                </span>
+                <span className="text-gray-700">{task.task}</span>
+              </div>
+            ))}
+          </div>
         </Section>
       )}
 
-      {/* Target Audience */}
-      {(data.learnerPersonas.length > 0 || data.stakeholders.length > 0) && (
-        <Section title="Target Audience">
-          {data.learnerPersonas.length > 0 && (
-            <div className="mb-2">
-              <span className="text-xs font-medium text-gray-600">Learner Personas:</span>
-              <ListBlock items={data.learnerPersonas} />
-            </div>
-          )}
-          {data.stakeholders.length > 0 && (
-            <div>
-              <span className="text-xs font-medium text-gray-600">Stakeholders:</span>
-              <ListBlock items={data.stakeholders} />
-            </div>
-          )}
+      {/* Legacy ID Synthesis (backward compat) */}
+      {ca.problemSummary && (
+        <Section title="Problem Summary">
+          <TextBlock value={ca.problemSummary} />
         </Section>
       )}
 
       {/* Constraints */}
-      {data.constraints.length > 0 && (
+      {ca.constraints.length > 0 && (
         <Section title="Constraints">
-          <ListBlock items={data.constraints} />
+          <ListBlock items={ca.constraints} />
+        </Section>
+      )}
+
+      {/* Training Decision */}
+      {ca.isTrainingSolution !== null && (
+        <Section title="Training Decision">
+          <p className="text-sm text-gray-700">
+            {ca.isTrainingSolution === true
+              ? 'Yes — training is the primary solution'
+              : ca.isTrainingSolution === false
+                ? 'No — training alone won\'t solve this'
+                : 'Partially — training is part of a blended solution'}
+          </p>
+          {ca.solutionRationale && (
+            <div className="mt-1">
+              <span className="text-xs font-medium text-gray-600">Rationale: </span>
+              <TextBlock value={ca.solutionRationale} />
+            </div>
+          )}
         </Section>
       )}
 
       {/* Success Metrics */}
-      {(data.level1Reaction || data.level2Learning || data.level3Behavior || data.level4Results) && (
+      {(ca.level1Reaction || ca.level2Learning || ca.level3Behavior || ca.level4Results) && (
         <Section title="Success Metrics (Kirkpatrick)">
-          {data.level1Reaction && (
+          {ca.level1Reaction && (
             <div className="mb-2">
               <span className="text-xs font-medium text-gray-600">L1 Reaction: </span>
-              <TextBlock value={data.level1Reaction} />
+              <TextBlock value={ca.level1Reaction} />
             </div>
           )}
-          {data.level2Learning && (
+          {ca.level2Learning && (
             <div className="mb-2">
               <span className="text-xs font-medium text-gray-600">L2 Learning: </span>
-              <TextBlock value={data.level2Learning} />
+              <TextBlock value={ca.level2Learning} />
             </div>
           )}
-          {data.level3Behavior && (
+          {ca.level3Behavior && (
             <div className="mb-2">
               <span className="text-xs font-medium text-gray-600">L3 Behavior: </span>
-              <TextBlock value={data.level3Behavior} />
+              <TextBlock value={ca.level3Behavior} />
             </div>
           )}
-          {data.level4Results && (
+          {ca.level4Results && (
             <div>
               <span className="text-xs font-medium text-gray-600">L4 Results: </span>
-              <TextBlock value={data.level4Results} />
+              <TextBlock value={ca.level4Results} />
             </div>
           )}
+        </Section>
+      )}
+
+      {/* Stakeholder Submissions Summary */}
+      {hasStakeholderData && (
+        <Section title={`Stakeholder Data (${context.submissions.length} submission${context.submissions.length !== 1 ? 's' : ''})`}>
+          {context.submissions.map((sub) => (
+            <div key={sub.id} className="mb-2 text-sm text-gray-600">
+              <span className="font-medium text-gray-700">{sub.stakeholderName}</span>
+              <span className="text-gray-400 ml-1">({sub.trainingType.replace(/_/g, ' ')})</span>
+            </div>
+          ))}
         </Section>
       )}
     </div>
