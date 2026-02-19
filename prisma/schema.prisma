@@ -303,6 +303,7 @@ model Course {
   targetGoLive DateTime?
   workspaceId String?
   archivedAt   DateTime?
+  dashboardStatuses Json?    // Stores card status overrides as JSON
 
   // External mapping
   externalId      String?

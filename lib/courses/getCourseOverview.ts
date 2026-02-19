@@ -52,10 +52,20 @@ export interface CourseOverview {
     createdAt: Date;
     updatedAt: Date;
     workspaceId: string;
+    targetGoLive: Date | null;
+    dashboardStatuses: Record<string, string> | null;
+    curricula: Array<{ id: string; name: string }>;
   };
   pages: PageSummary[];
   objectiveStats: ObjectiveStats;
   taskStats: TaskStats;
+  upcomingTasks: Array<{
+    id: string;
+    title: string;
+    dueDate: Date | null;
+    priority: string;
+    status: string;
+  }>;
 }
 
 /**
@@ -85,6 +95,18 @@ export async function getCourseOverview(
       createdAt: true,
       updatedAt: true,
       workspaceId: true,
+      targetGoLive: true,
+      dashboardStatuses: true,
+      curricula: {
+        select: {
+          curriculum: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
       pages: {
         select: {
           id: true,
@@ -181,6 +203,26 @@ export async function getCourseOverview(
     byPriority[count.priority] = count._count.id;
   }
 
+  // Fetch next 5 incomplete tasks, ordered by dueDate (nulls last), then priority
+  const upcomingTasks = await prisma.task.findMany({
+    where: {
+      courseId,
+      status: { not: 'DONE' },
+    },
+    select: {
+      id: true,
+      title: true,
+      dueDate: true,
+      priority: true,
+      status: true,
+    },
+    orderBy: [
+      { dueDate: 'asc' },
+      { priority: 'desc' },
+    ],
+    take: 5,
+  });
+
   return {
     course: {
       id: course.id,
@@ -189,6 +231,12 @@ export async function getCourseOverview(
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,
       workspaceId: course.workspaceId,
+      targetGoLive: course.targetGoLive,
+      dashboardStatuses: course.dashboardStatuses as Record<string, string> | null,
+      curricula: course.curricula.map(cc => ({
+        id: cc.curriculum.id,
+        name: cc.curriculum.name,
+      })),
     },
     pages: course.pages,
     objectiveStats: {
@@ -201,5 +249,6 @@ export async function getCourseOverview(
       byStatus,
       byPriority,
     },
+    upcomingTasks,
   };
 }

@@ -5,6 +5,7 @@ import SubTabBar from '@/components/ui/SubTabBar';
 import AnalysisTab from '@/components/needs-analysis/AnalysisTab';
 import StakeholdersTab from '@/components/needs-analysis/StakeholdersTab';
 import ObjectivesTab from '@/components/needs-analysis/ObjectivesTab';
+import SuccessMetricsTab from '@/components/needs-analysis/SuccessMetricsTab';
 import {
   CourseAnalysisFormData,
   defaultCourseAnalysisFormData,
@@ -15,6 +16,7 @@ import {
 const TABS = [
   { id: 'analysis', label: 'Analysis' },
   { id: 'stakeholders', label: 'Stakeholders' },
+  { id: 'success-metrics', label: 'Success Metrics' },
   { id: 'objectives', label: 'Objectives' },
 ];
 
@@ -191,6 +193,13 @@ export default function NeedsAnalysisView({
             data={formData}
             onChange={handleFormChange}
             workspaceContacts={workspaceContacts}
+          />
+        );
+      case 'success-metrics':
+        return (
+          <SuccessMetricsTab
+            data={formData}
+            onChange={handleFormChange}
           />
         );
       case 'objectives':

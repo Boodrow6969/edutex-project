@@ -12,7 +12,9 @@ interface CourseData {
   createdAt: string;
   updatedAt: string;
   workspaceId: string;
-  deadline?: string | null;
+  targetGoLive?: string | null;
+  dashboardStatuses?: Record<string, string> | null;
+  curricula?: Array<{ id: string; name: string }>;
 }
 
 interface PageSummary {
@@ -35,11 +37,20 @@ interface TaskStats {
   byPriority: Record<string, number>;
 }
 
+interface UpcomingTask {
+  id: string;
+  title: string;
+  dueDate: string | null;
+  priority: string;
+  status: string;
+}
+
 interface OverviewResponse {
   course: CourseData;
   pages: PageSummary[];
   objectiveStats: ObjectiveStats;
   taskStats: TaskStats;
+  upcomingTasks: UpcomingTask[];
 }
 
 interface StakeholderSubmission {
@@ -53,15 +64,6 @@ interface StakeholderSubmission {
 }
 
 type CardStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETE';
-
-// ---------- Dummy task data ----------
-
-const DUMMY_TASKS = [
-  { id: '1', title: 'Complete Needs Analysis', priority: 'high' as const, daysUntilDue: 3 },
-  { id: '2', title: 'Define Learning Objectives', priority: 'medium' as const, daysUntilDue: 7 },
-  { id: '3', title: 'Create Storyboard Outline', priority: 'medium' as const, daysUntilDue: 14 },
-  { id: '4', title: 'Draft Assessment Plan', priority: 'low' as const, daysUntilDue: 21 },
-];
 
 // ---------- Constants ----------
 
@@ -153,6 +155,18 @@ export default function CourseDashboard({ courseId, workspaceId }: CourseDashboa
         const overviewData = await overviewRes.json();
         setOverview(overviewData);
 
+        // Initialize status overrides from saved dashboard statuses
+        if (overviewData.course?.dashboardStatuses) {
+          const saved = overviewData.course.dashboardStatuses as Record<string, string>;
+          const mapped: Record<string, CardStatus> = {};
+          for (const [key, value] of Object.entries(saved)) {
+            if (value === 'Not Started') mapped[key] = 'NOT_STARTED';
+            else if (value === 'In Progress') mapped[key] = 'IN_PROGRESS';
+            else if (value === 'Complete') mapped[key] = 'COMPLETE';
+          }
+          setStatusOverrides(mapped);
+        }
+
         if (submissionsRes.ok) {
           const subData = await submissionsRes.json();
           setSubmissions(Array.isArray(subData) ? subData : []);
@@ -199,10 +213,16 @@ export default function CourseDashboard({ courseId, workspaceId }: CourseDashboa
     : null;
 
   // Days remaining
-  const deadline = course?.deadline ? new Date(course.deadline) : null;
+  const deadline = course?.targetGoLive ? new Date(course.targetGoLive) : null;
   const daysRemaining = deadline
     ? Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null;
+
+  // Curriculum info
+  const curricula = course?.curricula || [];
+
+  // Upcoming tasks
+  const upcomingTasks = overview?.upcomingTasks || [];
 
   const basePath = `/workspace/${workspaceId}/course/${courseId}`;
 
@@ -245,8 +265,19 @@ export default function CourseDashboard({ courseId, workspaceId }: CourseDashboa
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  setStatusOverrides((prev) => ({ ...prev, [cardKey]: s }));
+                  const newOverrides = { ...statusOverrides, [cardKey]: s };
+                  setStatusOverrides(newOverrides);
                   setOpenDropdown(null);
+                  // Persist to server (fire and forget)
+                  const apiStatuses: Record<string, string> = {};
+                  for (const [k, v] of Object.entries(newOverrides)) {
+                    apiStatuses[k] = STATUS_STYLES[v].label;
+                  }
+                  fetch(`/api/courses/${courseId}/dashboard-statuses`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(apiStatuses),
+                  }).catch((err) => console.error('Failed to save status:', err));
                 }}
                 className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 flex items-center gap-2 ${
                   currentStatus === s ? 'font-semibold' : ''
@@ -322,7 +353,7 @@ export default function CourseDashboard({ courseId, workspaceId }: CourseDashboa
             <span>
               Created {new Date(course!.createdAt).toLocaleDateString()}
             </span>
-            {deadline && daysRemaining !== null && (
+            {deadline && daysRemaining !== null ? (
               <span className="flex items-center gap-1.5">
                 Deadline {deadline.toLocaleDateString()}
                 <span
@@ -337,9 +368,17 @@ export default function CourseDashboard({ courseId, workspaceId }: CourseDashboa
                   {daysRemaining}d remaining
                 </span>
               </span>
+            ) : (
+              <span className="text-gray-400">No deadline set</span>
             )}
             <span className="text-gray-400">|</span>
-            <span>Standalone Course</span>
+            {curricula.length > 0 ? (
+              <Link href={`/workspace/${workspaceId}`} className="text-blue-600 hover:text-blue-800">
+                {curricula[0].name}
+              </Link>
+            ) : (
+              <span>Standalone Course</span>
+            )}
           </div>
 
           {/* Next Tasks strip */}
@@ -350,31 +389,48 @@ export default function CourseDashboard({ courseId, workspaceId }: CourseDashboa
                 View All →
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {DUMMY_TASKS.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50"
-                >
-                  <input
-                    type="checkbox"
-                    disabled
-                    className="mt-0.5 rounded border-gray-300"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`px-2 py-0.5 text-xs font-medium rounded-full ${PRIORITY_STYLES[task.priority]}`}
-                      >
-                        {task.priority}
-                      </span>
-                      <span className="text-xs text-gray-500">{task.daysUntilDue}d</span>
+            {upcomingTasks.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {upcomingTasks.map((task) => {
+                  const priorityKey = (task.priority === 'URGENT' || task.priority === 'HIGH')
+                    ? 'high'
+                    : task.priority === 'MEDIUM'
+                      ? 'medium'
+                      : 'low';
+                  const daysUntilDue = task.dueDate
+                    ? Math.ceil((new Date(task.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    : null;
+
+                  return (
+                    <div
+                      key={task.id}
+                      className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50"
+                    >
+                      <input
+                        type="checkbox"
+                        disabled
+                        className="mt-0.5 rounded border-gray-300"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span
+                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${PRIORITY_STYLES[priorityKey]}`}
+                          >
+                            {priorityKey}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {daysUntilDue !== null ? `${daysUntilDue}d` : 'No due date'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">No tasks yet</p>
+            )}
           </div>
         </div>
 
