@@ -1,35 +1,74 @@
 'use client';
-
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { usePageByType } from '@/lib/hooks/usePageByType';
+import TaskAnalysisView from '@/components/pages/TaskAnalysisView';
 
 export default function TaskAnalysisPage() {
   const params = useParams();
-  const workspaceId = params.workspaceId as string;
   const courseId = params.courseId as string;
+  const workspaceId = params.workspaceId as string;
+  const { pageId, isLoading, error, notFound } = usePageByType(courseId, 'TASK_ANALYSIS');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-full flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-gray-600">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-600 font-medium">{error}</p>
+          <Link href={`/workspace/${workspaceId}/course/${courseId}`} className="inline-block mt-4 text-blue-600 hover:text-blue-700">
+            ← Back to Course Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !pageId) {
+    return (
+      <div className="min-h-full">
+        <div className="bg-white border-b border-gray-200 px-6 py-3">
+          <nav className="flex items-center gap-2 text-sm text-gray-600">
+            <Link href="/workspace" className="hover:text-blue-600">Workspaces</Link>
+            <span>/</span>
+            <Link href={`/workspace/${workspaceId}/course/${courseId}`} className="hover:text-blue-600">Course</Link>
+            <span>/</span>
+            <span className="text-gray-900">Task Analysis</span>
+          </nav>
+        </div>
+        <div className="p-8 text-center">
+          <p className="text-gray-600">Task Analysis page hasn&apos;t been created yet.</p>
+          <Link href={`/workspace/${workspaceId}/course/${courseId}`} className="inline-block mt-4 text-blue-600 hover:text-blue-700">
+            ← Back to Course Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-full">
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
+    <div className="min-h-full flex flex-col">
+      <div className="bg-white border-b border-gray-200 px-6 py-3 flex-shrink-0">
         <nav className="flex items-center gap-2 text-sm text-gray-600">
           <Link href="/workspace" className="hover:text-blue-600">Workspaces</Link>
-          <span>/</span>
-          <Link href={`/workspace/${workspaceId}`} className="hover:text-blue-600">Workspace</Link>
           <span>/</span>
           <Link href={`/workspace/${workspaceId}/course/${courseId}`} className="hover:text-blue-600">Course</Link>
           <span>/</span>
           <span className="text-gray-900">Task Analysis</span>
         </nav>
       </div>
-      <div className="p-6 max-w-6xl mx-auto">
-        <Link
-          href={`/workspace/${workspaceId}/course/${courseId}`}
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-6"
-        >
-          ← Back to Course Dashboard
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Task Analysis</h1>
-        <p className="text-sm text-gray-500 mt-2">This page will be wired in Prompt 2.</p>
+      <div className="flex-1 overflow-hidden">
+        <TaskAnalysisView courseId={courseId} pageId={pageId} workspaceId={workspaceId} />
       </div>
     </div>
   );

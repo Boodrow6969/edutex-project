@@ -24,14 +24,16 @@ interface NeedsAnalysisViewProps {
   courseId: string;
   pageId?: string;
   workspaceId: string;
+  initialTab?: string;
 }
 
 export default function NeedsAnalysisView({
   courseId,
   pageId,
   workspaceId,
+  initialTab,
 }: NeedsAnalysisViewProps) {
-  const [activeTab, setActiveTab] = useState('analysis');
+  const [activeTab, setActiveTab] = useState(initialTab || 'analysis');
   const [formData, setFormData] = useState<CourseAnalysisFormData>(defaultCourseAnalysisFormData);
   const [submissions, setSubmissions] = useState<StakeholderSubmissionDisplay[]>([]);
   const [workspaceContacts, setWorkspaceContacts] = useState<WorkspaceContact[]>([]);
