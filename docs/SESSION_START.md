@@ -61,6 +61,22 @@ Claude Code will read `claude.md` from the project root automatically. Verify by
 | `npx prisma generate` | Regenerate Prisma client after schema changes |
 | `npx prisma migrate dev` | Apply schema migrations (requires approval) |
 
+## Current State (updated 2026-02-21)
+
+- **Active branch:** main
+- **Needs Analysis reconciliation** is merged to main
+- **Course dashboard revamp** is merged to main
+- Both systems are now unified: stakeholder submission data flows into the course-level Analysis tab
+- Stakeholder Data panels on Tasks & Competencies and Training Decision now use **section-title-based filtering** (works across all 4 training types: Performance Problem, New System, Compliance, Role Change)
+- Migration history was cleaned up for laptop environment: single init migration + needs-analysis-reconciliation migration + add-dashboard-statuses migration
+- **When returning to desktop:** need to either baseline migrations with `prisma migrate resolve` or nuke and recreate the desktop DB
+
+### Next Priorities
+1. Browser test all 4 training types through the full NA → Analysis tab pipeline
+2. Wire the NeedsAnalysisPanel (Task Analysis reference panel) to pull from the new analysis-context API
+3. Complete remaining dashboard cards (Job Aids, Assessment, Evaluation)
+4. Remove `edutex_backup.sql` from repo and add to `.gitignore`
+
 ## Development Workflow Best Practices
 
 ### Think Here, Build There

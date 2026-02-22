@@ -1,5 +1,13 @@
 # EDUTex Changelog
 
+## [0.13.1] - 2026-02-21
+### Fixed
+- Stakeholder Data panels in Tasks & Competencies and Training Decision now filter by section title instead of hardcoded question IDs, enabling support for all training types (Performance Problem, New System, Compliance, Role Change)
+- Reconciled migration history for multi-machine development (laptop/desktop)
+- Merged needs-analysis-reconciliation branch to main with dashboard revamp
+
+---
+
 ## v0.13.0 — February 17, 2026: Stakeholder Needs Analysis Reconciliation
 
 Complete rewrite of the stakeholder question system and needs analysis UI. All four training types now have type-appropriate questions with instructional design guidance built into every question. System-specific questions scoped to NEW_SYSTEM only; other types get purpose-built learner profile sections.

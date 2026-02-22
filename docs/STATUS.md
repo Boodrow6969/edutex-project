@@ -1,10 +1,10 @@
 # EDUTex Project Status
 
-Last Updated: February 13, 2026
+Last Updated: February 21, 2026
 
 ---
 
-## Current Version: 0.12.0
+## Current Version: 0.13.1
 
 ---
 ## To do
@@ -52,7 +52,7 @@ Last Updated: February 13, 2026
 - Markdown shortcuts (headings, lists, blockquotes)
 - Word export
 
-### Stakeholder Needs Analysis — Steps 1-4 Complete, Step 5 Pending
+### Stakeholder Needs Analysis — COMPLETE
 - 4 Prisma models: StakeholderAccessToken, StakeholderSubmission, StakeholderResponse, StakeholderChangeLog
 - All models use workspaceId (migrated from projectId)
 - 39 questions across 5 TypeScript constant files (shared: 11, performance: 6, newSystem: 9, compliance: 7, roleChange: 6)
@@ -60,8 +60,8 @@ Last Updated: February 13, 2026
 - 10 questions with idNotesExtended (Kirkpatrick, RACI, Mager's diagnostic, etc.)
 - 11 API endpoints with token-auth for stakeholder routes, session-auth for ID routes
 - Public form UI at /stakeholder/form/[token] — attribution modal, section rendering, autosave (1.5s debounce), required-field validation, revision banner, thank-you state
-- All endpoints verified: GET form, POST identify, PUT responses, POST submit return 200
-- Pending: Browser testing with real token, Step 5 (ID Review UI + dashboard integration)
+- Stakeholder data flows into course-level Analysis tab with section-title-based filtering (works across all 4 training types)
+- Needs Analysis Reconciliation merged to main (v0.13.1)
 
 ### Machine-Consumable Data Layer — Complete (v0.12.0)
 - 9 string fields converted to proper Prisma enums across 5 models
@@ -88,6 +88,7 @@ Last Updated: February 13, 2026
 
 ## Recently Completed
 
+- **v0.13.1 (Feb 21, 2026):** Needs Analysis Reconciliation — section-title-based stakeholder data filtering for all training types, migration history cleanup for laptop environment, course dashboard revamp merged to main.
 - **v0.12.0 (Feb 13, 2026):** Machine-consumability migration — 7 new enums, LearningTask model, AssessmentItem model, Objective link tables, block content contracts with _type discriminators, design rationale fields. 4 schema migrations, 5 workstreams, zero breaking changes.
 - **v0.11.0 (Feb 9, 2026):** Content Assets Phase A+B — ContentAsset model, local storage service, full CRUD API, reusable components, storyboard integration (Content, Title/Intro, Video screens).
 - **v0.10.0 (Feb 8, 2026):** Archive/restore for workspaces, courses, curricula. Delete confirmation modals. Toast notification system. Sidebar context menus. Enhanced workspace DELETE with name confirmation and transactional cascade.
