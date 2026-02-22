@@ -364,21 +364,19 @@ function TaskRow({
   );
 }
 
-// Question IDs relevant to tasks and competencies
-const TASK_QUESTION_IDS = new Set([
-  'SYS_02',  // System Capabilities
-  'SYS_09',  // Critical Tasks
-  'SYS_10',  // High-Stakes Situations
-  'SYS_11',  // Acceptable Performance at Launch
-  'SYS_12',  // Proficient Performance at 30 Days
+const TASK_SECTIONS = new Set([
+  'Performance & Impact',
+  'What Users Need to Do',
+  'New Role & Responsibilities',
+  'Regulation or Policy',
 ]);
 
 function extractTaskData(submissions: StakeholderSubmissionDisplay[]) {
   const items: { label: string; value: string }[] = [];
   for (const sub of submissions) {
     for (const section of sub.sections) {
-      for (const resp of section.responses) {
-        if (TASK_QUESTION_IDS.has(resp.questionId)) {
+      if (TASK_SECTIONS.has(section.title)) {
+        for (const resp of section.responses) {
           items.push({ label: resp.question, value: resp.value });
         }
       }

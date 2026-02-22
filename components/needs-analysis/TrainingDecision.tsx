@@ -186,27 +186,20 @@ export default function TrainingDecision({ data, onChange, submissions }: Traini
   );
 }
 
-// Question IDs relevant to training decision context
-const CONTEXT_QUESTION_IDS = new Set([
-  'SYS_05',   // Business Problem
-  'SYS_06',   // Consequences (Employee)
-  'SYS_07',   // Consequences (Customer)
-  'SHARED_16', // Sandbox Access
-  'SHARED_17', // Realistic Data
-  'SHARED_18', // Existing Documentation
-  'SHARED_19', // Vendor Training
-  'SHARED_20', // Scheduling Constraints
-  'SHARED_21', // Training Budget
-  'SHARED_22', // Other Constraints
-  'SHARED_25', // Concerns
+const CONTEXT_SECTIONS = new Set([
+  'Training Constraints and Resources',
+  'Success Criteria',
+  'Business Justification',
+  'Rollout Plan',
+  'Concerns and Final Thoughts',
 ]);
 
 function extractContextData(submissions: StakeholderSubmissionDisplay[]) {
   const items: { label: string; value: string }[] = [];
   for (const sub of submissions) {
     for (const section of sub.sections) {
-      for (const resp of section.responses) {
-        if (CONTEXT_QUESTION_IDS.has(resp.questionId)) {
+      if (CONTEXT_SECTIONS.has(section.title)) {
+        for (const resp of section.responses) {
           items.push({ label: resp.question, value: resp.value });
         }
       }
