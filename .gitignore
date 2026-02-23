@@ -50,3 +50,6 @@ files.zip
 
 # uploaded assets (local storage)
 /uploads/
+
+# backup files
+edutex_backup.sql
