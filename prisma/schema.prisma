@@ -273,8 +273,7 @@ model LearningTask {
   aiGenerated     Boolean           @default(false)
   aiReasoning     String?           @db.Text
 
-  // Link to TaskAnalysis page (for migration from JSON blob)
-  taskAnalysisId  String?
+  // (Legacy link removed — TaskAnalysis no longer holds LearningTask[])
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -282,12 +281,10 @@ model LearningTask {
   course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   parentTask      LearningTask?     @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
   childTasks      LearningTask[]    @relation("TaskHierarchy")
-  taskAnalysis    TaskAnalysis?     @relation(fields: [taskAnalysisId], references: [id])
   objectives      ObjectiveTaskLink[]
 
   @@index([courseId])
   @@index([externalId])
-  @@index([taskAnalysisId])
   @@map("learning_tasks")
 }
 
@@ -530,18 +527,80 @@ model TaskAnalysis {
   pageId    String @unique
   page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
-  // Job/Role Context
-  jobTitle        String @default("")
-  roleDescription String @default("") @db.Text
+  // Optional upstream links
+  objectiveId    String?
+  objective      Objective? @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
+  sourceTaskId   String?
 
-  // Tasks stored as JSON (array of TaskItem objects)
-  tasks Json @default("[]")
-  learningTasks  LearningTask[]
+  // Mode
+  analysisType   TaskAnalysisType @default(PROCEDURAL)
+
+  // Task identity
+  taskName       String @default("")
+  taskGoal       String @default("") @db.Text
+
+  // Learner context (standalone or pre-populated from NA)
+  audienceRole           String @default("")
+  audiencePriorKnowledge String @default("")
+  audienceTechComfort    String @default("")
+  constraints            String @default("") @db.Text
+  contextNotes           String @default("") @db.Text
+  dataSource             Json   @default("{}")
+
+  // Priority scoring (1-3)
+  criticalityScore   Int?
+  frequencyScore     Int?
+  difficultyScore    Int?
+  universalityScore  Int?
+  feasibilityScore   Int?
+
+  // Steps
+  steps ProceduralStep[]
+
+  // AI
+  aiDrafted Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("task_analyses")
+}
+
+model ProceduralStep {
+  id               String @id @default(cuid())
+  taskAnalysisId   String
+  taskAnalysis     TaskAnalysis @relation(fields: [taskAnalysisId], references: [id], onDelete: Cascade)
+
+  stepNumber       Int
+  description      String @db.Text
+  isDecisionPoint  Boolean @default(false)
+  branchCondition  String? @db.Text
+  commonErrors     String? @db.Text
+  cues             String? @db.Text
+  toolsRequired    String?
+  instructionalEvent InstructionalEvent?
+  notes            String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskAnalysisId])
+  @@map("procedural_steps")
+}
+
+enum TaskAnalysisType {
+  PROCEDURAL
+  HIERARCHICAL
+  COGNITIVE
+}
+
+enum InstructionalEvent {
+  DEMONSTRATION
+  PRACTICE
+  DECISION_BRANCH
+  INFORMATION
+  EXAMPLE
+  CAUTION
 }
 
 model Storyboard {
@@ -700,6 +759,7 @@ model Objective {
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   // Explicit relationships for adaptive engine consumption
+  taskAnalyses    TaskAnalysis[]
   taskLinks       ObjectiveTaskLink[]
   assessmentLinks ObjectiveAssessmentLink[]
 

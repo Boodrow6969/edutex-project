@@ -75,7 +75,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
         title: body.title.trim(),
         description: body.description?.trim() || null,
         order: nextOrder,
-        taskAnalysisId: body.taskAnalysisId || null,
       },
       include: {
         _count: { select: { objectives: true } },
