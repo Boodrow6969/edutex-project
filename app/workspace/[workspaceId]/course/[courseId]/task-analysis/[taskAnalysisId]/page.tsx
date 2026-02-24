@@ -1,12 +1,13 @@
 'use client';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import TaskAnalysisListView from '@/components/pages/task-analysis/TaskAnalysisListView';
+import TaskAnalysisDetailView from '@/components/pages/task-analysis/TaskAnalysisDetailView';
 
-export default function TaskAnalysisPage() {
+export default function TaskAnalysisDetailPage() {
   const params = useParams();
   const courseId = params.courseId as string;
   const workspaceId = params.workspaceId as string;
+  const taskAnalysisId = params.taskAnalysisId as string;
 
   return (
     <div className="min-h-full flex flex-col">
@@ -16,11 +17,17 @@ export default function TaskAnalysisPage() {
           <span>/</span>
           <Link href={`/workspace/${workspaceId}/course/${courseId}`} className="hover:text-blue-600">Course</Link>
           <span>/</span>
-          <span className="text-gray-900">Task Analysis</span>
+          <Link href={`/workspace/${workspaceId}/course/${courseId}/task-analysis`} className="hover:text-blue-600">Task Analysis</Link>
+          <span>/</span>
+          <span className="text-gray-900">Detail</span>
         </nav>
       </div>
       <div className="flex-1 overflow-hidden">
-        <TaskAnalysisListView courseId={courseId} workspaceId={workspaceId} />
+        <TaskAnalysisDetailView
+          courseId={courseId}
+          workspaceId={workspaceId}
+          taskAnalysisId={taskAnalysisId}
+        />
       </div>
     </div>
   );
