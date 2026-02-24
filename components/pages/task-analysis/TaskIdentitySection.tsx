@@ -80,10 +80,11 @@ export default function TaskIdentitySection({
     }
     setLoadingSourceTasks(true);
     try {
-      const res = await fetch(`/api/courses/${courseId}/learning-tasks`);
+      const res = await fetch(`/api/courses/${courseId}/analysis-context`);
       if (res.ok) {
         const data = await res.json();
-        setSourceTasks(data.map((t: { id: string; title: string }) => ({ id: t.id, title: t.title })));
+        const tasks = data.courseAnalysis?.tasks || [];
+        setSourceTasks(tasks.map((t: { id: string; task: string }) => ({ id: t.id, title: t.task })));
       }
     } catch { /* ignore */ }
     setLoadingSourceTasks(false);

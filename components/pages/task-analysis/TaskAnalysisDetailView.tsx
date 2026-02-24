@@ -37,6 +37,7 @@ export default function TaskAnalysisDetailView({
         if (!res.ok) throw new Error('Failed to load task analysis');
         const json = await res.json();
         if (!cancelled) {
+          json.dataSource = json.dataSource || {};
           setData(json);
           setIsLoading(false);
         }

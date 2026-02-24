@@ -51,14 +51,21 @@ export default function LearnerContextSection({
       const data = await res.json();
 
       // Extract relevant fields from NA context
+      const ca = data.courseAnalysis;
       const context: NAContext = {};
-      if (data.audiences?.length > 0) {
-        const audience = data.audiences[0];
+      if (ca?.audiences?.length > 0) {
+        const audience = ca.audiences[0];
         if (audience.role) context.audienceRole = audience.role;
         if (audience.priorKnowledge) context.priorKnowledge = audience.priorKnowledge;
-        if (audience.techComfort) context.techComfort = audience.techComfort;
+        if (audience.techComfort) {
+          // Normalize enum casing (e.g. "NOVICE" → "Novice") to match select options
+          const raw = audience.techComfort as string;
+          context.techComfort = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+        }
       }
-      if (data.constraints) context.constraints = data.constraints;
+      if (ca?.constraints?.length) {
+        context.constraints = ca.constraints.join('; ');
+      }
 
       if (Object.keys(context).length > 0) {
         setNaData(context);
