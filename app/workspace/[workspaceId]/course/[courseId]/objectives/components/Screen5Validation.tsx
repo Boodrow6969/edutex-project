@@ -62,7 +62,7 @@ export default function Screen5Validation({ objs, triageItems, naSummary }: Scre
         {naSummary && (
           <>
             <div className="text-xs font-bold text-[#03428e] uppercase tracking-wide mb-1.5">
-              Business Goal
+              {naSummary.labels?.businessGoal || 'Business Goal'}
             </div>
             <div className="text-[13px] text-gray-900 leading-normal px-3.5 py-2.5 bg-gray-50 rounded-md mb-3.5 border border-gray-200">
               {naSummary.businessGoal}
