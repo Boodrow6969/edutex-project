@@ -1,11 +1,14 @@
 'use client';
 
-interface PriorityScoringPanelProps {
+export interface PriorityScores {
   criticalityScore: number | null;
   frequencyScore: number | null;
   difficultyScore: number | null;
   universalityScore: number | null;
   feasibilityScore: number | null;
+}
+
+interface PriorityScoringPanelProps extends PriorityScores {
   onChange: (updates: Record<string, unknown>) => void;
 }
 
@@ -47,7 +50,7 @@ const LEVELS = [
   { value: 3, label: 'High' },
 ];
 
-function getComposite(props: PriorityScoringPanelProps): number | null {
+export function getComposite(props: PriorityScores): number | null {
   const scores = [
     props.criticalityScore,
     props.frequencyScore,
@@ -59,7 +62,7 @@ function getComposite(props: PriorityScoringPanelProps): number | null {
   return scores.reduce((sum, s) => (sum ?? 0) + (s ?? 0), 0);
 }
 
-function priorityBadge(score: number | null) {
+export function priorityBadge(score: number | null) {
   if (score === null) return { label: 'Not Scored', color: 'bg-gray-100 text-gray-500' };
   if (score <= 8) return { label: 'Low Priority', color: 'bg-gray-100 text-gray-600' };
   if (score <= 11) return { label: 'Medium Priority', color: 'bg-yellow-100 text-yellow-700' };
@@ -76,21 +79,8 @@ export default function PriorityScoringPanel(props: PriorityScoringPanelProps) {
   };
 
   return (
-    <details className="bg-white border border-gray-200 rounded-lg" open>
-      <summary className="px-6 py-4 cursor-pointer list-none flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-gray-900">Priority Scoring</h3>
-          <span className={`px-2 py-0.5 text-xs font-medium rounded ${priority.color}`}>
-            {composite !== null ? `${composite}/15 — ${priority.label}` : priority.label}
-          </span>
-        </div>
-        <svg className="w-5 h-5 text-gray-400 transition-transform [details[open]>&]:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </summary>
-
-      <div className="px-6 pb-6 space-y-4">
-        <p className="text-sm text-gray-500">Score task priority across 5 criteria to determine training investment.</p>
+    <div className="space-y-4">
+      <p className="text-sm text-gray-500">Score task priority across 5 criteria to determine training investment.</p>
 
         {CRITERIA.map((criterion) => {
           const currentValue = getScore(criterion.field);
@@ -132,7 +122,6 @@ export default function PriorityScoringPanel(props: PriorityScoringPanelProps) {
             </p>
           </div>
         )}
-      </div>
-    </details>
+    </div>
   );
 }

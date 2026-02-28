@@ -9,7 +9,7 @@ import {
   errorResponse,
 } from '@/lib/auth-helpers';
 import { toBloomLevel, isValidBloomLevel, CreateObjectiveInput } from '@/lib/types/objectives';
-import { WorkspaceRole } from '@prisma/client';
+import { WorkspaceRole, Prisma } from '@prisma/client';
 
 interface RouteContext {
   params: Promise<{ courseId: string }>;
@@ -42,17 +42,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
  * POST /api/courses/[courseId]/objectives
  * Creates one or more objectives for the course.
  *
- * Request body:
- * {
- *   objectives: Array<{
- *     title: string,
- *     description: string,
- *     bloomLevel: string,
- *     tags?: string[]
- *   }>
- * }
+ * Supports two modes:
+ * 1. Batch mode: { objectives: Array<{title, description, bloomLevel, tags?}> }
+ * 2. Wizard mode (single): { title, description?, bloomLevel?, ...wizard fields }
  *
- * Returns: { created: Objective[] }
+ * Returns: { created: Objective[] } (batch) or single Objective (wizard)
  */
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
@@ -60,15 +54,43 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { courseId } = await context.params;
     const body = await request.json();
 
-    // Verify user has permission to create objectives (Designers and above)
     await assertCourseAccess(courseId, user.id, [
       WorkspaceRole.ADMINISTRATOR,
       WorkspaceRole.MANAGER,
       WorkspaceRole.DESIGNER,
     ]);
 
-    // Validate objectives array
-    if (!body.objectives || !Array.isArray(body.objectives)) {
+    // Wizard single-objective mode (no objectives array)
+    if (!body.objectives) {
+      const data: Prisma.ObjectiveUncheckedCreateInput = {
+        courseId,
+        title: body.title || '',
+        description: body.description || '',
+        bloomLevel: body.bloomLevel && isValidBloomLevel(body.bloomLevel)
+          ? toBloomLevel(body.bloomLevel)
+          : 'REMEMBER',
+        tags: [],
+        // Wizard ABCD fields
+        ...(body.audience !== undefined && { audience: body.audience }),
+        ...(body.verb !== undefined && { verb: body.verb }),
+        ...(body.bloomKnowledge !== undefined && { bloomKnowledge: body.bloomKnowledge || null }),
+        ...(body.condition !== undefined && { condition: body.condition }),
+        ...(body.criteria !== undefined && { criteria: body.criteria }),
+        ...(body.freeformText !== undefined && { freeformText: body.freeformText }),
+        ...(body.objectivePriority !== undefined && { objectivePriority: body.objectivePriority || null }),
+        ...(body.requiresAssessment !== undefined && { requiresAssessment: body.requiresAssessment }),
+        ...(body.wiifm !== undefined && { wiifm: body.wiifm }),
+        ...(body.rationale !== undefined && { rationale: body.rationale }),
+        ...(body.linkedTriageItemId !== undefined && { linkedTriageItemId: body.linkedTriageItemId || null }),
+        ...(body.sortOrder !== undefined && { sortOrder: body.sortOrder }),
+      };
+
+      const created = await prisma.objective.create({ data });
+      return Response.json(created, { status: 201 });
+    }
+
+    // Batch mode (existing behavior)
+    if (!Array.isArray(body.objectives)) {
       return Response.json(
         { error: 'objectives array is required' },
         { status: 400 }
@@ -82,7 +104,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Validate each objective
     const validatedObjectives: CreateObjectiveInput[] = [];
     for (let i = 0; i < body.objectives.length; i++) {
       const obj = body.objectives[i];
@@ -118,7 +139,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       });
     }
 
-    // Create all objectives in a transaction
     const created = await prisma.$transaction(
       validatedObjectives.map((obj) =>
         prisma.objective.create({

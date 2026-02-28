@@ -83,9 +83,9 @@ export default function ProceduralStepBuilder({ steps, onChange }: ProceduralSte
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
+    <div>
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-lg font-semibold text-gray-900">Procedural Steps</h3>
+        <h3 className="text-base font-semibold text-gray-900">Procedural Steps</h3>
         <span className="text-xs text-gray-400">{steps.length} step{steps.length !== 1 ? 's' : ''}</span>
       </div>
       <p className="text-sm text-gray-500 mb-4">Break the task into sequential steps. Mark decision points and assign instructional events.</p>

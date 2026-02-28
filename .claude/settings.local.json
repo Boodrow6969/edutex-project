@@ -53,7 +53,9 @@
       "Bash(node -e:*)",
       "Bash(git pull:*)",
       "Bash(git reset:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git:*)"
     ],
     "deny": [],
     "ask": []

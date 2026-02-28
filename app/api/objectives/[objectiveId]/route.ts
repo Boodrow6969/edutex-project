@@ -87,29 +87,18 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     ]);
 
     // Build update data
-    const updateData: {
-      title?: string;
-      description?: string;
-      bloomLevel?: ReturnType<typeof toBloomLevel>;
-      tags?: string[];
-    } = {};
+    const updateData: Record<string, unknown> = {};
 
     if (body.title !== undefined) {
-      if (typeof body.title !== 'string' || !body.title.trim()) {
-        return Response.json(
-          { error: 'title must be a non-empty string' },
-          { status: 400 }
-        );
+      if (typeof body.title !== 'string') {
+        return Response.json({ error: 'title must be a string' }, { status: 400 });
       }
       updateData.title = body.title.trim();
     }
 
     if (body.description !== undefined) {
       if (typeof body.description !== 'string') {
-        return Response.json(
-          { error: 'description must be a string' },
-          { status: 400 }
-        );
+        return Response.json({ error: 'description must be a string' }, { status: 400 });
       }
       updateData.description = body.description.trim();
     }
@@ -126,15 +115,26 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     if (body.tags !== undefined) {
       if (!Array.isArray(body.tags)) {
-        return Response.json(
-          { error: 'tags must be an array' },
-          { status: 400 }
-        );
+        return Response.json({ error: 'tags must be an array' }, { status: 400 });
       }
       updateData.tags = body.tags.filter(
         (t: unknown): t is string => typeof t === 'string'
       );
     }
+
+    // Wizard ABCD fields
+    if (body.audience !== undefined) updateData.audience = body.audience;
+    if (body.verb !== undefined) updateData.verb = body.verb;
+    if (body.bloomKnowledge !== undefined) updateData.bloomKnowledge = body.bloomKnowledge || null;
+    if (body.condition !== undefined) updateData.condition = body.condition;
+    if (body.criteria !== undefined) updateData.criteria = body.criteria;
+    if (body.freeformText !== undefined) updateData.freeformText = body.freeformText;
+    if (body.objectivePriority !== undefined) updateData.objectivePriority = body.objectivePriority || null;
+    if (body.requiresAssessment !== undefined) updateData.requiresAssessment = body.requiresAssessment;
+    if (body.wiifm !== undefined) updateData.wiifm = body.wiifm;
+    if (body.rationale !== undefined) updateData.rationale = body.rationale;
+    if (body.linkedTriageItemId !== undefined) updateData.linkedTriageItemId = body.linkedTriageItemId || null;
+    if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
 
     // Check if there's anything to update
     if (Object.keys(updateData).length === 0) {

@@ -2,17 +2,26 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { TaskAnalysisData, ProceduralStepData } from '@/lib/types/proceduralTaskAnalysis';
-import TaskIdentitySection from './TaskIdentitySection';
-import ModeSelector from './ModeSelector';
+import TaskAnalysisHeader from './TaskAnalysisHeader';
+import TaskInfoBanner from './TaskInfoBanner';
 import LearnerContextSection from './LearnerContextSection';
 import ProceduralStepBuilder from './ProceduralStepBuilder';
-import PriorityScoringPanel from './PriorityScoringPanel';
+import PriorityScoringPanel, { getComposite, priorityBadge } from './PriorityScoringPanel';
+import ReferencePanel from './ReferencePanel';
 
 interface TaskAnalysisDetailViewProps {
   courseId: string;
   workspaceId: string;
   taskAnalysisId: string;
 }
+
+type RightTab = 'learner' | 'priority' | 'reference';
+
+const TABS: { key: RightTab; label: string }[] = [
+  { key: 'learner', label: 'Learner' },
+  { key: 'priority', label: 'Priority' },
+  { key: 'reference', label: 'Reference' },
+];
 
 export default function TaskAnalysisDetailView({
   courseId,
@@ -25,8 +34,20 @@ export default function TaskAnalysisDetailView({
   const [error, setError] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
 
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<RightTab>('learner');
+
   const pendingRef = useRef<Record<string, unknown>>({});
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Responsive: collapse panel by default on < 1024px
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    setIsPanelOpen(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsPanelOpen(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // Fetch task analysis on mount
   useEffect(() => {
@@ -80,7 +101,6 @@ export default function TaskAnalysisDetailView({
   useEffect(() => {
     return () => {
       clearTimeout(saveTimerRef.current);
-      // Fire synchronous best-effort save
       const pending = pendingRef.current;
       if (Object.keys(pending).length > 0) {
         navigator.sendBeacon?.(
@@ -93,13 +113,8 @@ export default function TaskAnalysisDetailView({
 
   const handleFieldChange = useCallback(
     (updates: Record<string, unknown>) => {
-      // Update local state immediately
       setData((prev) => (prev ? { ...prev, ...updates } as TaskAnalysisData : prev));
-
-      // Accumulate pending changes
       pendingRef.current = { ...pendingRef.current, ...updates };
-
-      // Debounced save (1500ms)
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => flushSave(), 1500);
     },
@@ -109,10 +124,7 @@ export default function TaskAnalysisDetailView({
   const handleStepsChange = useCallback(
     (steps: ProceduralStepData[]) => {
       setData((prev) => (prev ? { ...prev, steps } : prev));
-
-      // Steps always go as full array
       pendingRef.current = { ...pendingRef.current, steps };
-
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => flushSave(), 1500);
     },
@@ -142,80 +154,117 @@ export default function TaskAnalysisDetailView({
 
   if (!data) return null;
 
+  const composite = getComposite(data);
+  const priority = priorityBadge(composite);
+
   return (
-    <div className="flex-1 overflow-y-auto min-h-full bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-1">
-            <h1 className="text-xl font-semibold text-gray-900 truncate">
-              {data.taskName || 'Untitled Task Analysis'}
-            </h1>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {isSaving && (
-                <span className="text-xs text-gray-400 flex items-center gap-1">
-                  <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                  Saving...
-                </span>
-              )}
-              {!isSaving && lastSaved && (
-                <span className="text-xs text-gray-400">Saved {lastSaved}</span>
-              )}
-              {error && (
-                <span className="text-xs text-red-500">{error}</span>
-              )}
-            </div>
-          </div>
-          <p className="text-sm text-gray-500">
-            Edit task details, define procedural steps, and score priority.
-          </p>
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Header Bar */}
+      <TaskAnalysisHeader
+        taskName={data.taskName}
+        analysisType={data.analysisType}
+        priorityLabel={priority.label}
+        priorityColor={priority.color}
+        compositeScore={composite}
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+        error={error}
+        isPanelOpen={isPanelOpen}
+        onTaskNameChange={(name) => handleFieldChange({ taskName: name })}
+        onTogglePanel={() => setIsPanelOpen((prev) => !prev)}
+        onPriorityClick={() => {
+          setIsPanelOpen(true);
+          setActiveTab('priority');
+        }}
+      />
+
+      {/* Task Info Banner (full-width, collapsible) */}
+      <TaskInfoBanner
+        taskGoal={data.taskGoal}
+        objectiveId={data.objectiveId}
+        objective={data.objective}
+        sourceTaskId={data.sourceTaskId}
+        dataSource={data.dataSource}
+        courseId={courseId}
+        onChange={handleFieldChange}
+      />
+
+      {/* Split Layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel — Step Builder */}
+        <div
+          className={`flex-1 overflow-y-auto p-4 transition-all duration-300 ${
+            isPanelOpen ? '' : 'w-full'
+          }`}
+        >
+          {data.analysisType === 'PROCEDURAL' && (
+            <ProceduralStepBuilder
+              steps={data.steps}
+              onChange={handleStepsChange}
+            />
+          )}
         </div>
-      </div>
 
-      {/* Sections */}
-      <div className="p-6 max-w-5xl mx-auto space-y-6">
-        <TaskIdentitySection
-          taskName={data.taskName}
-          taskGoal={data.taskGoal}
-          objectiveId={data.objectiveId}
-          objective={data.objective}
-          sourceTaskId={data.sourceTaskId}
-          dataSource={data.dataSource}
-          courseId={courseId}
-          onChange={handleFieldChange}
-        />
+        {/* Right Panel — Tabbed Context */}
+        <div
+          className={`flex-shrink-0 border-l border-gray-200 bg-white flex flex-col transition-all duration-300 overflow-hidden ${
+            isPanelOpen
+              ? 'w-[35%] min-w-[320px] max-w-[480px]'
+              : 'w-0 min-w-0 border-l-0'
+          }`}
+        >
+          {isPanelOpen && (
+            <>
+              {/* Tab Bar — sticky */}
+              <div className="flex-shrink-0 border-b border-gray-200 flex">
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex-1 px-2 py-2.5 text-xs font-medium text-center transition-colors ${
+                      activeTab === tab.key
+                        ? 'text-[#03428e] border-b-2 border-[#03428e] bg-blue-50/30'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
-        <ModeSelector
-          analysisType={data.analysisType}
-          onChange={handleFieldChange}
-        />
+              {/* Tab Content — scrollable */}
+              <div className="flex-1 overflow-y-auto p-4">
+                {activeTab === 'learner' && (
+                  <LearnerContextSection
+                    audienceRole={data.audienceRole}
+                    audiencePriorKnowledge={data.audiencePriorKnowledge}
+                    audienceTechComfort={data.audienceTechComfort}
+                    constraints={data.constraints}
+                    contextNotes={data.contextNotes}
+                    dataSource={data.dataSource}
+                    courseId={courseId}
+                    onChange={handleFieldChange}
+                  />
+                )}
 
-        <LearnerContextSection
-          audienceRole={data.audienceRole}
-          audiencePriorKnowledge={data.audiencePriorKnowledge}
-          audienceTechComfort={data.audienceTechComfort}
-          constraints={data.constraints}
-          contextNotes={data.contextNotes}
-          dataSource={data.dataSource}
-          courseId={courseId}
-          onChange={handleFieldChange}
-        />
+                {activeTab === 'priority' && (
+                  <PriorityScoringPanel
+                    criticalityScore={data.criticalityScore}
+                    frequencyScore={data.frequencyScore}
+                    difficultyScore={data.difficultyScore}
+                    universalityScore={data.universalityScore}
+                    feasibilityScore={data.feasibilityScore}
+                    onChange={handleFieldChange}
+                  />
+                )}
 
-        {data.analysisType === 'PROCEDURAL' && (
-          <ProceduralStepBuilder
-            steps={data.steps}
-            onChange={handleStepsChange}
-          />
-        )}
-
-        <PriorityScoringPanel
-          criticalityScore={data.criticalityScore}
-          frequencyScore={data.frequencyScore}
-          difficultyScore={data.difficultyScore}
-          universalityScore={data.universalityScore}
-          feasibilityScore={data.feasibilityScore}
-          onChange={handleFieldChange}
-        />
+                {activeTab === 'reference' && (
+                  <ReferencePanel courseId={courseId} />
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

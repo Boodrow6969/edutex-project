@@ -92,27 +92,8 @@ export default function TaskIdentitySection({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">Task Identity</h3>
-      <p className="text-sm text-gray-500 mb-4">Name the task and define what successful performance looks like.</p>
-
-      <div className="space-y-4">
-        {/* Task Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Task Name <span className="text-red-400">*</span>
-            <DataSourceBadge field="taskName" dataSource={dataSource} />
-          </label>
-          <input
-            type="text"
-            value={taskName}
-            onChange={(e) => onChange({ taskName: e.target.value })}
-            placeholder="e.g., Process a customer return"
-            className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#03428e] focus:border-[#03428e] outline-none"
-          />
-        </div>
-
-        {/* Task Goal */}
+    <div className="space-y-4">
+      {/* Task Goal */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Task Goal
@@ -228,7 +209,6 @@ export default function TaskIdentitySection({
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
