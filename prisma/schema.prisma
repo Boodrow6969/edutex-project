@@ -302,6 +302,10 @@ model Course {
   archivedAt   DateTime?
   dashboardStatuses Json?    // Stores card status overrides as JSON
 
+  // Gap classification (Learning Objectives wizard)
+  gapKnowledge Boolean @default(false)
+  gapSkill     Boolean @default(false)
+
   // External mapping
   externalId      String?
   externalSource  String?
@@ -318,6 +322,7 @@ model Course {
   curricula    CurriculumCourse[]
   learningTasks  LearningTask[]
   assessmentItems AssessmentItem[]
+  triageItems    TriageItem[]
 
   @@index([externalId])
   @@map("courses")
@@ -744,6 +749,17 @@ model Objective {
   condition      String?    @db.Text
   criteria       String?    @db.Text
 
+  // Wizard ABCD extensions
+  audience           String?    @db.Text
+  verb               String?
+  bloomKnowledge     BloomKnowledgeType?
+  freeformText       String?    @db.Text
+  objectivePriority  ObjectivePriority?
+  requiresAssessment Boolean    @default(false)
+  wiifm              String?    @db.Text
+  linkedTriageItemId String?
+  sortOrder          Int        @default(0)
+
   // External taxonomy mapping
   externalId     String?
   externalSource String?
@@ -756,7 +772,8 @@ model Objective {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course         Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  linkedTriageItem TriageItem? @relation(fields: [linkedTriageItemId], references: [id], onDelete: SetNull)
 
   // Explicit relationships for adaptive engine consumption
   taskAnalyses    TaskAnalysis[]
@@ -837,6 +854,19 @@ enum BloomLevel {
   ANALYZE
   EVALUATE
   CREATE
+}
+
+enum BloomKnowledgeType {
+  FACTUAL
+  CONCEPTUAL
+  PROCEDURAL
+  METACOGNITIVE
+}
+
+enum ObjectivePriority {
+  MUST
+  SHOULD
+  NICE_TO_HAVE
 }
 
 model Deliverable {
@@ -1087,4 +1117,36 @@ model ContentAsset {
   @@index([workspaceId])
   @@index([workspaceId, mimeType])
   @@map("content_assets")
+}
+
+// Learning Objectives Wizard — Triage + Subtask models
+model TriageItem {
+  id         String   @id @default(cuid())
+  courseId    String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  text       String
+  column     String   @default("must")
+  source     String   @default("NA")
+  sortOrder  Int      @default(0)
+  subTasks   SubTask[]
+  objectives Objective[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([courseId])
+  @@map("triage_items")
+}
+
+model SubTask {
+  id           String     @id @default(cuid())
+  parentItemId String
+  parentItem   TriageItem @relation(fields: [parentItemId], references: [id], onDelete: Cascade)
+  text         String     @default("")
+  isNew        String     @default("New")
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([parentItemId])
+  @@map("sub_tasks")
 }

@@ -79,6 +79,45 @@
 - **Priority:** Low (UX polish)
 - **Status:** Open
 
+### BUG-015: Needs Analysis only shows Stakeholder Data button when Workspace Needs Analysis has been approved
+- **Location:** ?
+- **Issue:** If you enter the course needs analysis without first approving the stakeholder submission, there is no Stakeholder data button. 
+- **Fix:** While this is by desgin, there needs to be a notice to the user that if they approve a submission, they will be able to access that information from each section in the Course Needs Analysis
+- **Priority:** Low (UX polish)
+- **Status:** Open
+
+## BUG-016: REPEATING_TABLE fields render as concatenated string in review panel
+
+**Location:** Submission review slide-over panel (Needs Analysis → click submission)
+**Severity:** Minor / Cosmetic
+**Found by:** Cursor Background Agent — Needs Analysis workflow test (2026-02-26)
+
+**Steps to reproduce:**
+1. Fill out a stakeholder form with REPEATING_TABLE fields (e.g., SME table, rollout phases)
+2. Submit the form
+3. Open the submission in the review panel
+
+**Expected:** Table data renders as a formatted table with rows and columns
+**Actual:** All row data concatenates into a single string (e.g., "Tom Bradley - Salesforce Admin - tom.bradley@acmecorp.comRachel Kim - CPQ Configuration Lead...")
+
+**Likely fix:** Review panel component needs to parse REPEATING_TABLE JSON and render with `.map()` + row separators or an actual table element, rather than joining/stringifying the value.
+
+## BUG-017: Duplicate conditional questions shown in review panel
+
+**Location:** Submission review slide-over panel (Needs Analysis → click submission)
+**Severity:** Minor / Cosmetic
+**Found by:** Cursor Background Agent — Needs Analysis workflow test (2026-02-26)
+
+**Steps to reproduce:**
+1. Fill out a NEW_SYSTEM stakeholder form
+2. Select "Phased" for rollout approach
+3. Fill in the conditional "If phased or pilot, which groups go first and when?" field
+4. Submit and open in review panel
+
+**Expected:** Only the conditional variant matching the stakeholder's selection renders (Phased version with data)
+**Actual:** Both the Phased and Pilot conditional variants render — one with data, one showing "No response"
+
+**Likely fix:** Review panel rendering logic needs to evaluate the same `showWhen` / `conditionalOn` rules used by the form. Only display questions whose display conditions were satisfied based on the submitted answers.
 
 ---
 
@@ -265,6 +304,11 @@
 - **Priority:** Medium
 - **Status:** Open — awaiting design decisions
 
+### ENH-029: Needs Analysis Data for slide over needs Formatting
+- **Location** unknown - need to ask
+- **Issue** NA slideover data is a dump. Hard to see and hard to differentiate. Needs formatting to show the difference to IDs for easier Use
+- **Priority:** Medium
+- **Status:** Open — awaiting design decisions
 
 ---
 
