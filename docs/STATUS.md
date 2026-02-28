@@ -1,10 +1,10 @@
 # EDUTex Project Status
 
-Last Updated: February 21, 2026
+Last Updated: February 28, 2026
 
 ---
 
-## Current Version: 0.13.1
+## Current Version: 0.14.0
 
 ---
 ## To do
@@ -29,11 +29,19 @@ Last Updated: February 21, 2026
 - AI extraction for responses (mock mode available)
 - GuidancePanel component for tab instructions
 
-### Learning Objectives — Complete
-- Manual creation and AI-generated objectives
-- Bloom's taxonomy alignment
-- Quick Add form
-- Links to needs analysis data
+### Learning Objectives Wizard — Complete (v0.14.0)
+- 6-screen wizard: Context & Gap Check, Content Priority, Task Breakdown, Objective Builder (Guided/Freeform), Validation Dashboard, Export & Downstream Handoff
+- Horizontal stepper with non-linear navigation and step status indicators
+- NA Slide-Over with 5 tabs mapped from QUESTION_MAP sections, training-type-aware labels
+- Content Priority triage with coaching text, directional move buttons, theory citations
+- Bloom's taxonomy alignment (classic 6-level + Anderson-Krathwohl 2D verb matrix)
+- Gap classification with autosave
+- View toggle between Guided (ABCD) and Freeform modes
+- Validation dashboard: traceability, Bloom's distribution, priority breakdown, assessment alignment
+
+### Task Analysis UI — Rebuilt (v0.14.0)
+- New components: TaskAnalysisHeader, TaskInfoBanner, ReferencePanel
+- Rebuilt detail view with LearnerContextSection, PriorityScoringPanel, ProceduralStepBuilder
 
 ### Content Assets — Phase A Complete
 - `ContentAsset` Prisma model (workspace-scoped, image metadata, tags, alt text)
@@ -79,15 +87,16 @@ Last Updated: February 21, 2026
 
 ## What's Next (In Priority Order)
 
-1. Stakeholder needs analysis browser testing — create test token, full form walkthrough
-2. DATE_WITH_TEXT component — hybrid text input with calendar toggle (Cursor prompt ready)
-3. Step 5: ID Review UI — wire stakeholder feature into workspace dashboard
+1. Objective autosave — wire up debounced save for objectives (gap classification pattern exists)
+2. Training type tab mappings — define proper QUESTION_MAP mappings for PERFORMANCE_PROBLEM, COMPLIANCE, ROLE_CHANGE
+3. Drag-and-drop for Content Priority triage columns
 4. Quiz Builder — no dependencies, standalone module
 5. Job Aids — uses Content Assets
-7. Evaluation Plan — standalone module
+6. Evaluation Plan — standalone module
 
 ## Recently Completed
 
+- **v0.14.0 (Feb 28, 2026):** Learning Objectives Wizard — 6-screen wizard with Content Priority triage, NA Slide-Over redesign (QUESTION_MAP-driven tab mapping), training-type-aware labels, coaching UX. Task Analysis UI overhaul. Bugs fixed: courseType missing from overview select, hardcoded validation labels.
 - **v0.13.1 (Feb 21, 2026):** Needs Analysis Reconciliation — section-title-based stakeholder data filtering for all training types, migration history cleanup for laptop environment, course dashboard revamp merged to main.
 - **v0.12.0 (Feb 13, 2026):** Machine-consumability migration — 7 new enums, LearningTask model, AssessmentItem model, Objective link tables, block content contracts with _type discriminators, design rationale fields. 4 schema migrations, 5 workstreams, zero breaking changes.
 - **v0.11.0 (Feb 9, 2026):** Content Assets Phase A+B — ContentAsset model, local storage service, full CRUD API, reusable components, storyboard integration (Content, Title/Intro, Video screens).

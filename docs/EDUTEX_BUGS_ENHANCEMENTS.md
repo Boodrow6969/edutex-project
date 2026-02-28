@@ -305,10 +305,11 @@
 - **Status:** Open — awaiting design decisions
 
 ### ENH-029: Needs Analysis Data for slide over needs Formatting
-- **Location** unknown - need to ask
-- **Issue** NA slideover data is a dump. Hard to see and hard to differentiate. Needs formatting to show the difference to IDs for easier Use
+- **Location:** `app/workspace/[workspaceId]/course/[courseId]/objectives/page.tsx`, `constants.ts`
+- **Issue:** NA slideover data was a dump. Hard to see and hard to differentiate.
 - **Priority:** Medium
-- **Status:** Open — awaiting design decisions
+- **Status:** Resolved (February 28, 2026, v0.14.0)
+- **Resolution:** Rebuilt slide-over tab mapping using QUESTION_MAP sections. Responses now routed to 5 purpose-driven tabs (What They Need to Do, The System/Change, Who's Learning, Constraints & Environment, Project & Stakeholders) with items sorted by displayOrder. Stakeholder names prefix each response. CourseAnalysis data supplements as "ID Analysis" entries.
 
 ---
 
@@ -390,4 +391,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: February 9, 2026 (v0.11.0 — Content Assets Phase A+B; ENH-012 complete)*
+*Last updated: February 28, 2026 (v0.14.0 — Learning Objectives Wizard, NA Slide-Over redesign, Content Priority UX; ENH-029 resolved)*
