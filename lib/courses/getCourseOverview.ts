@@ -49,6 +49,7 @@ export interface CourseOverview {
     id: string;
     name: string;
     description: string | null;
+    courseType: string | null;
     createdAt: Date;
     updatedAt: Date;
     workspaceId: string;
@@ -92,6 +93,7 @@ export async function getCourseOverview(
       id: true,
       name: true,
       description: true,
+      courseType: true,
       createdAt: true,
       updatedAt: true,
       workspaceId: true,
@@ -228,6 +230,7 @@ export async function getCourseOverview(
       id: course.id,
       name: course.name,
       description: course.description,
+      courseType: course.courseType,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,
       workspaceId: course.workspaceId,
