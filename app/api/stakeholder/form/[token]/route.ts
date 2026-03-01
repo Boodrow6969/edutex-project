@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,8 @@ async function validateToken(tokenString: string) {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { token: tokenString } = await params;
+    const limited = await checkRateLimit(tokenString);
+    if (limited) return limited;
     const result = await validateToken(tokenString);
 
     if ('error' in result) {

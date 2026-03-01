@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,8 @@ interface RouteParams {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { token: tokenString } = await params;
+    const limited = await checkRateLimit(tokenString);
+    if (limited) return limited;
 
     // Validate token
     const token = await prisma.stakeholderAccessToken.findUnique({
