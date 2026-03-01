@@ -9,6 +9,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { storyboardToDocx } from '@/lib/export/storyboard-to-docx';
+import {
+  getCurrentUserOrThrow,
+  assertPageAccess,
+  errorResponse,
+} from '@/lib/auth-helpers';
 
 export async function GET(
   request: NextRequest,
@@ -16,6 +21,10 @@ export async function GET(
 ) {
   try {
     const { pageId } = await params;
+
+    const user = await getCurrentUserOrThrow();
+    await assertPageAccess(pageId, user.id);
+
     const searchParams = request.nextUrl.searchParams;
     const format = searchParams.get('format') || 'docx';
     const includeEmptyFields = searchParams.get('includeEmpty') === 'true';
@@ -101,9 +110,6 @@ export async function GET(
     });
   } catch (error) {
     console.error('Storyboard export error:', error);
-    return NextResponse.json(
-      { error: 'Failed to export storyboard' },
-      { status: 500 }
-    );
+    return errorResponse(error, 'Failed to export storyboard');
   }
 }

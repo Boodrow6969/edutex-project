@@ -35,6 +35,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (expiresAt !== undefined && expiresAt !== null) {
+      const parsed = new Date(expiresAt);
+      if (isNaN(parsed.getTime()) || parsed <= new Date()) {
+        return Response.json(
+          { error: 'expiresAt must be a valid future date' },
+          { status: 400 }
+        );
+      }
+    }
+
     await assertWorkspaceMember(workspaceId, user.id);
 
     const result = await prisma.$transaction(async (tx) => {

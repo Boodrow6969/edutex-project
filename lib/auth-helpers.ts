@@ -50,6 +50,9 @@ export interface AuthUser {
 export async function getCurrentUserOrThrow(): Promise<AuthUser> {
   // Development-only auth bypass
   if (process.env.SKIP_AUTH === 'true') {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SKIP_AUTH cannot be enabled in production');
+    }
     console.warn('⚠️  AUTH BYPASS ENABLED: Authentication is skipped (SKIP_AUTH=true). This should only be used in development.');
 
     // Upsert the dev user to ensure it exists in the database
@@ -124,6 +127,9 @@ export async function assertWorkspaceMember(
 ): Promise<WorkspaceMembershipResult> {
   // Development-only auth bypass
   if (process.env.SKIP_AUTH === 'true') {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SKIP_AUTH cannot be enabled in production');
+    }
     console.warn(`⚠️  WORKSPACE MEMBERSHIP BYPASS: Skipping membership check for workspace ${workspaceId} (SKIP_AUTH=true). This should only be used in development.`);
     // Return fake membership with ADMINISTRATOR role so all role checks pass
     return {
@@ -198,6 +204,9 @@ export async function assertCourseAccess(
 ): Promise<{ courseId: string; workspaceId: string; membership: WorkspaceMembershipResult }> {
   // Development-only auth bypass
   if (process.env.SKIP_AUTH === 'true') {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SKIP_AUTH cannot be enabled in production');
+    }
     console.warn(`⚠️  COURSE ACCESS BYPASS: Skipping workspace checks for course ${courseId} (SKIP_AUTH=true). This should only be used in development.`);
 
     // Still verify course exists
@@ -275,6 +284,9 @@ export async function assertCurriculumAccess(
 ): Promise<{ curriculumId: string; workspaceId: string; membership: WorkspaceMembershipResult }> {
   // Development-only auth bypass
   if (process.env.SKIP_AUTH === 'true') {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SKIP_AUTH cannot be enabled in production');
+    }
     console.warn(`⚠️  CURRICULUM ACCESS BYPASS: Skipping workspace checks for curriculum ${curriculumId} (SKIP_AUTH=true). This should only be used in development.`);
 
     const curriculum = await prisma.curriculum.findUnique({

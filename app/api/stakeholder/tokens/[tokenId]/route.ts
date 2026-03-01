@@ -49,7 +49,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     if (body.expiresAt !== undefined) {
-      updateData.expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
+      if (body.expiresAt !== null) {
+        const parsed = new Date(body.expiresAt);
+        if (isNaN(parsed.getTime()) || parsed <= new Date()) {
+          return Response.json(
+            { error: 'expiresAt must be a valid future date' },
+            { status: 400 }
+          );
+        }
+        updateData.expiresAt = parsed;
+      } else {
+        updateData.expiresAt = null;
+      }
     }
 
     if (Object.keys(updateData).length === 0) {
