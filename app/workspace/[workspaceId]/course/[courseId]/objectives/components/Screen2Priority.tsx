@@ -22,9 +22,9 @@ interface ColDef {
 const COLS: Record<TriageColumn, ColDef> = {
   must: {
     label: 'Must Have',
-    what: 'Tasks where failure has business consequences \u2014 errors, safety risks, compliance violations, or inability to perform the core job.',
-    why: 'Every Must Have item gets a learning objective and an assessment.',
-    question: 'Would someone get in trouble or cause harm if they couldn\u2019t do this on Day 1?',
+    what: 'Failure of these tasks have business consequences, including errors, safety risks, compliance violations, or inability to perform the core job.',
+    why: 'Every Must Have Task should have a learning objective and an assessment.',
+    question: '"Would someone get in trouble or cause harm if they couldn\u2019t do this on Day 1?"',
     color: '#dc2626',
     bg: 'bg-red-50',
     border: 'border-red-200',
@@ -32,17 +32,17 @@ const COLS: Record<TriageColumn, ColDef> = {
   should: {
     label: 'Should Have',
     what: 'Important for full proficiency but survivable short-term. People could get by using workarounds, job aids, or asking a colleague.',
-    why: 'Should Have items get objectives but may use lighter assessment or practice.',
-    question: 'Could they muddle through the first week without this, even if it\u2019s not ideal?',
+    why: 'Should Have Tasks require objectives but may use lighter assessment or practice.',
+    question: '"Could they muddle through the first week without this, even if it\u2019s not ideal?"',
     color: '#ca8a04',
     bg: 'bg-yellow-50',
     border: 'border-yellow-200',
   },
   nice: {
     label: 'Nice to Have',
-    what: 'Good to know, but no learning objective is written. These become job aids, reference materials, or Phase 2 training.',
-    why: 'If everything is Must Have, nothing is. Protect training scope by being honest about priorities.',
-    question: 'If we cut this from training entirely, would anyone notice in the first 30 days?',
+    what: 'Strictly optional, these become job aids, reference materials, or Phase 2 training.',
+    why: 'Tasks that don\'t require objectives. Use this classification to protect training scope by being honest about priorities.',
+    question: '"If we cut this from training entirely, would anyone notice in the first 30 days? Rememeber, If everything is a Must Have, nothing is."',  
     color: '#6b7280',
     bg: 'bg-gray-50',
     border: 'border-gray-200',
@@ -88,9 +88,9 @@ export default function Screen2Priority({ triageItems, setTriageItems, courseId 
 
   return (
     <div className="p-6 max-w-[960px] mx-auto">
-      <h2 className="text-lg font-bold text-gray-900 mb-1">Content Priority</h2>
+      <h2 className="text-lg font-bold text-gray-900 mb-1">Content Priority Training Tasks</h2>
       <p className="text-[13px] text-gray-500 mb-4">
-        Classify tasks by business impact. Only &ldquo;Must Have&rdquo; and &ldquo;Should Have&rdquo; items become learning objectives.
+        Classify tasks by business impact. Only &ldquo;Must Have&rdquo; and &ldquo;Should Have&rdquo; tasks become learning objectives.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3.5">
@@ -104,18 +104,18 @@ export default function Screen2Priority({ triageItems, setTriageItems, courseId 
             >
               {/* Column header with coaching */}
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[13px] font-bold" style={{ color: c.color }}>
+                <span className="text-[15px] font-bold" style={{ color: c.color }}>
                   {c.label}
                 </span>
                 <span className="text-[11px]" style={{ color: c.color }}>
                   {items.length}
                 </span>
               </div>
+              <div className="text-[12px] text-gray-700 font-semibold leading-snug mb-1.5">
+                {c.why}
+              </div>              
               <div className="text-[11px] text-gray-600 leading-snug mb-1.5">
                 {c.what}
-              </div>
-              <div className="text-[11px] text-gray-700 font-semibold leading-snug mb-1.5">
-                {c.why}
               </div>
               <div className="text-[11px] text-gray-500 italic leading-snug mb-3">
                 {c.question}
