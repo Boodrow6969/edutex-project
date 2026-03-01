@@ -8,6 +8,52 @@ import {
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
 import { defaultCourseAnalysisFormData } from '@/lib/types/courseAnalysis';
+import { z } from 'zod';
+
+const audienceSchema = z.object({
+  id: z.string().optional(),
+  role: z.string().max(500),
+  headcount: z.string().max(100).optional(),
+  frequency: z.string().max(100).optional(),
+  techComfort: z.string().max(100).optional(),
+  trainingFormat: z.string().max(200).optional(),
+  notes: z.string().max(2000).optional(),
+  order: z.number().int().min(0).optional(),
+});
+
+const taskSchema = z.object({
+  id: z.string().optional(),
+  task: z.string().max(1000),
+  audience: z.string().max(500).optional(),
+  source: z.string().max(200).optional(),
+  complexity: z.string().max(100).optional(),
+  intervention: z.string().max(200).optional(),
+  priority: z.string().max(100).optional(),
+  notes: z.string().max(2000).optional(),
+  order: z.number().int().min(0).optional(),
+});
+
+const courseAnalysisSchema = z.object({
+  problemSummary: z.string().max(5000).optional(),
+  currentStateSummary: z.string().max(5000).optional(),
+  desiredStateSummary: z.string().max(5000).optional(),
+  constraints: z.array(z.string().max(1000)).optional(),
+  assumptions: z.array(z.string().max(1000)).optional(),
+  learnerPersonas: z.array(z.string().max(1000)).optional(),
+  stakeholders: z.array(z.string().max(1000)).optional(),
+  smes: z.array(z.string().max(1000)).optional(),
+  isTrainingSolution: z.boolean().nullable().optional(),
+  nonTrainingFactors: z.string().max(5000).optional(),
+  solutionRationale: z.string().max(5000).optional(),
+  deliveryNotes: z.string().max(5000).optional(),
+  existingMaterials: z.string().max(5000).optional(),
+  level1Reaction: z.string().max(2000).optional(),
+  level2Learning: z.string().max(2000).optional(),
+  level3Behavior: z.string().max(2000).optional(),
+  level4Results: z.string().max(2000).optional(),
+  audiences: z.array(audienceSchema).optional(),
+  tasks: z.array(taskSchema).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -83,49 +129,58 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     ]);
 
     const body = await request.json();
+    const parsed = courseAnalysisSchema.safeParse(body);
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const {
+      problemSummary,
+      currentStateSummary,
+      desiredStateSummary,
+      constraints,
+      assumptions,
+      learnerPersonas,
+      stakeholders,
+      smes,
+      isTrainingSolution,
+      nonTrainingFactors,
+      solutionRationale,
+      deliveryNotes,
+      existingMaterials,
+      level1Reaction,
+      level2Learning,
+      level3Behavior,
+      level4Results,
+      audiences,
+      tasks,
+    } = parsed.data;
 
     const flatData = {
-      problemSummary: body.problemSummary ?? '',
-      currentStateSummary: body.currentStateSummary ?? '',
-      desiredStateSummary: body.desiredStateSummary ?? '',
-      constraints: body.constraints ?? [],
-      assumptions: body.assumptions ?? [],
-      learnerPersonas: body.learnerPersonas ?? [],
-      stakeholders: body.stakeholders ?? [],
-      smes: body.smes ?? [],
-      isTrainingSolution: body.isTrainingSolution ?? null,
-      nonTrainingFactors: body.nonTrainingFactors ?? '',
-      solutionRationale: body.solutionRationale ?? '',
-      deliveryNotes: body.deliveryNotes ?? '',
-      existingMaterials: body.existingMaterials ?? '',
-      level1Reaction: body.level1Reaction ?? '',
-      level2Learning: body.level2Learning ?? '',
-      level3Behavior: body.level3Behavior ?? '',
-      level4Results: body.level4Results ?? '',
+      problemSummary,
+      currentStateSummary,
+      desiredStateSummary,
+      constraints,
+      assumptions,
+      learnerPersonas,
+      stakeholders,
+      smes,
+      isTrainingSolution,
+      nonTrainingFactors,
+      solutionRationale,
+      deliveryNotes,
+      existingMaterials,
+      level1Reaction,
+      level2Learning,
+      level3Behavior,
+      level4Results,
     };
 
-    const incomingAudiences: Array<{
-      id?: string;
-      role: string;
-      headcount?: string;
-      frequency?: string;
-      techComfort?: string;
-      trainingFormat?: string;
-      notes?: string;
-      order?: number;
-    }> = body.audiences ?? [];
-
-    const incomingTasks: Array<{
-      id?: string;
-      task: string;
-      audience?: string;
-      source?: string;
-      complexity?: string;
-      intervention?: string;
-      priority?: string;
-      notes?: string;
-      order?: number;
-    }> = body.tasks ?? [];
+    const incomingAudiences = audiences ?? [];
+    const incomingTasks = tasks ?? [];
 
     const result = await prisma.$transaction(async (tx) => {
       // Upsert flat fields

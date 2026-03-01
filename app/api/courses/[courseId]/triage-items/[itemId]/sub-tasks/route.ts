@@ -8,6 +8,13 @@ import {
   errorResponse,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
+import { z } from 'zod';
+
+const subTaskSchema = z.object({
+  text: z.string().max(2000).optional(),
+  isNew: z.string().max(50).optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
 
 interface RouteContext {
   params: Promise<{ courseId: string; itemId: string }>;
@@ -29,12 +36,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
       WorkspaceRole.DESIGNER,
     ]);
 
+    const parsed = subTaskSchema.safeParse(body);
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const { text, isNew, sortOrder } = parsed.data;
+
     const subTask = await prisma.subTask.create({
       data: {
         parentItemId: itemId,
-        text: body.text || '',
-        isNew: body.isNew || 'New',
-        sortOrder: body.sortOrder ?? 0,
+        text: text || '',
+        isNew: isNew || 'New',
+        sortOrder: sortOrder ?? 0,
       },
     });
 

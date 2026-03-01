@@ -5,7 +5,52 @@ import {
   assertCourseAccess,
   errorResponse,
 } from '@/lib/auth-helpers';
-import { WorkspaceRole } from '@prisma/client';
+import { Prisma, WorkspaceRole, TaskAnalysisType, InstructionalEvent } from '@prisma/client';
+import { z } from 'zod';
+
+const taskAnalysisStepSchema = z.object({
+  stepNumber: z.number().int().min(1).optional(),
+  description: z.string().max(5000).optional(),
+  isDecisionPoint: z.boolean().optional(),
+  branchCondition: z.string().max(2000).nullable().optional(),
+  commonErrors: z.string().max(2000).nullable().optional(),
+  cues: z.string().max(2000).nullable().optional(),
+  toolsRequired: z.string().max(2000).nullable().optional(),
+  instructionalEvent: z.enum([
+    InstructionalEvent.DEMONSTRATION,
+    InstructionalEvent.PRACTICE,
+    InstructionalEvent.DECISION_BRANCH,
+    InstructionalEvent.INFORMATION,
+    InstructionalEvent.EXAMPLE,
+    InstructionalEvent.CAUTION,
+  ]).nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+const taskAnalysisSchema = z.object({
+  objectiveId: z.string().nullable().optional(),
+  sourceTaskId: z.string().nullable().optional(),
+  analysisType: z.enum([
+    TaskAnalysisType.PROCEDURAL,
+    TaskAnalysisType.HIERARCHICAL,
+    TaskAnalysisType.COGNITIVE,
+  ]).optional(),
+  taskName: z.string().max(1000).optional(),
+  taskGoal: z.string().max(5000).optional(),
+  audienceRole: z.string().max(500).optional(),
+  audiencePriorKnowledge: z.string().max(2000).optional(),
+  audienceTechComfort: z.string().max(200).optional(),
+  constraints: z.string().max(5000).optional(),
+  contextNotes: z.string().max(5000).optional(),
+  dataSource: z.record(z.string(), z.unknown()).optional(),
+  criticalityScore: z.number().min(0).max(10).nullable().optional(),
+  frequencyScore: z.number().min(0).max(10).nullable().optional(),
+  difficultyScore: z.number().min(0).max(10).nullable().optional(),
+  universalityScore: z.number().min(0).max(10).nullable().optional(),
+  feasibilityScore: z.number().min(0).max(10).nullable().optional(),
+  aiDrafted: z.boolean().optional(),
+  steps: z.array(taskAnalysisStepSchema).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +106,33 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     await assertCourseAccess(courseId, user.id, WRITE_ROLES);
 
     const body = await request.json();
+    const parsed = taskAnalysisSchema.safeParse(body);
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const {
+      objectiveId,
+      sourceTaskId,
+      analysisType,
+      taskName,
+      taskGoal,
+      audienceRole,
+      audiencePriorKnowledge,
+      audienceTechComfort,
+      constraints,
+      contextNotes,
+      dataSource,
+      criticalityScore,
+      frequencyScore,
+      difficultyScore,
+      universalityScore,
+      feasibilityScore,
+      aiDrafted,
+      steps,
+    } = parsed.data;
 
     // Find or create a TASK_ANALYSIS page for this course
     let page = await prisma.page.findFirst({
@@ -70,7 +142,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!page) {
       page = await prisma.page.create({
         data: {
-          title: body.taskName || 'Task Analysis',
+          title: taskName || 'Task Analysis',
           type: 'TASK_ANALYSIS',
           courseId,
           createdById: user.id,
@@ -81,51 +153,36 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const taskAnalysis = await prisma.taskAnalysis.create({
       data: {
         pageId: page.id,
-        objectiveId: body.objectiveId ?? null,
-        sourceTaskId: body.sourceTaskId ?? null,
-        analysisType: body.analysisType ?? 'PROCEDURAL',
-        taskName: body.taskName ?? '',
-        taskGoal: body.taskGoal ?? '',
-        audienceRole: body.audienceRole ?? '',
-        audiencePriorKnowledge: body.audiencePriorKnowledge ?? '',
-        audienceTechComfort: body.audienceTechComfort ?? '',
-        constraints: body.constraints ?? '',
-        contextNotes: body.contextNotes ?? '',
-        dataSource: body.dataSource ?? {},
-        criticalityScore: body.criticalityScore ?? null,
-        frequencyScore: body.frequencyScore ?? null,
-        difficultyScore: body.difficultyScore ?? null,
-        universalityScore: body.universalityScore ?? null,
-        feasibilityScore: body.feasibilityScore ?? null,
-        aiDrafted: body.aiDrafted ?? false,
-        steps: body.steps?.length
+        objectiveId: objectiveId ?? null,
+        sourceTaskId: sourceTaskId ?? null,
+        analysisType: analysisType ?? 'PROCEDURAL',
+        taskName: taskName ?? '',
+        taskGoal: taskGoal ?? '',
+        audienceRole: audienceRole ?? '',
+        audiencePriorKnowledge: audiencePriorKnowledge ?? '',
+        audienceTechComfort: audienceTechComfort ?? '',
+        constraints: constraints ?? '',
+        contextNotes: contextNotes ?? '',
+        dataSource: (dataSource ?? {}) as Prisma.InputJsonValue,
+        criticalityScore: criticalityScore ?? null,
+        frequencyScore: frequencyScore ?? null,
+        difficultyScore: difficultyScore ?? null,
+        universalityScore: universalityScore ?? null,
+        feasibilityScore: feasibilityScore ?? null,
+        aiDrafted: aiDrafted ?? false,
+        steps: steps?.length
           ? {
-              create: body.steps.map(
-                (
-                  s: {
-                    stepNumber: number;
-                    description: string;
-                    isDecisionPoint?: boolean;
-                    branchCondition?: string;
-                    commonErrors?: string;
-                    cues?: string;
-                    toolsRequired?: string;
-                    instructionalEvent?: string;
-                    notes?: string;
-                  },
-                  i: number,
-                ) => ({
-                  stepNumber: s.stepNumber ?? i + 1,
-                  description: s.description ?? '',
-                  isDecisionPoint: s.isDecisionPoint ?? false,
-                  branchCondition: s.branchCondition ?? null,
-                  commonErrors: s.commonErrors ?? null,
-                  cues: s.cues ?? null,
-                  toolsRequired: s.toolsRequired ?? null,
-                  instructionalEvent: s.instructionalEvent ?? null,
-                  notes: s.notes ?? null,
-                }),
-              ),
+              create: steps.map((s, i) => ({
+                stepNumber: s.stepNumber ?? i + 1,
+                description: s.description ?? '',
+                isDecisionPoint: s.isDecisionPoint ?? false,
+                branchCondition: s.branchCondition ?? null,
+                commonErrors: s.commonErrors ?? null,
+                cues: s.cues ?? null,
+                toolsRequired: s.toolsRequired ?? null,
+                instructionalEvent: s.instructionalEvent ?? null,
+                notes: s.notes ?? null,
+              })),
             }
           : undefined,
       },
