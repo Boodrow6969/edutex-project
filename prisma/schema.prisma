@@ -1024,7 +1024,7 @@ enum SubmissionStatus {
 
 model StakeholderAccessToken {
   id               String    @id @default(cuid())
-  token            String    @unique @default(cuid())
+  token            String    @unique
   workspaceId      String
   workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   trainingType     TrainingType

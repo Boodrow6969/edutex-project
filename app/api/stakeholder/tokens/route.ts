@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { randomBytes } from 'crypto';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -48,8 +49,10 @@ export async function POST(request: NextRequest) {
     await assertWorkspaceMember(workspaceId, user.id);
 
     const result = await prisma.$transaction(async (tx) => {
+      const tokenValue = randomBytes(32).toString('hex');
       const token = await tx.stakeholderAccessToken.create({
         data: {
+          token: tokenValue,
           workspaceId,
           trainingType,
           createdById: user.id,
