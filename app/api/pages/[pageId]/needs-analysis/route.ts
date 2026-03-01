@@ -7,6 +7,24 @@ import {
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole } from '@prisma/client';
+import { z } from 'zod';
+
+const needsAnalysisSchema = z.object({
+  problemStatement: z.string().max(5000).optional(),
+  businessNeed: z.string().max(5000).optional(),
+  department: z.string().max(500).optional(),
+  currentState: z.string().max(5000).optional(),
+  desiredState: z.string().max(5000).optional(),
+  constraints: z.array(z.string().max(1000)).optional(),
+  assumptions: z.array(z.string().max(1000)).optional(),
+  learnerPersonas: z.array(z.string().max(1000)).optional(),
+  stakeholders: z.array(z.string().max(1000)).optional(),
+  smes: z.array(z.string().max(1000)).optional(),
+  level1Reaction: z.string().max(2000).optional(),
+  level2Learning: z.string().max(2000).optional(),
+  level3Behavior: z.string().max(2000).optional(),
+  level4Results: z.string().max(2000).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -99,42 +117,65 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     ]);
 
     const body = await request.json();
+    const result = needsAnalysisSchema.safeParse(body);
+    if (!result.success) {
+      return Response.json(
+        { error: 'Invalid request body', details: result.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const {
+      problemStatement,
+      businessNeed,
+      department,
+      constraints,
+      assumptions,
+      learnerPersonas,
+      stakeholders,
+      smes,
+      currentState,
+      desiredState,
+      level1Reaction,
+      level2Learning,
+      level3Behavior,
+      level4Results,
+    } = result.data;
 
     // Upsert the needs analysis data
     const needsAnalysis = await prisma.needsAnalysis.upsert({
       where: { pageId },
       create: {
         pageId,
-        problemStatement: body.problemStatement ?? '',
-        businessNeed: body.businessNeed ?? '',
-        department: body.department ?? '',
-        constraints: body.constraints ?? [],
-        assumptions: body.assumptions ?? [],
-        learnerPersonas: body.learnerPersonas ?? [],
-        stakeholders: body.stakeholders ?? [],
-        smes: body.smes ?? [],
-        currentState: body.currentState ?? '',
-        desiredState: body.desiredState ?? '',
-        level1Reaction: body.level1Reaction ?? '',
-        level2Learning: body.level2Learning ?? '',
-        level3Behavior: body.level3Behavior ?? '',
-        level4Results: body.level4Results ?? '',
+        problemStatement,
+        businessNeed,
+        department,
+        constraints,
+        assumptions,
+        learnerPersonas,
+        stakeholders,
+        smes,
+        currentState,
+        desiredState,
+        level1Reaction,
+        level2Learning,
+        level3Behavior,
+        level4Results,
       },
       update: {
-        problemStatement: body.problemStatement ?? '',
-        businessNeed: body.businessNeed ?? '',
-        department: body.department ?? '',
-        constraints: body.constraints ?? [],
-        assumptions: body.assumptions ?? [],
-        learnerPersonas: body.learnerPersonas ?? [],
-        stakeholders: body.stakeholders ?? [],
-        smes: body.smes ?? [],
-        currentState: body.currentState ?? '',
-        desiredState: body.desiredState ?? '',
-        level1Reaction: body.level1Reaction ?? '',
-        level2Learning: body.level2Learning ?? '',
-        level3Behavior: body.level3Behavior ?? '',
-        level4Results: body.level4Results ?? '',
+        problemStatement,
+        businessNeed,
+        department,
+        constraints,
+        assumptions,
+        learnerPersonas,
+        stakeholders,
+        smes,
+        currentState,
+        desiredState,
+        level1Reaction,
+        level2Learning,
+        level3Behavior,
+        level4Results,
       },
     });
 
