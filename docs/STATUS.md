@@ -120,6 +120,14 @@ See docs/EDUTEX_BUGS_ENHANCEMENTS.md for full details.
 
 ---
 
+## Security Backlog
+
+1. **Input validation** — Add Zod schema validation to: `/pages/[pageId]/needs-analysis`, `/pages/[pageId]/course-analysis`, `/courses/[courseId]/task-analyses`, `/courses/[courseId]/triage-items/.../sub-tasks`. Currently uses loose destructuring with defaults. Address when Zod pattern is established.
+
+2. **Rate limiting** — Add rate limiting to `/stakeholder/form/[token]/*` routes (4 endpoints). These are public/unauthenticated. Required before any staging or external deployment. Suggested: upstash/ratelimit or a simple in-memory limiter for dev validation first.
+
+---
+
 ## Tech Stack
 
 - Framework: Next.js 15 + React 19
