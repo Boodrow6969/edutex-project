@@ -1,6 +1,6 @@
 'use client';
 
-import { BLOOM } from '../constants';
+import { useState } from 'react';
 import { BloomBadge, PriorityBadge } from './ObjCard';
 import type { WizardObjective, TriageItemData } from '../types';
 
@@ -8,6 +8,8 @@ interface Screen6Props {
   objs: WizardObjective[];
   triageItems: TriageItemData[];
   audiences: string[];
+  courseId: string;
+  courseName: string;
   onCreateObjective: () => void;
 }
 
@@ -15,8 +17,12 @@ export default function Screen6Export({
   objs,
   triageItems,
   audiences,
+  courseId,
+  courseName,
   onCreateObjective,
 }: Screen6Props) {
+  const [exporting, setExporting] = useState<'docx' | 'pdf' | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
   const activeTasks = triageItems.filter((t) => t.column !== 'nice');
   const orphanTasks = activeTasks.filter(
     (t) => !objs.some((o) => o.linkedTaskId === t.id)
@@ -32,6 +38,44 @@ export default function Screen6Export({
     grouped[taskName].push(o);
   });
 
+  const handleExport = async (format: 'docx' | 'pdf') => {
+    try {
+      setExporting(format);
+      setExportError(null);
+      const response = await fetch(
+        `/api/courses/${courseId}/objectives/export?format=${format}`
+      );
+
+      // Handle PDF fallback
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          if (data.fallback === 'docx') {
+            setExportError(data.error);
+            return;
+          }
+        }
+        throw new Error('Export failed');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ext = format === 'pdf' ? 'pdf' : 'docx';
+      const safeName = courseName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
+      a.download = `Learning_Objectives_${safeName}.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export error:', err);
+      setExportError('Export failed. Please try again.');
+    } finally {
+      setExporting(null);
+    }
+  };
+
   const actions = [
     {
       icon: '📝',
@@ -42,11 +86,6 @@ export default function Screen6Export({
       icon: '📋',
       label: 'Push to Assessment Builder',
       desc: `${objs.filter((o) => o.requiresAssessment).length} assessed objectives create assessment stubs`,
-    },
-    {
-      icon: '📄',
-      label: 'Export Objectives Table',
-      desc: 'Download as .docx or .pdf for stakeholder review',
     },
     {
       icon: '📎',
@@ -71,6 +110,47 @@ export default function Screen6Export({
       <p className="text-[13px] text-gray-500 mb-4">
         Export always works regardless of completeness. Missing fields are blank, not blocked.
       </p>
+
+      {/* Export buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-3">
+        <button
+          onClick={() => handleExport('docx')}
+          disabled={exporting !== null}
+          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="text-lg flex-shrink-0">📄</span>
+          <div>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {exporting === 'docx' ? 'Exporting...' : 'Export to Word'}
+            </div>
+            <div className="text-[11px] text-gray-500 mt-0.5">
+              Download .docx for stakeholder review
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={() => handleExport('pdf')}
+          disabled={exporting !== null}
+          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="text-lg flex-shrink-0">📑</span>
+          <div>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {exporting === 'pdf' ? 'Exporting...' : 'Export to PDF'}
+            </div>
+            <div className="text-[11px] text-gray-500 mt-0.5">
+              Download .pdf for stakeholder review
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Export error message */}
+      {exportError && (
+        <div className="mb-3 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[12px] text-amber-700">
+          {exportError}
+        </div>
+      )}
 
       {/* Push action cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-4">

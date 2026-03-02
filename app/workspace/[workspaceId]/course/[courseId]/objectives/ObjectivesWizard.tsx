@@ -368,6 +368,8 @@ export default function ObjectivesWizard({
             objs={objs}
             triageItems={triageItems}
             audiences={audiences}
+            courseId={courseId}
+            courseName={courseName}
             onCreateObjective={createObjFromExport}
           />
         )}
