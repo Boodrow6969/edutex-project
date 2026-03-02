@@ -26,11 +26,15 @@ export default function Screen6Export({
   const workspaceId = params.workspaceId as string;
   const [exporting, setExporting] = useState<'docx' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
-  const [pushing, setPushing] = useState<'storyboard' | null>(null);
+  const [pushing, setPushing] = useState<'storyboard' | 'assessment' | null>(null);
   const [pushResult, setPushResult] = useState<{
     type: 'success' | 'error';
     message: string;
     storyboardPageId?: string;
+  } | null>(null);
+  const [assessmentResult, setAssessmentResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
   } | null>(null);
   const activeTasks = triageItems.filter((t) => t.column !== 'nice');
   const orphanTasks = activeTasks.filter(
@@ -108,6 +112,33 @@ export default function Screen6Export({
     } catch (err) {
       console.error('Push to storyboard error:', err);
       setPushResult({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Push failed',
+      });
+    } finally {
+      setPushing(null);
+    }
+  };
+
+  const handlePushToAssessment = async () => {
+    try {
+      setPushing('assessment');
+      setAssessmentResult(null);
+      const response = await fetch(
+        `/api/courses/${courseId}/objectives/push-to-assessment`,
+        { method: 'POST' }
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Push failed');
+      }
+      setAssessmentResult({
+        type: 'success',
+        message: result.message,
+      });
+    } catch (err) {
+      console.error('Push to assessment error:', err);
+      setAssessmentResult({
         type: 'error',
         message: err instanceof Error ? err.message : 'Push failed',
       });
@@ -208,19 +239,30 @@ export default function Screen6Export({
             <div className="text-[11px] text-gray-500 mt-0.5">{actions[0].desc}</div>
           </div>
         </button>
-        {/* Remaining action placeholders */}
-        {actions.slice(1).map((a) => (
-          <button
-            key={a.label}
-            className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50"
-          >
-            <span className="text-lg flex-shrink-0">{a.icon}</span>
-            <div>
-              <div className="text-[13px] font-semibold text-gray-900">{a.label}</div>
-              <div className="text-[11px] text-gray-500 mt-0.5">{a.desc}</div>
+        {/* Push to Assessment Builder — functional */}
+        <button
+          onClick={handlePushToAssessment}
+          disabled={pushing !== null}
+          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="text-lg flex-shrink-0">{actions[1].icon}</span>
+          <div>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {pushing === 'assessment' ? 'Pushing...' : actions[1].label}
             </div>
-          </button>
-        ))}
+            <div className="text-[11px] text-gray-500 mt-0.5">{actions[1].desc}</div>
+          </div>
+        </button>
+        {/* Copy to Design Strategy — placeholder */}
+        <button
+          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50"
+        >
+          <span className="text-lg flex-shrink-0">{actions[2].icon}</span>
+          <div>
+            <div className="text-[13px] font-semibold text-gray-900">{actions[2].label}</div>
+            <div className="text-[11px] text-gray-500 mt-0.5">{actions[2].desc}</div>
+          </div>
+        </button>
       </div>
 
       {/* Push to Storyboard result banner */}
@@ -241,6 +283,19 @@ export default function Screen6Export({
               View Storyboard &rarr;
             </a>
           )}
+        </div>
+      )}
+
+      {/* Push to Assessment result banner */}
+      {assessmentResult && (
+        <div
+          className={`mb-3 px-4 py-2.5 border rounded-lg text-[12px] ${
+            assessmentResult.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}
+        >
+          {assessmentResult.message}
         </div>
       )}
 
