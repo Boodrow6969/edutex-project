@@ -323,6 +323,7 @@ model Course {
   learningTasks  LearningTask[]
   assessmentItems AssessmentItem[]
   triageItems    TriageItem[]
+  designStrategy  DesignStrategy?
 
   @@index([externalId])
   @@map("courses")
@@ -854,6 +855,46 @@ enum BloomLevel {
   ANALYZE
   EVALUATE
   CREATE
+}
+
+enum DesignStrategyStatus {
+  DRAFT
+  STAKEHOLDER_REVIEW
+  APPROVED
+}
+
+model DesignStrategy {
+  id        String                @id @default(cuid())
+  courseId   String                @unique  // One design strategy per course
+
+  // Business Alignment (populated from Needs Analysis if available)
+  businessChallenge   String?     @db.Text
+  businessGoal        String?     @db.Text
+
+  // Solution Breakdown
+  trainingPercent     Int?        // e.g. 60 means training is 60% of solution
+  solutionComponents  Json?       // Array of { component: string, percentage: number, description?: string }
+
+  // Evaluation Strategy (Kirkpatrick)
+  evaluationPlan      Json?       // { level1?: string, level2?: string, level3?: string, level4?: string }
+
+  // Objectives snapshot (denormalized at generation time)
+  objectivesSnapshot  Json?       // Array of objective summaries at time of generation
+
+  // Lessons / curriculum structure stubs
+  lessonStubs         Json?       // Array of { title: string, objectiveIds: string[], duration?: string, format?: string }
+
+  // Communication plan stubs
+  communicationPlan   Json?       // Array of { audience: string, message: string, timing?: string, channel?: string }
+
+  status              DesignStrategyStatus @default(DRAFT)
+
+  generatedAt         DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  course              Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("design_strategies")
 }
 
 enum BloomKnowledgeType {

@@ -36,6 +36,11 @@ export default function Screen6Export({
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [copying, setCopying] = useState<'designStrategy' | null>(null);
+  const [copyResult, setCopyResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const activeTasks = triageItems.filter((t) => t.column !== 'nice');
   const orphanTasks = activeTasks.filter(
     (t) => !objs.some((o) => o.linkedTaskId === t.id)
@@ -147,6 +152,58 @@ export default function Screen6Export({
     }
   };
 
+  const anyInFlight = exporting !== null || pushing !== null || copying !== null;
+
+  const handleCopyToDesignStrategy = async () => {
+    try {
+      setCopying('designStrategy');
+      setCopyResult(null);
+      const response = await fetch(
+        `/api/courses/${courseId}/objectives/copy-to-design-strategy`,
+        { method: 'POST' }
+      );
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const err = await response.json();
+          throw new Error(err.error || 'Export failed');
+        }
+        throw new Error('Export failed');
+      }
+      // Check if JSON response (no objectives case)
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const result = await response.json();
+        setCopyResult({
+          type: 'success',
+          message: result.message,
+        });
+        return;
+      }
+      // Response is a .docx file — download it
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const safeName = courseName.replace(/[^a-zA-Z0-9]/g, '_');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Design_Strategy_${safeName}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setCopyResult({
+        type: 'success',
+        message: 'Design Strategy document generated and saved to course.',
+      });
+    } catch (err) {
+      console.error('Copy to Design Strategy error:', err);
+      setCopyResult({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Export failed',
+      });
+    } finally {
+      setCopying(null);
+    }
+  };
+
   const actions = [
     {
       icon: '📝',
@@ -161,7 +218,7 @@ export default function Screen6Export({
     {
       icon: '📎',
       label: 'Copy to Design Strategy',
-      desc: 'Insert into HLDD objectives section',
+      desc: 'Generate a Design Strategy document pre-filled with objectives and lesson stubs',
     },
   ];
 
@@ -186,7 +243,7 @@ export default function Screen6Export({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-3">
         <button
           onClick={() => handleExport('docx')}
-          disabled={exporting !== null}
+          disabled={anyInFlight}
           className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-lg flex-shrink-0">📄</span>
@@ -201,7 +258,7 @@ export default function Screen6Export({
         </button>
         <button
           onClick={() => handleExport('pdf')}
-          disabled={exporting !== null}
+          disabled={anyInFlight}
           className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-lg flex-shrink-0">📑</span>
@@ -225,10 +282,10 @@ export default function Screen6Export({
 
       {/* Push action cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-3">
-        {/* Push to Storyboard — functional */}
+        {/* Push to Storyboard */}
         <button
           onClick={handlePushToStoryboard}
-          disabled={pushing !== null}
+          disabled={anyInFlight}
           className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-lg flex-shrink-0">{actions[0].icon}</span>
@@ -239,10 +296,10 @@ export default function Screen6Export({
             <div className="text-[11px] text-gray-500 mt-0.5">{actions[0].desc}</div>
           </div>
         </button>
-        {/* Push to Assessment Builder — functional */}
+        {/* Push to Assessment Builder */}
         <button
           onClick={handlePushToAssessment}
-          disabled={pushing !== null}
+          disabled={anyInFlight}
           className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-lg flex-shrink-0">{actions[1].icon}</span>
@@ -253,13 +310,17 @@ export default function Screen6Export({
             <div className="text-[11px] text-gray-500 mt-0.5">{actions[1].desc}</div>
           </div>
         </button>
-        {/* Copy to Design Strategy — placeholder */}
+        {/* Copy to Design Strategy */}
         <button
-          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50"
+          onClick={handleCopyToDesignStrategy}
+          disabled={anyInFlight}
+          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-lg flex-shrink-0">{actions[2].icon}</span>
           <div>
-            <div className="text-[13px] font-semibold text-gray-900">{actions[2].label}</div>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {copying === 'designStrategy' ? 'Generating...' : actions[2].label}
+            </div>
             <div className="text-[11px] text-gray-500 mt-0.5">{actions[2].desc}</div>
           </div>
         </button>
@@ -296,6 +357,19 @@ export default function Screen6Export({
           }`}
         >
           {assessmentResult.message}
+        </div>
+      )}
+
+      {/* Copy to Design Strategy result banner */}
+      {copyResult && (
+        <div
+          className={`mb-3 px-4 py-2.5 border rounded-lg text-[12px] ${
+            copyResult.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}
+        >
+          {copyResult.message}
         </div>
       )}
 

@@ -311,6 +311,19 @@
 - **Status:** Resolved (February 28, 2026, v0.14.0)
 - **Resolution:** Rebuilt slide-over tab mapping using QUESTION_MAP sections. Responses now routed to 5 purpose-driven tabs (What They Need to Do, The System/Change, Who's Learning, Constraints & Environment, Project & Stakeholders) with items sorted by displayOrder. Stakeholder names prefix each response. CourseAnalysis data supplements as "ID Analysis" entries.
 
+
+### ENH-030: PDF export from Learning Objectives Wizard
+- **Location:** LO Wizard Screen 6 export, `app/api/courses/[courseId]/objectives/export/route.ts`
+- **Description:** PDF export currently requires LibreOffice installed on the server. The fallback works correctly (returns error with docx suggestion). Need to either: (a) add LibreOffice to the Docker container, (b) use a Node.js-native PDF generation approach (e.g. generate PDF directly from the same data instead of converting from docx), or (c) accept docx-only for now and defer PDF to production deployment.
+- **Priority:** Low (infrastructure)
+- **Status:** Open
+
+### ENH-031: Learning Objectives Word export formatting polish
+- **Location:** `lib/export/objectives-to-docx.ts`
+- **Description:** Word export is functionally correct but needs formatting refinement. Specific issues TBD after review — may include table widths, heading spacing, color consistency, or content layout adjustments.
+- **Priority:** Low (cosmetic)
+- **Status:** Open
+
 ---
 
 ## Future / Phase 2
