@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { BloomBadge, PriorityBadge } from './ObjCard';
 import type { WizardObjective, TriageItemData } from '../types';
 
@@ -21,8 +22,16 @@ export default function Screen6Export({
   courseName,
   onCreateObjective,
 }: Screen6Props) {
+  const params = useParams();
+  const workspaceId = params.workspaceId as string;
   const [exporting, setExporting] = useState<'docx' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [pushing, setPushing] = useState<'storyboard' | null>(null);
+  const [pushResult, setPushResult] = useState<{
+    type: 'success' | 'error';
+    message: string;
+    storyboardPageId?: string;
+  } | null>(null);
   const activeTasks = triageItems.filter((t) => t.column !== 'nice');
   const orphanTasks = activeTasks.filter(
     (t) => !objs.some((o) => o.linkedTaskId === t.id)
@@ -73,6 +82,37 @@ export default function Screen6Export({
       setExportError('Export failed. Please try again.');
     } finally {
       setExporting(null);
+    }
+  };
+
+  const handlePushToStoryboard = async () => {
+    try {
+      setPushing('storyboard');
+      setPushResult(null);
+      const response = await fetch(
+        `/api/courses/${courseId}/objectives/push-to-storyboard`,
+        { method: 'POST' }
+      );
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Push failed');
+      }
+      const result = await response.json();
+      setPushResult({
+        type: 'success',
+        message:
+          `${result.created} objective${result.created !== 1 ? 's' : ''} pushed to storyboard.` +
+          (result.skipped > 0 ? ` ${result.skipped} already present.` : ''),
+        storyboardPageId: result.storyboardPageId,
+      });
+    } catch (err) {
+      console.error('Push to storyboard error:', err);
+      setPushResult({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Push failed',
+      });
+    } finally {
+      setPushing(null);
     }
   };
 
@@ -153,8 +193,23 @@ export default function Screen6Export({
       )}
 
       {/* Push action cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-4">
-        {actions.map((a) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-3">
+        {/* Push to Storyboard — functional */}
+        <button
+          onClick={handlePushToStoryboard}
+          disabled={pushing !== null}
+          className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="text-lg flex-shrink-0">{actions[0].icon}</span>
+          <div>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {pushing === 'storyboard' ? 'Pushing...' : actions[0].label}
+            </div>
+            <div className="text-[11px] text-gray-500 mt-0.5">{actions[0].desc}</div>
+          </div>
+        </button>
+        {/* Remaining action placeholders */}
+        {actions.slice(1).map((a) => (
           <button
             key={a.label}
             className="flex items-start gap-2.5 p-4 bg-white border border-gray-200 rounded-lg cursor-pointer text-left hover:bg-gray-50"
@@ -167,6 +222,27 @@ export default function Screen6Export({
           </button>
         ))}
       </div>
+
+      {/* Push to Storyboard result banner */}
+      {pushResult && (
+        <div
+          className={`mb-3 px-4 py-2.5 border rounded-lg text-[12px] ${
+            pushResult.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}
+        >
+          {pushResult.message}
+          {pushResult.type === 'success' && pushResult.storyboardPageId && (
+            <a
+              href={`/workspace/${workspaceId}/course/${courseId}/storyboard`}
+              className="ml-2 font-semibold underline"
+            >
+              View Storyboard &rarr;
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Orphan task warning */}
       {orphanTasks.length > 0 && (
