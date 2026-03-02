@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { TriageItemData, SubTaskData } from '../types';
 
 interface Screen3Props {
@@ -8,32 +8,97 @@ interface Screen3Props {
   subTasks: SubTaskData[];
   setSubTasks: React.Dispatch<React.SetStateAction<SubTaskData[]>>;
   openNA: (tab: string) => void;
+  courseId: string;
 }
 
-export default function Screen3Tasks({ triageItems, subTasks, setSubTasks, openNA }: Screen3Props) {
+export default function Screen3Tasks({ triageItems, subTasks, setSubTasks, openNA, courseId }: Screen3Props) {
   const active = triageItems.filter((i) => i.column !== 'nice');
   const [expanded, setExpanded] = useState<string | null>(active[0]?.id || null);
 
+  // Per-sub-task debounce timers for autosave
+  const saveTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  // Track temp IDs that are still being POSTed
+  const pendingCreates = useRef<Set<string>>(new Set());
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      saveTimers.current.forEach((timer) => clearTimeout(timer));
+    };
+  }, []);
+
   const addSub = (parentId: string) => {
     const existingSubs = subTasks.filter((s) => s.parentItemId === parentId);
-    setSubTasks((p) => [
-      ...p,
-      {
-        id: `sub-${Date.now()}`,
-        parentItemId: parentId,
-        text: '',
-        isNew: 'New',
-        sortOrder: existingSubs.length + 1,
-      },
-    ]);
+    const tempId = `sub-${Date.now()}`;
+    const newSub: SubTaskData = {
+      id: tempId,
+      parentItemId: parentId,
+      text: '',
+      isNew: 'New',
+      sortOrder: existingSubs.length + 1,
+    };
+    // Optimistic UI
+    setSubTasks((p) => [...p, newSub]);
+    // Persist
+    pendingCreates.current.add(tempId);
+    fetch(`/api/courses/${courseId}/triage-items/${parentId}/sub-tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: newSub.text, isNew: newSub.isNew, sortOrder: newSub.sortOrder }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to create sub-task');
+        return res.json();
+      })
+      .then((created) => {
+        pendingCreates.current.delete(tempId);
+        setSubTasks((p) => p.map((s) => (s.id === tempId ? { ...s, id: created.id } : s)));
+      })
+      .catch(() => {
+        pendingCreates.current.delete(tempId);
+        setSubTasks((p) => p.filter((s) => s.id !== tempId));
+      });
   };
 
-  const updateSub = (id: string, field: string, value: string) => {
+  const updateSub = useCallback((id: string, field: string, value: string) => {
     setSubTasks((p) => p.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
-  };
+    // Skip API for temp IDs (POST still in flight)
+    if (id.startsWith('sub-') && pendingCreates.current.has(id)) return;
+    // Find parentItemId for the URL
+    const sub = subTasks.find((s) => s.id === id);
+    if (!sub) return;
+    // Debounce per sub-task (1s)
+    const existing = saveTimers.current.get(id);
+    if (existing) clearTimeout(existing);
+    saveTimers.current.set(
+      id,
+      setTimeout(() => {
+        saveTimers.current.delete(id);
+        fetch(`/api/courses/${courseId}/triage-items/${sub.parentItemId}/sub-tasks/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: value }),
+        }).catch(() => { /* silent */ });
+      }, 1000)
+    );
+  }, [courseId, subTasks, setSubTasks]);
 
   const removeSub = (id: string) => {
     setSubTasks((p) => p.filter((s) => s.id !== id));
+    // Clear any pending save timer
+    const timer = saveTimers.current.get(id);
+    if (timer) { clearTimeout(timer); saveTimers.current.delete(id); }
+    // Skip API call for temp IDs
+    if (pendingCreates.current.has(id)) {
+      pendingCreates.current.delete(id);
+      return;
+    }
+    // Find parentItemId for the URL
+    const sub = subTasks.find((s) => s.id === id);
+    if (!sub) return;
+    fetch(`/api/courses/${courseId}/triage-items/${sub.parentItemId}/sub-tasks/${id}`, {
+      method: 'DELETE',
+    }).catch(() => { /* silent */ });
   };
 
   return (

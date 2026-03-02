@@ -7,7 +7,7 @@ import ObjectivesWizard from './ObjectivesWizard';
 import type { WizardObjective, TriageItemData, SubTaskData, NASummary, NASection } from './types';
 import { getTabsForTrainingType } from './constants';
 import { QUESTION_MAP } from '@/lib/questions';
-import type { StakeholderSubmissionDisplay, CourseAnalysisFormData } from '@/lib/types/courseAnalysis';
+import type { StakeholderSubmissionDisplay, CourseAnalysisFormData, AnalysisTaskData } from '@/lib/types/courseAnalysis';
 
 interface WizardData {
   objectives: WizardObjective[];
@@ -71,7 +71,7 @@ export default function ObjectivesPage() {
         );
 
         // Extract sub-tasks from triage items (they come with include)
-        const triageItems: TriageItemData[] = (Array.isArray(triageData) ? triageData : []).map(
+        let triageItems: TriageItemData[] = (Array.isArray(triageData) ? triageData : []).map(
           (t: Record<string, unknown>) => ({
             id: t.id as string,
             courseId: t.courseId as string,
@@ -98,6 +98,44 @@ export default function ObjectivesPage() {
         const naSummary = buildNASummary(contextData, course);
         const naSections = buildNASections(contextData, course);
         const audiences = extractAudiences(contextData);
+
+        // Pre-populate triage items from CourseAnalysis tasks if none exist yet
+        if (triageItems.length === 0 && contextData) {
+          const ca = contextData.courseAnalysis as CourseAnalysisFormData | undefined;
+          const naTasks = (ca?.tasks || []) as AnalysisTaskData[];
+          // Only pre-populate tasks marked for training intervention
+          const trainingTasks = naTasks.filter(
+            (t) => t.task && t.intervention !== 'not-training' && t.intervention !== 'existing'
+          );
+          if (trainingTasks.length > 0) {
+            try {
+              const created = await Promise.all(
+                trainingTasks.map((t, i) =>
+                  fetch(`/api/courses/${courseId}/triage-items`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      text: t.task,
+                      column: 'should',
+                      source: 'NA',
+                      sortOrder: i,
+                    }),
+                  }).then((r) => r.json())
+                )
+              );
+              triageItems = created.map((c) => ({
+                id: c.id,
+                courseId: c.courseId,
+                text: c.text,
+                column: c.column as TriageItemData['column'],
+                source: c.source as TriageItemData['source'],
+                sortOrder: c.sortOrder || 0,
+              }));
+            } catch {
+              // Silent fail — user can add manually
+            }
+          }
+        }
 
         setData({
           objectives,

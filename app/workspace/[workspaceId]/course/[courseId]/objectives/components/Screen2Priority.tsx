@@ -42,7 +42,7 @@ const COLS: Record<TriageColumn, ColDef> = {
     label: 'Nice to Have',
     what: 'Strictly optional, these become job aids, reference materials, or Phase 2 training.',
     why: 'Tasks that don\'t require objectives. Use this classification to protect training scope by being honest about priorities.',
-    question: '"If we cut this from training entirely, would anyone notice in the first 30 days? Rememeber, If everything is a Must Have, nothing is."',  
+    question: '"If we cut this from training entirely, would anyone notice in the first 30 days? Remember, If everything is a Must Have, nothing is."',  
     color: '#6b7280',
     bg: 'bg-gray-50',
     border: 'border-gray-200',
@@ -69,21 +69,50 @@ export default function Screen2Priority({ triageItems, setTriageItems, courseId 
   const [newItem, setNewItem] = useState('');
 
   const move = (id: string, to: TriageColumn) => {
+    // Optimistic UI update
     setTriageItems((p) => p.map((i) => (i.id === id ? { ...i, column: to } : i)));
+    // Persist immediately (discrete action, no debounce)
+    fetch(`/api/courses/${courseId}/triage-items/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ column: to }),
+    }).catch(() => {
+      // Revert on failure
+      setTriageItems((p) => p.map((i) => (i.id === id ? { ...i, column: i.column } : i)));
+    });
   };
 
   const add = () => {
     if (!newItem.trim()) return;
+    const tempId = `tri-${Date.now()}`;
     const item: TriageItemData = {
-      id: `tri-${Date.now()}`,
+      id: tempId,
       courseId,
       text: newItem.trim(),
       column: 'should',
       source: 'Custom',
       sortOrder: triageItems.length,
     };
+    // Optimistic UI update
     setTriageItems((p) => [...p, item]);
     setNewItem('');
+    // Persist and swap temp ID with real DB ID
+    fetch(`/api/courses/${courseId}/triage-items`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: item.text, column: item.column, source: item.source, sortOrder: item.sortOrder }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to create triage item');
+        return res.json();
+      })
+      .then((created) => {
+        setTriageItems((p) => p.map((i) => (i.id === tempId ? { ...i, id: created.id } : i)));
+      })
+      .catch(() => {
+        // Remove on failure
+        setTriageItems((p) => p.filter((i) => i.id !== tempId));
+      });
   };
 
   return (

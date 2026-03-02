@@ -1,5 +1,6 @@
 'use client';
 
+import { useParams, useRouter } from 'next/navigation';
 import { BLOOM, PRI } from '../constants';
 import { BloomBadge } from './ObjCard';
 import type { WizardObjective, TriageItemData, NASummary } from '../types';
@@ -11,6 +12,10 @@ interface Screen5Props {
 }
 
 export default function Screen5Validation({ objs, triageItems, naSummary }: Screen5Props) {
+  const params = useParams();
+  const router = useRouter();
+  const workspaceId = params.workspaceId as string;
+  const courseId = params.courseId as string;
   const activeTasks = triageItems.filter((t) => t.column !== 'nice');
   const linked = objs.filter((o) => o.linkedTaskId);
   const unlT = activeTasks.filter((t) => !objs.some((o) => o.linkedTaskId === t.id));
@@ -269,7 +274,10 @@ export default function Screen5Validation({ objs, triageItems, naSummary }: Scre
             Task Analysis not yet completed. Objectives based on Needs Analysis data and manual
             breakdown.
             <div className="mt-2">
-              <button className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#03428e] border-none rounded cursor-pointer hover:bg-[#022d61]">
+              <button
+                onClick={() => router.push(`/workspace/${workspaceId}/course/${courseId}/task-analysis`)}
+                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#03428e] border-none rounded cursor-pointer hover:bg-[#022d61]"
+              >
                 Start Task Analysis →
               </button>
             </div>

@@ -28,6 +28,9 @@ interface Screen4Props {
   openNA: (tab: string) => void;
   showAI: boolean;
   setShowAI: React.Dispatch<React.SetStateAction<boolean>>;
+  onFieldChange?: (objId: string, updates: Partial<WizardObjective>) => void;
+  onAddObj?: () => Promise<void>;
+  onDeleteObj?: (id: string) => Promise<void>;
 }
 
 export default function Screen4Builder({
@@ -41,6 +44,9 @@ export default function Screen4Builder({
   openNA,
   showAI,
   setShowAI,
+  onFieldChange,
+  onAddObj,
+  onDeleteObj,
 }: Screen4Props) {
   const sel = objs.find((o) => o.id === selId) || null;
   const selIdx = objs.findIndex((o) => o.id === selId);
@@ -52,16 +58,23 @@ export default function Screen4Builder({
     setObjs((p) =>
       p.map((o) => (o.id === selId ? { ...o, [field]: value } : o))
     );
+    if (selId) onFieldChange?.(selId, { [field]: value } as Partial<WizardObjective>);
   };
 
   const verbSel = (v: string, bl: string, bk: string | null) => {
+    const updates: Partial<WizardObjective> = {
+      verb: v,
+      bloomLevel: bl as WizardObjective['bloomLevel'],
+      ...(bk ? { bloomKnowledge: bk as WizardObjective['bloomKnowledge'] } : {}),
+    };
     setObjs((p) =>
       p.map((o) =>
         o.id === selId
-          ? { ...o, verb: v, bloomLevel: bl as WizardObjective['bloomLevel'], ...(bk ? { bloomKnowledge: bk as WizardObjective['bloomKnowledge'] } : {}) }
+          ? { ...o, ...updates }
           : o
       )
     );
+    if (selId) onFieldChange?.(selId, updates);
   };
 
   const composedText = (o: WizardObjective) => {
@@ -75,9 +88,13 @@ export default function Screen4Builder({
   };
 
   const addObj = () => {
-    const n = newObjective();
-    setObjs((p) => [...p, n]);
-    setSelId(n.id);
+    if (onAddObj) {
+      onAddObj();
+    } else {
+      const n = newObjective();
+      setObjs((p) => [...p, n]);
+      setSelId(n.id);
+    }
   };
 
   const inputClass =
@@ -160,13 +177,23 @@ export default function Screen4Builder({
 
           {/* Objective Cards */}
           {objs.map((o) => (
-            <ObjCard
-              key={o.id}
-              obj={o}
-              isSel={selId === o.id}
-              onClick={() => setSelId(o.id)}
-              triageItems={triageItems}
-            />
+            <div key={o.id} className="relative group">
+              <ObjCard
+                obj={o}
+                isSel={selId === o.id}
+                onClick={() => setSelId(o.id)}
+                triageItems={triageItems}
+              />
+              {onDeleteObj && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDeleteObj(o.id); }}
+                  className="absolute top-1 right-1 hidden group-hover:flex items-center justify-center w-5 h-5 text-[10px] text-gray-400 hover:text-red-500 bg-white border border-gray-200 rounded cursor-pointer"
+                  title="Delete objective"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           ))}
           <button
             onClick={addObj}

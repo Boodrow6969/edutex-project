@@ -21,6 +21,49 @@ import Screen4Builder from './components/Screen4Builder';
 import Screen5Validation from './components/Screen5Validation';
 import Screen6Export from './components/Screen6Export';
 
+/** Converts wizard-format fields to DB-format fields for the API */
+function convertWizardFieldsToDb(fields: Partial<WizardObjective>): Record<string, unknown> {
+  const db: Record<string, unknown> = {};
+
+  // behavior → title
+  if (fields.behavior !== undefined) db.title = fields.behavior;
+
+  // linkedTaskId → linkedTriageItemId
+  if (fields.linkedTaskId !== undefined) db.linkedTriageItemId = fields.linkedTaskId;
+
+  // Priority: 'Must Have' → 'MUST', etc.
+  if (fields.priority !== undefined) {
+    const priMap: Record<string, string> = {
+      'Must Have': 'MUST',
+      'Should Have': 'SHOULD',
+      'Nice to Have': 'NICE_TO_HAVE',
+    };
+    db.objectivePriority = priMap[fields.priority] || null;
+  }
+
+  // Bloom level: 'Remember' → 'REMEMBER', etc.
+  if (fields.bloomLevel !== undefined) {
+    db.bloomLevel = fields.bloomLevel ? fields.bloomLevel.toUpperCase() : null;
+  }
+
+  // Bloom knowledge: 'Factual' → 'FACTUAL', etc.
+  if (fields.bloomKnowledge !== undefined) {
+    db.bloomKnowledge = fields.bloomKnowledge ? fields.bloomKnowledge.toUpperCase() : null;
+  }
+
+  // Pass-through fields (same name in wizard and DB)
+  const passthrough: (keyof WizardObjective)[] = [
+    'audience', 'verb', 'condition', 'criteria',
+    'freeformText', 'requiresAssessment', 'rationale',
+    'wiifm', 'sortOrder',
+  ];
+  for (const key of passthrough) {
+    if (fields[key] !== undefined) db[key] = fields[key];
+  }
+
+  return db;
+}
+
 interface ObjectivesWizardProps {
   courseId: string;
   courseName: string;
@@ -85,13 +128,118 @@ export default function ObjectivesWizard({
     return () => clearTimeout(gapSaveTimer.current);
   }, [gapTypes, courseId]);
 
+  // ─── Autosave: objectives ───
+  const objPendingRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+  const objTimerRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const objCreatingRef = useRef<Set<string>>(new Set()); // temp IDs with POST in flight
+
+  const flushObjSave = useCallback(async (objId: string) => {
+    const pending = objPendingRef.current.get(objId);
+    if (!pending || Object.keys(pending).length === 0) return;
+    objPendingRef.current.delete(objId);
+    // Skip temp IDs — they'll be flushed after POST completes
+    if (objCreatingRef.current.has(objId)) return;
+    try {
+      await fetch(`/api/objectives/${objId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pending),
+      });
+    } catch {
+      // Silent fail — user can retry
+    }
+  }, []);
+
+  const handleObjFieldChange = useCallback((objId: string, updates: Partial<WizardObjective>) => {
+    // Accumulate dirty fields (converted to DB format)
+    const dbUpdates = convertWizardFieldsToDb(updates);
+    const existing = objPendingRef.current.get(objId) || {};
+    objPendingRef.current.set(objId, { ...existing, ...dbUpdates });
+    // Reset debounce timer for this objective
+    const existingTimer = objTimerRef.current.get(objId);
+    if (existingTimer) clearTimeout(existingTimer);
+    objTimerRef.current.set(
+      objId,
+      setTimeout(() => {
+        objTimerRef.current.delete(objId);
+        flushObjSave(objId);
+      }, 1500)
+    );
+  }, [flushObjSave]);
+
+  const handleAddObj = useCallback(async () => {
+    const n = newObjective();
+    const tempId = n.id;
+    setObjs((p) => [...p, n]);
+    setSelId(tempId);
+    // POST to API
+    objCreatingRef.current.add(tempId);
+    try {
+      const res = await fetch(`/api/courses/${courseId}/objectives`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: '', objectivePriority: 'SHOULD' }),
+      });
+      if (!res.ok) throw new Error('Failed to create objective');
+      const created = await res.json();
+      const realId = created.id;
+      objCreatingRef.current.delete(tempId);
+      // Swap temp ID with real ID in state
+      setObjs((p) => p.map((o) => (o.id === tempId ? { ...o, id: realId } : o)));
+      setSelId((prev) => (prev === tempId ? realId : prev));
+      // Flush any changes accumulated during POST
+      const queued = objPendingRef.current.get(tempId);
+      if (queued && Object.keys(queued).length > 0) {
+        objPendingRef.current.delete(tempId);
+        objPendingRef.current.set(realId, queued);
+        flushObjSave(realId);
+      }
+    } catch {
+      objCreatingRef.current.delete(tempId);
+      setObjs((p) => p.filter((o) => o.id !== tempId));
+    }
+  }, [courseId, flushObjSave]);
+
+  const handleDeleteObj = useCallback(async (objId: string) => {
+    // Remove from state immediately
+    setObjs((p) => p.filter((o) => o.id !== objId));
+    setSelId((prev) => {
+      if (prev !== objId) return prev;
+      // Select another objective
+      return null;
+    });
+    // Clear pending saves
+    objPendingRef.current.delete(objId);
+    const timer = objTimerRef.current.get(objId);
+    if (timer) { clearTimeout(timer); objTimerRef.current.delete(objId); }
+    // Skip API if temp ID
+    if (objCreatingRef.current.has(objId)) {
+      objCreatingRef.current.delete(objId);
+      return;
+    }
+    try {
+      await fetch(`/api/objectives/${objId}`, { method: 'DELETE' });
+    } catch {
+      // Silent fail
+    }
+  }, []);
+
+  // Cleanup objective timers on unmount
+  useEffect(() => {
+    return () => {
+      objTimerRef.current.forEach((timer) => clearTimeout(timer));
+      // Attempt to flush any pending saves synchronously
+      objPendingRef.current.forEach((_pending, objId) => {
+        flushObjSave(objId);
+      });
+    };
+  }, [flushObjSave]);
+
   // ─── Create objective from Export screen ───
   const createObjFromExport = useCallback(() => {
-    const n = newObjective();
-    setObjs((p) => [...p, n]);
-    setSelId(n.id);
+    handleAddObj();
     setStep('builder');
-  }, []);
+  }, [handleAddObj]);
 
   // ─── Step status computation ───
   const status = useMemo<Record<StepKey, StepStatus>>(() => {
@@ -188,6 +336,7 @@ export default function ObjectivesWizard({
             subTasks={subTasks}
             setSubTasks={setSubTasks}
             openNA={openNA}
+            courseId={courseId}
           />
         )}
         {step === 'builder' && (
@@ -202,6 +351,9 @@ export default function ObjectivesWizard({
             openNA={openNA}
             showAI={showAI}
             setShowAI={setShowAI}
+            onFieldChange={handleObjFieldChange}
+            onAddObj={handleAddObj}
+            onDeleteObj={handleDeleteObj}
           />
         )}
         {step === 'validation' && (
