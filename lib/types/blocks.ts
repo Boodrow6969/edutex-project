@@ -145,96 +145,6 @@ export interface LearningObjectivesImportContent {
   displayMode: 'compact' | 'detailed';
 }
 
-export interface ChecklistContent {
-  _type: 'checklist';
-  title: string;
-  items: Array<{
-    id: string;
-    task: string;
-    responsible: string;
-    dueDate: string | null;
-    completed: boolean;
-    notes: string;
-  }>;
-}
-
-export interface TableContent {
-  _type: 'table';
-  title: string;
-  columns: Array<{
-    id: string;
-    header: string;
-    width?: number;
-    type: 'text' | 'number' | 'date' | 'select';
-    options?: string[];
-  }>;
-  rows: Array<{
-    id: string;
-    cells: Record<string, string | number>;
-  }>;
-}
-
-export interface FacilitatorNotesContent {
-  _type: 'facilitatorNotes';
-  sectionTitle: string;
-  timing: string;
-  activityType: 'lecture' | 'discussion' | 'activity' | 'break' | 'assessment';
-  facilitatorInstructions: string;
-  talkingPoints: string[];
-  expectedOutcomes: string;
-  materialsNeeded: string[];
-}
-
-export interface MaterialsListContent {
-  _type: 'materialsList';
-  title: string;
-  categories: Array<{
-    name: string;
-    items: Array<{
-      id: string;
-      name: string;
-      quantity: number | string;
-      notes: string;
-      required: boolean;
-    }>;
-  }>;
-}
-
-export interface ImageContent {
-  _type: 'image';
-  src: string;
-  alt: string;
-  title: string;
-  width?: number;
-  height?: number;
-  caption?: string;
-}
-
-export interface VideoContent {
-  _type: 'video';
-  src: string;
-  videoType: 'youtube' | 'vimeo' | 'file';
-  title: string;
-  poster?: string;
-  caption?: string;
-}
-
-// =============================================================================
-// Legacy Block Content Type (for migration)
-// =============================================================================
-
-export interface StoryboardFrameContent {
-  _type: 'storyboardFrame';
-  sceneTitle: string;
-  durationSeconds: number;
-  script: string;
-  onScreenText: string;
-  visualDescription: string;
-  audioNotes: string;
-  transition: string;
-  notes: string;
-}
-
 // =============================================================================
 // Union type for all block content
 // =============================================================================
@@ -247,13 +157,6 @@ export type BlockContent =
   | StoryboardMetadataContent
   | ContentScreenContent
   | LearningObjectivesImportContent
-  | ChecklistContent
-  | TableContent
-  | FacilitatorNotesContent
-  | MaterialsListContent
-  | ImageContent
-  | VideoContent
-  | StoryboardFrameContent
   | Record<string, unknown>; // Fallback for unknown content
 
 // =============================================================================
@@ -306,14 +209,6 @@ export const TIPTAP_NODE_TO_BLOCK_TYPE: Record<string, BlockType> = {
   storyboardMetadata: 'STORYBOARD_METADATA',
   contentScreen: 'CONTENT_SCREEN',
   learningObjectivesImport: 'LEARNING_OBJECTIVES_IMPORT',
-  checklist: 'CHECKLIST',
-  customTable: 'TABLE', // Named customTable to avoid conflict with HTML table element
-  facilitatorNotes: 'FACILITATOR_NOTES',
-  materialsList: 'MATERIALS_LIST',
-
-  // M2.5: Media blocks
-  image: 'IMAGE',
-  video: 'VIDEO',
 };
 
 export const BLOCK_TYPE_TO_TIPTAP_NODE: Record<string, string> = {
@@ -330,14 +225,6 @@ export const BLOCK_TYPE_TO_TIPTAP_NODE: Record<string, string> = {
   STORYBOARD_METADATA: 'storyboardMetadata',
   CONTENT_SCREEN: 'contentScreen',
   LEARNING_OBJECTIVES_IMPORT: 'learningObjectivesImport',
-  CHECKLIST: 'checklist',
-  TABLE: 'customTable', // Named customTable to avoid conflict with HTML table element
-  FACILITATOR_NOTES: 'facilitatorNotes',
-  MATERIALS_LIST: 'materialsList',
-
-  // M2.5: Media blocks
-  IMAGE: 'image',
-  VIDEO: 'video',
 };
 
 // =============================================================================
@@ -386,40 +273,3 @@ export function createDefaultStoryboardMetadataContent(): StoryboardMetadataCont
   };
 }
 
-export function createDefaultChecklistContent(): ChecklistContent {
-  return {
-    _type: 'checklist',
-    title: 'Checklist',
-    items: [],
-  };
-}
-
-export function createDefaultTableContent(): TableContent {
-  return {
-    _type: 'table',
-    title: 'Table',
-    columns: [
-      { id: 'col1', header: 'Column 1', type: 'text' },
-      { id: 'col2', header: 'Column 2', type: 'text' },
-    ],
-    rows: [],
-  };
-}
-
-export function createDefaultImageContent(): ImageContent {
-  return {
-    _type: 'image',
-    src: '',
-    alt: '',
-    title: '',
-  };
-}
-
-export function createDefaultVideoContent(): VideoContent {
-  return {
-    _type: 'video',
-    src: '',
-    videoType: 'youtube',
-    title: '',
-  };
-}

@@ -32,18 +32,10 @@ const VALID_BLOCK_TYPES: BlockType[] = [
   'TASK_STEP',
   'LEARNING_OBJECTIVE',
   'ASSESSMENT_IDEA',
-  'STORYBOARD_FRAME',
   // M2: Storyboard blocks
   'STORYBOARD_METADATA',
   'CONTENT_SCREEN',
   'LEARNING_OBJECTIVES_IMPORT',
-  'CHECKLIST',
-  'TABLE',
-  'FACILITATOR_NOTES',
-  'MATERIALS_LIST',
-  // M2.5: Media blocks
-  'IMAGE',
-  'VIDEO',
 ];
 
 /**

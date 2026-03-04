@@ -7,7 +7,7 @@
 - **Issue:** Deleting objectives triggers native JS confirm/alert window which is clunky and hard to click off
 - **Fix:** Replace with custom modal component matching app design patterns
 - **Priority:** Medium (UX friction)
-- **Status:** Open
+- **Status:** Resolved (March 2026 — confirmed fixed via spot-check; no window.confirm/alert calls remain in objectives components)
 
 ### BUG-004: Adding custom block inserts extra space above topmost block
 - **Location:** lib/tiptap/extensions/ (ContentScreenNode.ts, LearningObjectivesImportNode.ts)
@@ -38,6 +38,53 @@
 - **Location:** Workspace Dashboard → Needs Analysis Card
 - **Description:** The Needs Analysis status badge on the Workspace Dashboard shows "Not Started" even after a stakeholder link has been created and sent. It remains "Not Started" until a stakeholder submits the form, then jumps directly to "Pending Review" — skipping the "Active" state entirely. The Needs Analysis management screen correctly shows "Active" when links exist, and the dashboard card itself shows "1 active link" while the badge still says "Not Started," which is contradictory. The dashboard status logic likely only checks for submitted responses rather than also checking for active tokens/links.
 - **Priority:** Medium (functional inconsistency)
+- **Status:** Open
+
+### BUG-016: REPEATING_TABLE fields render as concatenated string in review panel
+- **Location:** Submission review slide-over panel (Needs Analysis → click submission)
+- **Severity:** Minor / Cosmetic
+- **Found by:** Cursor Background Agent — Needs Analysis workflow test (2026-02-26)
+- **Steps to reproduce:**
+  1. Fill out a stakeholder form with REPEATING_TABLE fields (e.g., SME table, rollout phases)
+  2. Submit the form
+  3. Open the submission in the review panel
+- **Expected:** Table data renders as a formatted table with rows and columns
+- **Actual:** All row data concatenates into a single string (e.g., "Tom Bradley - Salesforce Admin - tom.bradley@acmecorp.comRachel Kim - CPQ Configuration Lead...")
+- **Likely fix:** Review panel component needs to parse REPEATING_TABLE JSON and render with `.map()` + row separators or an actual table element, rather than joining/stringifying the value.
+- **Status:** Open
+
+### BUG-017: Duplicate conditional questions shown in review panel
+- **Location:** Submission review slide-over panel (Needs Analysis → click submission)
+- **Severity:** Minor / Cosmetic
+- **Found by:** Cursor Background Agent — Needs Analysis workflow test (2026-02-26)
+- **Steps to reproduce:**
+  1. Fill out a NEW_SYSTEM stakeholder form
+  2. Select "Phased" for rollout approach
+  3. Fill in the conditional "If phased or pilot, which groups go first and when?" field
+  4. Submit and open in review panel
+- **Expected:** Only the conditional variant matching the stakeholder's selection renders (Phased version with data)
+- **Actual:** Both the Phased and Pilot conditional variants render — one with data, one showing "No response"
+- **Likely fix:** Review panel rendering logic needs to evaluate the same `showWhen` / `conditionalOn` rules used by the form. Only display questions whose display conditions were satisfied based on the submitted answers.
+- **Status:** Open
+
+### BUG-018: Needs Analysis — New task accordion steals focus from Description field
+- **Location:** Needs Analysis → Non-submission mode → Task accordion (likely in components related to task form/accordion in needs analysis)
+- **Description:** When adding a new Task, if the user clicks inside the Task Description textarea immediately after the accordion opens, the cursor jumps up to the Title field. The user must re-click inside the Description textarea. Workaround: click the Title to collapse the task, reopen it, then click Description — focus stays correctly. Root cause is likely an autoFocus or ref.focus() on the title input that fires on every accordion expand, not just on initial creation.
+- **Priority:** Low (UX)
+- **Status:** Open
+
+### BUG-019: Copy Findings Summary button only visible in Non-Training filter
+- **Location:** components/pages/TaskAnalysisView.tsx
+- **Issue:** The Copy Findings Summary button only appears when the "Non-Training Findings" filter is active. It should be visible in the summary stats bar at all times when non-training findings count > 0, next to the "X non-training findings" text.
+- **Fix:** Move FindingsSummary button into the stats bar, render conditionally on nonTrainingCount > 0 instead of filter === 'non-training'
+- **Priority:** Low (UX polish)
+- **Status:** Open
+
+### BUG-015: Needs Analysis only shows Stakeholder Data button when Workspace Needs Analysis has been approved
+- **Location:** ?
+- **Issue:** If you enter the course needs analysis without first approving the stakeholder submission, there is no Stakeholder data button.
+- **Fix:** While this is by desgin, there needs to be a notice to the user that if they approve a submission, they will be able to access that information from each section in the Course Needs Analysis
+- **Priority:** Low (UX polish)
 - **Status:** Open
 
 ---
@@ -71,59 +118,6 @@
 - **Priority:** High (functional)
 - **Status:** Resolved (February 8, 2026)
 - **Resolution:** Added `CustomEvent('course-created')` dispatch with course data from the workspace detail page after creation. Added optimistic event listener in `useWorkspacesTree` that synchronously updates state via `setWorkspaces(prev => ...)` — same pattern the sidebar's own `createCourse` uses. Also added `pathname`-triggered refetch as a fallback. Fix applied to workspace detail page (`app/workspace/[workspaceId]/page.tsx`), not the `CreateCourseModal` which was initially misidentified as the source.
-
-### BUG-014: Copy Findings Summary button only visible in Non-Training filter
-- **Location:** components/pages/TaskAnalysisView.tsx
-- **Issue:** The Copy Findings Summary button only appears when the "Non-Training Findings" filter is active. It should be visible in the summary stats bar at all times when non-training findings count > 0, next to the "X non-training findings" text.
-- **Fix:** Move FindingsSummary button into the stats bar, render conditionally on nonTrainingCount > 0 instead of filter === 'non-training'
-- **Priority:** Low (UX polish)
-- **Status:** Open
-
-### BUG-015: Needs Analysis only shows Stakeholder Data button when Workspace Needs Analysis has been approved
-- **Location:** ?
-- **Issue:** If you enter the course needs analysis without first approving the stakeholder submission, there is no Stakeholder data button. 
-- **Fix:** While this is by desgin, there needs to be a notice to the user that if they approve a submission, they will be able to access that information from each section in the Course Needs Analysis
-- **Priority:** Low (UX polish)
-- **Status:** Open
-
-## BUG-016: REPEATING_TABLE fields render as concatenated string in review panel
-
-**Location:** Submission review slide-over panel (Needs Analysis → click submission)
-**Severity:** Minor / Cosmetic
-**Found by:** Cursor Background Agent — Needs Analysis workflow test (2026-02-26)
-
-**Steps to reproduce:**
-1. Fill out a stakeholder form with REPEATING_TABLE fields (e.g., SME table, rollout phases)
-2. Submit the form
-3. Open the submission in the review panel
-
-**Expected:** Table data renders as a formatted table with rows and columns
-**Actual:** All row data concatenates into a single string (e.g., "Tom Bradley - Salesforce Admin - tom.bradley@acmecorp.comRachel Kim - CPQ Configuration Lead...")
-
-**Likely fix:** Review panel component needs to parse REPEATING_TABLE JSON and render with `.map()` + row separators or an actual table element, rather than joining/stringifying the value.
-
-## BUG-017: Duplicate conditional questions shown in review panel
-
-**Location:** Submission review slide-over panel (Needs Analysis → click submission)
-**Severity:** Minor / Cosmetic
-**Found by:** Cursor Background Agent — Needs Analysis workflow test (2026-02-26)
-
-**Steps to reproduce:**
-1. Fill out a NEW_SYSTEM stakeholder form
-2. Select "Phased" for rollout approach
-3. Fill in the conditional "If phased or pilot, which groups go first and when?" field
-4. Submit and open in review panel
-
-**Expected:** Only the conditional variant matching the stakeholder's selection renders (Phased version with data)
-**Actual:** Both the Phased and Pilot conditional variants render — one with data, one showing "No response"
-
-**Likely fix:** Review panel rendering logic needs to evaluate the same `showWhen` / `conditionalOn` rules used by the form. Only display questions whose display conditions were satisfied based on the submitted answers.
-
-### BUG-018: Needs Analysis — New task accordion steals focus from Description field
-- **Location:** Needs Analysis → Non-submission mode → Task accordion (likely in components related to task form/accordion in needs analysis)
-- **Description:** When adding a new Task, if the user clicks inside the Task Description textarea immediately after the accordion opens, the cursor jumps up to the Title field. The user must re-click inside the Description textarea. Workaround: click the Title to collapse the task, reopen it, then click Description — focus stays correctly. Root cause is likely an autoFocus or ref.focus() on the title input that fires on every accordion expand, not just on initial creation.
-- **Priority:** Low (UX)
-- **Status:** Open
 
 ---
 
@@ -169,7 +163,7 @@
 - **Notes:** Could be part of a broader "Resources" or "Settings" section
 
 ### ENH-007: Always-visible delete button on custom blocks
-- **Location:** ContentScreenComponent.tsx, StoryboardMetadataComponent.tsx
+- **Location:** ContentScreenComponent.tsx
 - **Description:** Trash can icon should always be visible, not just on hover
 - **Priority:** Low (cosmetic/UX)
 - **Status:** Backlog
@@ -178,10 +172,10 @@
 - **Location:** components/tiptap/BlockPicker.tsx
 - **Description:** Group basic text blocks (Heading, Paragraph, Bullet List, Numbered List, Quote) as a "Text Formatting" or "Basic" submenu/section, separate from instructional design blocks. Currently all items are at the same level, which doesn't reflect their different purposes.
 - **Priority:** Medium (UX)
-- **Status:** ⚠️ Likely obsolete — BlockPicker was replaced by StoryboardToolbar in Phase 2. Verify if BlockPicker is still used on non-storyboard pages before closing.
+- **Status:** Closed — Obsolete (BlockPicker.tsx is dead code, not imported anywhere. Replaced by StoryboardToolbar in Phase 2.)
 
 ### ENH-009: Auto-resize textareas in storyboard blocks
-- **Location:** components/tiptap/nodes/ (ContentScreenComponent.tsx, StoryboardMetadataComponent.tsx, and future block components)
+- **Location:** components/tiptap/nodes/ (ContentScreenComponent.tsx and future block components)
 - **Description:** All textareas in custom storyboard blocks should auto-expand based on content length using scrollHeight. Applies to any multi-line input field across all block types.
 - **Priority:** Low (UX polish)
 - **Status:** Backlog
@@ -410,4 +404,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: February 28, 2026 (v0.14.0 — Learning Objectives Wizard, NA Slide-Over redesign, Content Priority UX; ENH-029 resolved)*
+*Last updated: March 3, 2026 — doc cleanup from spot-check audit*

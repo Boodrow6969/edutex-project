@@ -7,7 +7,13 @@ import {
   NotFoundError,
 } from '@/lib/auth-helpers';
 import { WorkspaceRole, StoryboardStatus } from '@prisma/client';
-import { defaultMetadata } from '@/lib/types/storyboard';
+
+const defaultMetadata = {
+  targetAudience: '',
+  status: 'DRAFT' as const,
+  linkedObjectiveIds: [] as string[],
+  version: 1,
+};
 
 export const dynamic = 'force-dynamic';
 

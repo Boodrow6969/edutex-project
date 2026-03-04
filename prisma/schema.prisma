@@ -683,23 +683,12 @@ enum BlockType {
   LEARNING_OBJECTIVE
   ASSESSMENT_IDEA
 
-  // Legacy storyboard (to be migrated in M4)
-  STORYBOARD_FRAME
-
   // Storyboard blocks (Milestone 2)
   STORYBOARD_METADATA
   CONTENT_SCREEN
 
   // Storyboard blocks (Milestone 3)
   LEARNING_OBJECTIVES_IMPORT
-  CHECKLIST
-  TABLE
-  FACILITATOR_NOTES
-  MATERIALS_LIST
-
-  // Media blocks (Milestone 2.5)
-  IMAGE
-  VIDEO
 }
 
 model Task {

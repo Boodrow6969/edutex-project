@@ -254,16 +254,6 @@ function blockToNode(block: Block): JSONContent | null {
       };
     }
 
-    // Legacy storyboard frame - convert to paragraph for now (full migration in Milestone 4)
-    case 'STORYBOARD_FRAME': {
-      const text = getString(blockContent, 'sceneTitle') || getString(blockContent, 'script') || '';
-      return {
-        type: 'paragraph',
-        attrs: { blockId: block.id, originalType: 'STORYBOARD_FRAME' },
-        content: text ? [{ type: 'text', text: `[Storyboard Frame: ${text}]` }] : [],
-      };
-    }
-
     default:
       // For unknown block types, render as paragraph with JSON
       console.warn(`Unknown block type: ${block.type}`);
