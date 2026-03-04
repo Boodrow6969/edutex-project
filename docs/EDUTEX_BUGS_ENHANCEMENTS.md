@@ -119,6 +119,12 @@
 
 **Likely fix:** Review panel rendering logic needs to evaluate the same `showWhen` / `conditionalOn` rules used by the form. Only display questions whose display conditions were satisfied based on the submitted answers.
 
+### BUG-018: Needs Analysis — New task accordion steals focus from Description field
+- **Location:** Needs Analysis → Non-submission mode → Task accordion (likely in components related to task form/accordion in needs analysis)
+- **Description:** When adding a new Task, if the user clicks inside the Task Description textarea immediately after the accordion opens, the cursor jumps up to the Title field. The user must re-click inside the Description textarea. Workaround: click the Title to collapse the task, reopen it, then click Description — focus stays correctly. Root cause is likely an autoFocus or ref.focus() on the title input that fires on every accordion expand, not just on initial creation.
+- **Priority:** Low (UX)
+- **Status:** Open
+
 ---
 
 ## Enhancements
