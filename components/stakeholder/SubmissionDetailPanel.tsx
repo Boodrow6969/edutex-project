@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { TRAINING_TYPE_LABELS, TrainingType } from '@/lib/types/stakeholderAnalysis';
+import { ResponseValue, shouldShow } from '@/components/stakeholder/ResponseValue';
 
 // -- Types matching the API response --
 
@@ -12,6 +13,11 @@ interface QuestionResponse {
   questionText: string;
   fieldType: string;
   options: string[] | null;
+  conditional: {
+    questionId: string;
+    operator: 'includes' | 'equals' | 'not_equals';
+    value: string;
+  } | null;
   response: {
     id: string;
     value: string;
@@ -80,16 +86,6 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
-function parseMultiSelect(value: string): string[] {
-  try {
-    const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) return parsed;
-  } catch {
-    // fall through — might be comma-separated
-  }
-  return value.split(',').map((s) => s.trim()).filter(Boolean);
-}
-
 function groupBySection(items: QuestionResponse[]): { section: string; questions: QuestionResponse[] }[] {
   const map = new Map<string, QuestionResponse[]>();
   for (const item of items) {
@@ -98,39 +94,6 @@ function groupBySection(items: QuestionResponse[]): { section: string; questions
     map.set(item.section, list);
   }
   return Array.from(map.entries()).map(([section, questions]) => ({ section, questions }));
-}
-
-// -- Response value renderer --
-
-function ResponseValue({ qr }: { qr: QuestionResponse }) {
-  if (!qr.response) {
-    return <span className="text-gray-400 italic text-sm">No response</span>;
-  }
-
-  const value = qr.response.value;
-
-  if (qr.fieldType === 'MULTI_SELECT') {
-    const items = parseMultiSelect(value);
-    return (
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((item, i) => (
-          <span
-            key={i}
-            className="inline-flex px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded-full"
-          >
-            {item}
-          </span>
-        ))}
-      </div>
-    );
-  }
-
-  if (qr.fieldType === 'SCALE') {
-    return <span className="text-gray-900">{value} / 5</span>;
-  }
-
-  // SINGLE_SELECT, SHORT_TEXT, LONG_TEXT, DATE, DATE_WITH_TEXT, NUMBER
-  return <span className="text-gray-900 whitespace-pre-wrap">{value}</span>;
 }
 
 // -- Component --
@@ -238,7 +201,22 @@ export default function SubmissionDetailPanel({
 
   const isOpen = submissionId !== null;
   const canReview = data && (data.status === 'SUBMITTED' || data.status === 'UNDER_REVIEW');
-  const sections = data ? groupBySection(data.questionResponses) : [];
+  const responseMap = new Map<string, string>();
+  if (data) {
+    data.questionResponses.forEach((qr) => {
+      if (qr.response?.value) {
+        responseMap.set(qr.questionId, qr.response.value);
+      }
+    });
+  }
+  const sections = data
+    ? groupBySection(data.questionResponses)
+        .map((s) => ({
+          ...s,
+          questions: s.questions.filter((qr) => shouldShow(qr.conditional, responseMap)),
+        }))
+        .filter((s) => s.questions.length > 0)
+    : [];
   const status = data ? (statusConfig[data.status] ?? statusConfig.DRAFT) : null;
 
   return (
@@ -332,7 +310,7 @@ export default function SubmissionDetailPanel({
                         <p className="text-sm text-gray-500 mb-1">
                           {qr.questionText}
                         </p>
-                        <ResponseValue qr={qr} />
+                        <ResponseValue fieldType={qr.fieldType} value={qr.response?.value ?? null} />
                       </div>
                     ))}
                   </div>

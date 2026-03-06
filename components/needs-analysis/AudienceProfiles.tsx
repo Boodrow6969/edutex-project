@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import type { AudienceProfileData, StakeholderSubmissionDisplay } from '@/lib/types/courseAnalysis';
+import { QUESTION_MAP } from '@/lib/questions';
+import { ResponseValue, shouldShow, type ConditionalDef } from '@/components/stakeholder/ResponseValue';
 import StakeholderReference from './StakeholderReference';
+
+interface AudienceItem {
+  label: string;
+  value: string;
+  fieldType: string;
+  conditional: ConditionalDef | null;
+  questionId: string;
+}
 
 const DELIVERY_OPTIONS = ['eLearning', 'vILT', 'ILT', 'Job Aid', 'Video', 'OJT/Coaching'];
 const TECH_COMFORT = ['Low', 'Moderate', 'High'];
@@ -103,7 +113,7 @@ export default function AudienceProfiles({ audiences, onChange, submissions }: A
             {stakeholderAudienceData.map((item, i) => (
               <div key={i}>
                 <span className="font-medium text-gray-700">{item.label}:</span>
-                <p className="text-xs text-gray-600 mt-0.5">{item.value}</p>
+                <ResponseValue fieldType={item.fieldType} value={item.value || null} />
               </div>
             ))}
           </StakeholderReference>
@@ -322,13 +332,28 @@ const AUDIENCE_QUESTION_IDS = new Set([
 ]);
 
 function extractAudienceData(submissions: StakeholderSubmissionDisplay[]) {
-  const items: { label: string; value: string }[] = [];
+  const items: AudienceItem[] = [];
   for (const sub of submissions) {
+    // Build responseMap across all sections for conditional checks
+    const responseMap = new Map<string, string>();
     for (const section of sub.sections) {
       for (const resp of section.responses) {
-        if (AUDIENCE_QUESTION_IDS.has(resp.questionId)) {
-          items.push({ label: resp.question, value: resp.value });
-        }
+        if (resp.value) responseMap.set(resp.questionId, resp.value);
+      }
+    }
+    for (const section of sub.sections) {
+      for (const resp of section.responses) {
+        if (!AUDIENCE_QUESTION_IDS.has(resp.questionId)) continue;
+        const qDef = QUESTION_MAP[resp.questionId];
+        const conditional = qDef?.conditional ?? null;
+        if (!shouldShow(conditional, responseMap)) continue;
+        items.push({
+          label: resp.question,
+          value: resp.value,
+          fieldType: qDef?.fieldType ?? 'SHORT_TEXT',
+          conditional,
+          questionId: resp.questionId,
+        });
       }
     }
   }

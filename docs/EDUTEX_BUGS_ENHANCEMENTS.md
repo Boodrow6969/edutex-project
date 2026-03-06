@@ -324,6 +324,37 @@
 - **Priority:** Low (cosmetic)
 - **Status:** Open
 
+### ENH-032: Context Hotspots — Contextual NA Reference System
+- **Concept:** Small info-button hotspots placed throughout the app (storyboard, assessment builder, task analysis, LO wizard, etc.) that show a popup containing: (1) The relevant stakeholder NA response (formatted, read-only), and (2) Guidance text explaining how to interpret that data in the current context.
+- **Key Design Principles:**
+  - Hotspots are read-only — view only, no editing
+  - Guidance is context-sensitive — the same NA field (e.g., SYS_10) shows different coaching text depending on WHERE the hotspot appears (storyboard vs. assessment builder vs. task analysis)
+  - Guidance is grounded in learning theory — explains WHY this data matters here and HOW the ID should use it to inform their current design decision
+- **Data Model (rough):** Each hotspot maps: sourceField (e.g., SYS_10) + location (e.g., "assessment-builder:task-alignment") → guidance text. Guidance text is static (authored once per field+location combo). NA data pulled live from approved stakeholder submission.
+- **Placement Examples (not exhaustive):** Storyboard → SYS_09 (tasks), SYS_11 (Day 1 proficiency scope); Assessment builder, task alignment → SYS_10 (high-stakes situations); LO Wizard → SYS_11 (go-live scope), SYS_12 (30-day scope); Task Analysis → SYS_09 (workflows), PERF_07 (complex situations)
+- **Dependencies:** Formatted NA display (current work), guidance copy (to be authored)
+- **Priority:** Medium (high UX value but requires guidance authoring across many locations)
+- **Status:** Spec — awaiting design decisions on hotspot placement map and guidance copy
+
+### ENH-033: Multi-Submission Reconciliation Layer
+
+**Location**: Needs Analysis — stakeholder submission review
+**Description**: When multiple stakeholder tokens are sent and multiple submissions are received, the ID currently has no tooling to compare or reconcile conflicting answers. They must open each submission separately and manually resolve differences.
+**Chosen approach**: ID reconciliation layer (Option 3). After reviewing all submissions, the ID authors a reconciled "master" answer per question. This reconciled record becomes the authoritative source of truth that feeds all downstream tools (Task Analysis reference panel, LO Wizard slide-over, storyboard context, etc.).
+**Proposed behavior**:
+
+**When 2+ approved submissions exist for a workspace, a "Reconcile" action becomes available
+Reconciliation view shows all submissions side-by-side per question, with conflict highlighting where answers differ
+ID selects or writes the master answer for each question
+Reconciled record saves as a distinct data structure (not overwriting any submission)
+All downstream NA reference panels pull from the reconciled record when one exists, falling back to single approved submission when only one exists
+
+
+**Schema implications**: New ReconciledSubmission model or reconciliation fields on CourseAnalysis. Needs design decision before scoping.
+**Dependencies**: ENH-027 (NA reference panel data source fix) should be complete first so downstream panels are already reading from the right place
+**Priority**: Medium (important for multi-stakeholder workflows, not blocking MVP)
+**Status**: Logged — awaiting design and schema scoping
+
 ---
 
 ## Future / Phase 2
@@ -404,4 +435,4 @@ These items need decisions before becoming actionable:
 
 ---
 
-*Last updated: March 3, 2026 — doc cleanup from spot-check audit*
+*Last updated: March 3, 2026 — schema cleanup, REPEATING_TABLE form fix, ENH-032 spec added*

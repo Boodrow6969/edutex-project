@@ -1,6 +1,6 @@
 # EDUTex Quick Reference
-**Last Updated:** January 22, 2026  
-**Current Version:** 0.8.0
+**Last Updated:** March 6, 2026
+**Current Version:** 0.14.0
 
 ---
 
@@ -10,68 +10,50 @@
 - **Editor:** TipTap (ProseMirror-based)
 - **Styling:** Tailwind CSS + Lucide icons
 - **AI:** Anthropic/OpenAI (MOCK_AI=true for dev)
+- **Auth:** NextAuth
+- **Drag & Drop:** @dnd-kit
+
+---
+
+## Architecture
+```
+Workspace → Curriculum → Course
+Tools (Needs Analysis, Task Analysis, Learning Objectives, etc.)
+  ↓ feeds into ↓
+Storyboard Modules
+```
+Tools are independent. Upstream data pre-populates when available. Never required.
 
 ---
 
 ## What's Built ✅
 
-### Core Modules
 | Module | Status |
 |--------|--------|
-| Needs Analysis (5 tabs) | ✅ Complete |
-| Learning Objectives | ✅ Complete |
-| Curriculum Management | ✅ Complete |
-| Workspace Navigation | ✅ Complete |
-| Course Creation Flow | ✅ Complete |
-
-### TipTap Storyboard Editor
-| Milestone | Status |
-|-----------|--------|
-| M1: Foundation + Autosave | ✅ Complete |
-| M2: Custom Blocks | ✅ Complete |
-| M2.5: IMAGE + VIDEO | ✅ Complete |
-| M3: Block Picker | ✅ Complete |
-| M3: CONTENT_SCREEN | ✅ Complete |
-| M3: LEARNING_OBJECTIVES_IMPORT (course objectives auto-fetch) | ✅ Complete |
-| Export to Word (.docx) | ✅ Complete |
-
-### Available Block Types (in BlockPicker)
-1. Course Information (STORYBOARD_METADATA)
-2. Content Screen (CONTENT_SCREEN)
-3. Learning Objectives (LEARNING_OBJECTIVES_IMPORT)
-4. Image (IMAGE)
-5. Video (VIDEO)
-6. Heading
-7. Paragraph
-8. Bullet List
-9. Numbered List
-10. Quote / Callout
+| Authentication + Workspace/Course/Curriculum Management | ✅ Complete |
+| Needs Analysis — stakeholder forms, approval workflow, reconciled analysis UI | ✅ Complete |
+| Learning Objectives Wizard — 6-screen, export, Bloom's alignment | ✅ Complete |
+| Task Analysis — step decomposition, priority scoring, learner context | ✅ Complete (sync placeholder only) |
+| Storyboard Editor (TipTap) — blocks, autosave, Word export | ✅ Complete (needs testing) |
+| Content Assets — upload, CRUD, storyboard integration | ✅ Complete |
+| Machine-Consumable Data Layer — enums, LearningTask, AssessmentItem, link tables | ✅ Complete |
+| DesignStrategy model | ✅ Schema only |
+| Security — tokens, rate limiting, Zod validation | ✅ Complete |
 
 ---
 
 ## What's NOT Built ❌
 
-### Priority Modules (Ready to Build)
 | Module | Dependencies | Notes |
 |--------|--------------|-------|
-| **Quiz Builder** | None | Start here |
-| **Content Assets** | None | Foundation for Job Aids |
-| **Job Aids** | Content Assets | Drag-and-drop media |
+| **Quiz Builder** | None — schema exists | Next priority |
+| **Job Aids** | Content Assets ✅ | Ready to build |
 | **Evaluation Plan** | None | Standalone |
-
-### Descoped from Storyboard (Moved Elsewhere)
-- CHECKLIST → Job Aids or separate module
-- TABLE → Job Aids or separate module
-- FACILITATOR_NOTES → Facilitator Guide module
-- MATERIALS_LIST → Facilitator Guide module
-
-### Future / Phase 2
-- Designer Dashboard
-- Manager Dashboard
-- SME Dashboard
-- Articulate Review 360 integration
-- In-app messaging
-- Email templates
+| **Task Analysis bilateral sync** | — | Placeholder only |
+| **Assessment Builder** (full) | AssessmentItem schema ✅ | Stub via LO export |
+| **HLDD** | — | Referenced but not scoped |
+| **SME persistent portal** | — | Phase 2 |
+| **Storyboard collaborative review** | — | Phase 2 |
 
 ---
 
@@ -79,68 +61,60 @@
 
 | ID | Description | Severity | Workaround |
 |----|-------------|----------|------------|
-| **BUG-012** | Rapid block addition overwrites | **HIGH** | Wait 2-3 sec between blocks |
-| BUG-001 | Modal flash on course create | Low | None needed |
-| BUG-002 | Clunky delete popup | Medium | Use native confirm |
-| BUG-004 | Extra space above first block | Low | Cosmetic only |
-
-### BUG-012 Details (Critical)
-- **Location:** `useStoryboardEditor.ts`, `sync.ts`
-- **Root cause:** `blockId` not preserved through `setContent()` for Image/Video
-- **Status:** Deferred to post-MVP
-- **Fix options:**
-  1. Add blockId to Image/Video extension attributes
-  2. Use transactions instead of setContent
-  3. Client-side temporary IDs
+| **BUG-012** | Rapid block addition overwrites previous block | **HIGH** | Wait 2-3 sec + "Saved" indicator before next block |
+| BUG-014 | NA dashboard badge shows "Not Started" when links active | Medium | Check NA management screen for true status |
+| BUG-016 | REPEATING_TABLE renders as concatenated string in review panel | Minor | None |
+| BUG-017 | Duplicate conditional questions in review panel | Minor | None |
+| BUG-004 | Extra space above topmost block | Low | Cosmetic |
+| BUG-018 | New task accordion steals focus from Description | Low | Collapse and reopen accordion first |
+| BUG-015 | No notice when Stakeholder Data button is absent | Low | Approve submission first |
+| BUG-019 | Copy Findings Summary only visible in Non-Training filter | Low | Switch filter |
 
 ---
 
-## Key Enhancements Backlog
+## Key Patterns (see docs/edutex-dev-reference.md for full detail)
 
-| ID | Description | Priority |
-|----|-------------|----------|
-| ENH-008 | Reorganize Block Picker menu | Medium |
-| ENH-011 | Reorder blocks (up/down arrows) | Medium |
-| ENH-012 | Content Assets in Storyboard | Medium |
-| ENH-015 | Node-based flow visualization | Medium |
+```ts
+// Next.js 15 — params are Promises
+type Props = { params: Promise<{ id: string }> }
+const { id } = await props.params
 
-Full list: `docs/EDUTEX_BUGS_ENHANCEMENTS.md`
+// Prisma enums are UPPERCASE
+status: 'DRAFT'   type: 'CONTENT_SCREEN'
+
+// ContentScreen JSON requires discriminator
+{ _type: 'contentScreen', ... }
+
+// Block model uses `order` not `sortOrder`
+
+// Auth helpers
+await getCurrentUserOrThrow()
+await assertCourseAccess(userId, courseId)
+
+// Error handling
+return errorResponse('message', 400)
+```
 
 ---
 
-## Key Files Reference
+## Key Files
 
-### Documentation
 ```
-/STATUS.md                    # Course/project status
-/CHANGELOG.md                 # Version history
-/NEXT_STEPS.md               # Current priorities
-/docs/EDUTEX_BUGS_ENHANCEMENTS.md  # Bug/enhancement tracker
-```
+claude.md (root)                          — Claude Code rules
+docs/edutex-dev-reference.md             — Coding patterns cheat sheet
+docs/EDUTEX_BUGS_ENHANCEMENTS.md         — Bug/enhancement tracker
+CHANGELOG.md (root)                      — Version history
+STATUS.md (root)                         — Current state
+prisma/schema.prisma                     — Database schema (PROTECTED)
 
-### TipTap Implementation
-```
-lib/tiptap/
-├── extensions/
-│   ├── index.ts              # All extensions configured
-│   ├── StoryboardMetadataNode.ts
-│   ├── ContentScreenNode.ts
-│   ├── LearningObjectivesImportNode.ts
-│   └── VideoNode.ts
-└── sync.ts                   # Block ↔ TipTap conversion
-
-lib/hooks/useStoryboardEditor.ts  # Editor hook + autosave
-
-components/tiptap/
-├── BlockPicker.tsx           # Block insertion dropdown
-├── StoryboardEditor.tsx      # Main editor component
-└── nodes/                    # React components for blocks
-```
-
-### Schema
-```
-prisma/schema.prisma          # BlockType enum, all models
-lib/types/blocks.ts           # TypeScript interfaces
+lib/tiptap/sync.ts                       — Block ↔ TipTap conversion
+lib/hooks/useStoryboardEditor.ts         — Editor hook + autosave
+lib/questions/                           — Stakeholder NA question constants
+lib/types/blocks.ts                      — TypeScript block interfaces
+lib/types/courseAnalysis.ts              — Analysis data types
+components/tiptap/                       — Storyboard editor components
+components/pages/objectives/             — LO Wizard screens
+components/pages/task-analysis/          — Task Analysis components
 ```
 
 ---
@@ -148,15 +122,8 @@ lib/types/blocks.ts           # TypeScript interfaces
 ## Environment
 
 ```bash
-# Development
-MOCK_AI=true                  # Skip real API calls
-DATABASE_URL=postgresql://...
-NEXTAUTH_SECRET=...
-
-# Production
-MOCK_AI=false
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
+MOCK_AI=true        # Skip real API calls (dev)
+MOCK_AI=false       # Use real Anthropic/OpenAI
 ```
 
 ---
@@ -164,34 +131,31 @@ OPENAI_API_KEY=...
 ## Common Commands
 
 ```powershell
-# Start dev server
-cd D:\Dropbox\Dropbox\EduTex\app
-npm run dev
-
-# Database
-npx prisma migrate dev        # Run migrations
-npx prisma studio            # Visual DB browser
-npx prisma db seed           # Seed test data
-
-# Git
-git add .
-git commit -m "message"
-git push
+npm run dev                          # Start dev server
+npm run build                        # Verify build passes
+npx prisma migrate dev --name [x]    # Run migration (requires approval)
+npx prisma generate                  # Regenerate client after schema change
+npx prisma studio                    # Visual DB browser
 ```
 
 ---
 
-## Build Order (Recommended)
+## Build Order — Completed + Remaining
 
-1. ✅ ~~Needs Analysis~~
-2. ✅ ~~Curriculum Management~~
-3. ✅ ~~TipTap Storyboard (M1-M3)~~
-4. ✅ ~~Export to Word~~
-5. **→ Quiz Builder** (next)
-6. Content Assets
-7. Job Aids
-8. Evaluation Plan
-9. Dashboards (Phase 2)
+1. ✅ Core platform + auth
+2. ✅ Needs Analysis
+3. ✅ Stakeholder forms + approval workflow
+4. ✅ Content Assets
+5. ✅ Storyboard Editor (TipTap)
+6. ✅ Task Analysis
+7. ✅ Learning Objectives Wizard
+8. ✅ Machine-consumable data layer
+9. **→ Quiz Builder** (next — no dependencies)
+10. Job Aids (Content Assets done)
+11. Evaluation Plan
+12. Task Analysis bilateral sync
+13. Assessment Builder (full)
+14. HLDD
 
 ---
 

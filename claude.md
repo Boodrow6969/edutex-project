@@ -5,6 +5,11 @@
 - Stack: Next.js 15, React 19, TypeScript, Tailwind CSS, Prisma ORM, PostgreSQL
 - Project root: D:\Dropbox\Dropbox\EduTex\app\
 
+## Picking the right Clause model
+When a task involves 5+ files, a new module from scratch, or a migration 
+touching interdependent models, state at the start of your response:
+"⚠️ Consider switching to Opus for this task."
+
 ### Important: Project → Course Rename (2026-02-08)
 - The Prisma model for courses was renamed from `Project` to `Course`. There is no `Project` model.
 - Database table: `courses` (was `projects`). All FKs: `courseId` (was `projectId`).
@@ -20,6 +25,9 @@
 - An experienced ID moves through it fast because the cards are quick to click.
 
 ## Absolute Rules — Never Break These
+
+### Development References
+At the start of every session, read docs/edutex-dev-reference.md and apply its patterns to all code you write.
 
 ### File Safety
 - Never create files outside app/, components/, lib/, or docs/

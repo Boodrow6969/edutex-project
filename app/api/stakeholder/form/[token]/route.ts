@@ -72,6 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       fieldType: q.fieldType,
       required: q.required,
       options: q.options,
+      tableColumns: q.tableColumns,
       displayOrder: q.displayOrder,
       conditional: q.conditional,
     }));

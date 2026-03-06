@@ -7,6 +7,7 @@ import ObjectivesWizard from './ObjectivesWizard';
 import type { WizardObjective, TriageItemData, SubTaskData, NASummary, NASection } from './types';
 import { getTabsForTrainingType } from './constants';
 import { QUESTION_MAP } from '@/lib/questions';
+import { shouldShow } from '@/components/stakeholder/ResponseValue';
 import type { StakeholderSubmissionDisplay, CourseAnalysisFormData, AnalysisTaskData } from '@/lib/types/courseAnalysis';
 
 interface WizardData {
@@ -354,7 +355,7 @@ function buildNASections(
         key: 'project',
         title: 'Project Context',
         color: '#3b82f6',
-        items: [{ q: 'Status', a: 'No Needs Analysis data available.' }],
+        items: [{ q: 'Status', a: 'No Needs Analysis data available.', fieldType: 'SHORT_TEXT' }],
       },
     ];
   }
@@ -365,7 +366,7 @@ function buildNASections(
   const ca = contextData.courseAnalysis as CourseAnalysisFormData | undefined;
 
   // Build a map: tab key → items[]
-  const tabItems: Record<string, { q: string; a: string; order: number }[]> = {};
+  const tabItems: Record<string, { q: string; a: string; order: number; fieldType: string }[]> = {};
   for (const tab of tabConfig) {
     tabItems[tab.key] = [];
   }
@@ -373,11 +374,20 @@ function buildNASections(
   // Route submission responses to tabs
   for (const sub of submissions) {
     const name = sub.stakeholderName || 'Stakeholder';
+    // Build responseMap for conditional filtering
+    const responseMap = new Map<string, string>();
+    for (const sec of sub.sections) {
+      for (const resp of sec.responses) {
+        if (resp.value) responseMap.set(resp.questionId, resp.value);
+      }
+    }
     for (const sec of sub.sections) {
       for (const resp of sec.responses) {
         if (!resp.value) continue;
 
         const qDef = QUESTION_MAP[resp.questionId];
+        const conditional = qDef?.conditional ?? null;
+        if (!shouldShow(conditional, responseMap)) continue;
         const qSection = qDef?.section ?? sec.title;
         const displayOrder = qDef?.displayOrder ?? 9999;
 
@@ -392,6 +402,7 @@ function buildNASections(
           q: `${name}: ${qDef?.questionText ?? resp.question ?? resp.questionId}`,
           a: resp.value,
           order: displayOrder,
+          fieldType: qDef?.fieldType ?? 'SHORT_TEXT',
         });
       }
     }
@@ -399,16 +410,16 @@ function buildNASections(
 
   // Add courseAnalysis supplementary data to relevant tabs
   if (ca?.problemSummary) {
-    tabItems['system']?.push({ q: 'ID Analysis: Problem Summary', a: ca.problemSummary, order: 0 });
+    tabItems['system']?.push({ q: 'ID Analysis: Problem Summary', a: ca.problemSummary, order: 0, fieldType: 'LONG_TEXT' });
   }
   if (ca?.solutionRationale) {
-    tabItems['system']?.push({ q: 'ID Analysis: Solution Rationale', a: ca.solutionRationale, order: 1 });
+    tabItems['system']?.push({ q: 'ID Analysis: Solution Rationale', a: ca.solutionRationale, order: 1, fieldType: 'LONG_TEXT' });
   }
   if (ca?.audiences && ca.audiences.length > 0) {
     const audienceText = ca.audiences
       .map(a => `${a.role}${a.headcount ? ` (~${a.headcount})` : ''} — ${a.frequency || ''}, Tech: ${a.techComfort || ''}`)
       .join('\n');
-    tabItems['audience']?.push({ q: 'ID Analysis: Audience Profiles', a: audienceText, order: 0 });
+    tabItems['audience']?.push({ q: 'ID Analysis: Audience Profiles', a: audienceText, order: 0, fieldType: 'LONG_TEXT' });
   }
 
   // Sort items within each tab by displayOrder
@@ -423,12 +434,12 @@ function buildNASections(
       key: tab.key,
       title: tab.title,
       color: tab.color,
-      items: tabItems[tab.key].map(({ q, a }) => ({ q, a })),
+      items: tabItems[tab.key].map(({ q, a, fieldType }) => ({ q, a, fieldType })),
     }));
 
   return sections.length > 0
     ? sections
-    : [{ key: 'project', title: 'Project Context', color: '#3b82f6', items: [{ q: 'Status', a: 'No data available yet.' }] }];
+    : [{ key: 'project', title: 'Project Context', color: '#3b82f6', items: [{ q: 'Status', a: 'No data available yet.', fieldType: 'SHORT_TEXT' }] }];
 }
 
 function extractAudiences(contextData: Record<string, unknown> | null): string[] {

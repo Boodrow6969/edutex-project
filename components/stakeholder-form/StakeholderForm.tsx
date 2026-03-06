@@ -13,6 +13,7 @@ interface Question {
   fieldType: string;
   required: boolean;
   options?: string[];
+  tableColumns?: { key: string; label: string }[];
   displayOrder: number;
   conditional?: {
     questionId: string;

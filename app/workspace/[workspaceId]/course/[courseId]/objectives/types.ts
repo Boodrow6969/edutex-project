@@ -65,7 +65,7 @@ export interface NASection {
   key: string;
   title: string;
   color: string;
-  items: { q: string; a: string }[];
+  items: { q: string; a: string; fieldType: string }[];
 }
 
 export interface StepDef {

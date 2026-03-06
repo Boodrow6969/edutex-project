@@ -2,6 +2,10 @@
 
 Run these steps EVERY TIME you open Cursor or start a Claude Code session.
 
+## 0. Make sure you're using the right model
+- New module or complex migration? → Start with Opus prompt
+- Bug fix or pattern-following build? → Sonnet is fine
+
 ## 1. Confirm You're in the Right Folder
 
 ```powershell

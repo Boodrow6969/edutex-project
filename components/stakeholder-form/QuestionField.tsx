@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { AutoResizeTextarea } from './AutoResizeTextarea';
 import { DateWithTextInput } from './DateWithTextInput';
 
@@ -11,6 +12,7 @@ interface Question {
   fieldType: string;
   required: boolean;
   options?: string[];
+  tableColumns?: { key: string; label: string }[];
   displayOrder: number;
   conditional?: {
     questionId: string;
@@ -201,6 +203,17 @@ function renderField(
         </div>
       );
 
+    case 'REPEATING_TABLE':
+      return (
+        <RepeatingTable
+          id={id}
+          columns={question.tableColumns ?? []}
+          value={value}
+          onChange={onChange}
+          errorRing={errorRing}
+        />
+      );
+
     default:
       return (
         <input
@@ -211,4 +224,144 @@ function renderField(
         />
       );
   }
+}
+
+// ── Repeating Table sub-component ──────────────────────────────────────
+
+interface RepeatingTableProps {
+  id: string;
+  columns: { key: string; label: string }[];
+  value: string;
+  onChange: (id: string, val: string) => void;
+  errorRing: string;
+}
+
+function parseRows(
+  value: string,
+  columns: { key: string }[]
+): Record<string, string>[] {
+  if (!value) return [emptyRow(columns)];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    return [emptyRow(columns)];
+  } catch {
+    // Legacy plain-string value — put it in the first column
+    const row: Record<string, string> = {};
+    columns.forEach((c, i) => {
+      row[c.key] = i === 0 ? value : '';
+    });
+    return [row];
+  }
+}
+
+function emptyRow(columns: { key: string }[]): Record<string, string> {
+  const row: Record<string, string> = {};
+  columns.forEach((c) => {
+    row[c.key] = '';
+  });
+  return row;
+}
+
+function RepeatingTable({
+  id,
+  columns,
+  value,
+  onChange,
+  errorRing,
+}: RepeatingTableProps) {
+  const [rows, setRows] = useState(() => parseRows(value, columns));
+
+  // Sync from external value changes (e.g. loading saved responses)
+  useEffect(() => {
+    setRows(parseRows(value, columns));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const commit = (updated: Record<string, string>[]) => {
+    setRows(updated);
+    onChange(id, JSON.stringify(updated));
+  };
+
+  const handleCellChange = (rowIdx: number, key: string, val: string) => {
+    const updated = rows.map((r, i) =>
+      i === rowIdx ? { ...r, [key]: val } : r
+    );
+    commit(updated);
+  };
+
+  const addRow = () => {
+    commit([...rows, emptyRow(columns)]);
+  };
+
+  const removeRow = (rowIdx: number) => {
+    if (rows.length <= 1) return;
+    commit(rows.filter((_, i) => i !== rowIdx));
+  };
+
+  return (
+    <div className={`rounded-lg border border-gray-300 overflow-hidden ${errorRing}`}>
+      {/* Header */}
+      <div
+        className="grid bg-gray-50 border-b border-gray-300"
+        style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr) 36px` }}
+      >
+        {columns.map((col) => (
+          <div
+            key={col.key}
+            className="px-3 py-2 text-xs font-medium text-gray-600 uppercase tracking-wide"
+          >
+            {col.label}
+          </div>
+        ))}
+        <div />
+      </div>
+
+      {/* Rows */}
+      {rows.map((row, ri) => (
+        <div
+          key={ri}
+          className={`grid items-center ${ri > 0 ? 'border-t border-gray-200' : ''}`}
+          style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr) 36px` }}
+        >
+          {columns.map((col) => (
+            <div key={col.key} className="px-1">
+              <input
+                type="text"
+                value={row[col.key] ?? ''}
+                onChange={(e) => handleCellChange(ri, col.key, e.target.value)}
+                className="w-full px-2 py-2 text-sm border-0 focus:outline-none focus:ring-0 bg-transparent"
+                placeholder={col.label}
+              />
+            </div>
+          ))}
+          <div className="flex items-center justify-center">
+            {rows.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeRow(ri)}
+                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="Remove row"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Add row */}
+      <div className="border-t border-gray-200 px-3 py-2">
+        <button
+          type="button"
+          onClick={addRow}
+          className="text-xs font-medium text-[#03428e] hover:text-[#022d61] transition-colors"
+        >
+          + Add row
+        </button>
+      </div>
+    </div>
+  );
 }

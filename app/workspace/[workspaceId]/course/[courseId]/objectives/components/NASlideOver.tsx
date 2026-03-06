@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import SlideOver from '@/components/ui/SlideOver';
+import { ResponseValue } from '@/components/stakeholder/ResponseValue';
 import type { NASection } from '../types';
 
 interface NASlideOverProps {
@@ -89,9 +90,7 @@ export default function NASlideOver({
               >
                 {it.q}
               </div>
-              <div className="text-sm text-gray-900 leading-relaxed whitespace-pre-line">
-                {it.a}
-              </div>
+              <ResponseValue fieldType={it.fieldType} value={it.a || null} />
             </div>
           ))}
         </div>
