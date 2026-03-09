@@ -9,7 +9,7 @@ import { learnerProfileQuestions } from "./learnerProfiles";
 
 const TYPE_QUESTIONS: Record<TrainingType, QuestionDefinition[]> = {
   [TrainingType.PERFORMANCE_PROBLEM]: performanceProblemQuestions,
-  [TrainingType.NEW_SYSTEM]: newSystemQuestions,
+  [TrainingType.TOOL_AND_PROCESS]: newSystemQuestions,
   [TrainingType.COMPLIANCE]: complianceQuestions,
   [TrainingType.ROLE_CHANGE]: roleChangeQuestions,
 };

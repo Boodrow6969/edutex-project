@@ -243,7 +243,7 @@ function mapPriority(priority: string | null | undefined): WizardObjective['prio
 
 function getSummaryLabels(trainingType: string) {
   switch (trainingType) {
-    case 'NEW_SYSTEM':
+    case 'TOOL_AND_PROCESS':
       return {
         businessGoal: 'Business Problem',
         currentState: 'Current System / Process',

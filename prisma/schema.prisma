@@ -133,7 +133,7 @@ enum CoursePhase {
 
 enum CourseType {
   PERFORMANCE_PROBLEM
-  NEW_SYSTEM
+  TOOL_AND_PROCESS   // was NEW_SYSTEM
   COMPLIANCE
   ROLE_CHANGE
   ONBOARDING
@@ -1039,7 +1039,7 @@ model ActivityInstance {
 // Stakeholder Needs Analysis Models
 enum TrainingType {
   PERFORMANCE_PROBLEM
-  NEW_SYSTEM
+  TOOL_AND_PROCESS   // was NEW_SYSTEM
   COMPLIANCE
   ROLE_CHANGE
 }

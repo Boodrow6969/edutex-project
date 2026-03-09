@@ -4,14 +4,14 @@
 
 export enum TrainingType {
   PERFORMANCE_PROBLEM = "PERFORMANCE_PROBLEM",
-  NEW_SYSTEM = "NEW_SYSTEM",
+  TOOL_AND_PROCESS = "TOOL_AND_PROCESS",
   COMPLIANCE = "COMPLIANCE",
   ROLE_CHANGE = "ROLE_CHANGE",
 }
 
 export const TRAINING_TYPE_LABELS: Record<TrainingType, string> = {
   [TrainingType.PERFORMANCE_PROBLEM]: "Performance Problem",
-  [TrainingType.NEW_SYSTEM]: "New System",
+  [TrainingType.TOOL_AND_PROCESS]: "Tool & Process Training",
   [TrainingType.COMPLIANCE]: "Compliance",
   [TrainingType.ROLE_CHANGE]: "Role Change",
 };

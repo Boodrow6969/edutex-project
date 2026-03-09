@@ -96,7 +96,7 @@ const INTERVENTION_STYLES: Record<string, string> = {
 
 const TRAINING_TYPE_LABELS: Record<string, string> = {
   PERFORMANCE_PROBLEM: 'Performance Problem',
-  NEW_SYSTEM: 'New System',
+  TOOL_AND_PROCESS: 'Tool & Process Training',
   COMPLIANCE: 'Compliance',
   ROLE_CHANGE: 'Role Change',
 };

@@ -15,7 +15,7 @@ import { QuestionDefinition } from "../types/questionDefinition";
  * Dynamic sections 2–4 are defined per-type (e.g., newSystem.ts).
  *
  * A legacy success-measures question (SHARED_LEGACY_SUCCESS) is retained
- * for non-NEW_SYSTEM types. NEW_SYSTEM uses SYS_08 (Section 3.4) instead.
+ * for non-TOOL_AND_PROCESS types. TOOL_AND_PROCESS uses SYS_08 (Section 3.4) instead.
  */
 
 export const sharedQuestions: QuestionDefinition[] = [
@@ -125,7 +125,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     ],
     required: true,
     displayOrder: 500,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_07",
@@ -143,7 +143,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "Yes (please describe below)",
     ],
     displayOrder: 501,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_07B",
@@ -157,7 +157,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 502,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
     conditional: {
       questionId: "SHARED_07",
       operator: "includes",
@@ -181,7 +181,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "Limited — will need significant support and practice",
     ],
     displayOrder: 503,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_09",
@@ -199,7 +199,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "No, this is their first system of this type",
     ],
     displayOrder: 504,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_09B",
@@ -213,7 +213,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     fieldType: FieldType.SHORT_TEXT,
     required: true,
     displayOrder: 505,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
     conditional: {
       questionId: "SHARED_09",
       operator: "equals",
@@ -255,7 +255,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "Not yet determined",
     ],
     displayOrder: 506,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_10B",
@@ -269,7 +269,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 507,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
     conditional: {
       questionId: "SHARED_10",
       operator: "equals",
@@ -288,7 +288,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 508,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -312,7 +312,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "Not yet determined",
     ],
     displayOrder: 600,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_13",
@@ -330,7 +330,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     ],
     required: true,
     displayOrder: 601,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
     conditional: {
       questionId: "SHARED_12",
       operator: "includes",
@@ -353,7 +353,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     ],
     required: true,
     displayOrder: 601,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
     conditional: {
       questionId: "SHARED_12",
       operator: "includes",
@@ -372,7 +372,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     fieldType: FieldType.SHORT_TEXT,
     required: true,
     displayOrder: 602,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -433,7 +433,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "Unsure — I need to check with IT/the vendor",
     ],
     displayOrder: 701,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_16B",
@@ -471,7 +471,7 @@ export const sharedQuestions: QuestionDefinition[] = [
       "Don't know",
     ],
     displayOrder: 703,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_18",
@@ -499,7 +499,7 @@ export const sharedQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: false,
     displayOrder: 705,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SHARED_20",
@@ -659,9 +659,9 @@ export const sharedQuestions: QuestionDefinition[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // LEGACY: Success Measures (for non-NEW_SYSTEM types)
+  // LEGACY: Success Measures (for non-TOOL_AND_PROCESS types)
   //
-  // NEW_SYSTEM uses the more specific SYS_08 (Section 3.4) instead.
+  // TOOL_AND_PROCESS uses the more specific SYS_08 (Section 3.4) instead.
   // Other training types retain this general success question until their
   // own dynamic sections are revised.
   // ═══════════════════════════════════════════════════════════════════════════

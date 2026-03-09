@@ -2,7 +2,7 @@ import { FieldType, TrainingType } from "../types/stakeholderAnalysis";
 import { QuestionDefinition } from "../types/questionDefinition";
 
 /**
- * Dynamic questions for NEW_SYSTEM training type only.
+ * Dynamic questions for TOOL_AND_PROCESS training type only.
  *
  * Sections covered:
  *   2. About the System (displayOrder 200–203)
@@ -21,7 +21,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     id: "SYS_01",
     section: "About the System",
     questionText:
-      "What system, software, or tool is being introduced? In one or two sentences, what is its main purpose?",
+      "In one sentence, what system, software, or tool is being introduced and what is its main purpose?",
     idNotes:
       "Get the exact product name and version. This determines whether vendor training exists, what documentation is available, and whether you can get sandbox/demo access for your own analysis. Also ask about the deployment model (cloud vs. on-prem, SaaS vs. custom) during review — it affects how quickly the interface might change after training goes live.",
     stakeholderGuidance:
@@ -29,7 +29,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.SHORT_TEXT,
     required: true,
     displayOrder: 200,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_02",
@@ -43,7 +43,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 201,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_03",
@@ -57,13 +57,13 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 202,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_04",
     section: "About the System",
     questionText:
-      "What other systems does this connect to or interact with?",
+      "What other systems, software, tools, or processes does this connect to or interact with?",
     idNotes:
       "Integration points create training scope boundaries and potential error zones. The reference analysis captured critical integration points (defi Servicing, Repay, EDW, EDMS) that directly shaped training scope — the Repay integration alone became a separate training track. Each connected system is a potential handoff point where errors can occur, and those handoffs often need to be taught explicitly.",
     stakeholderGuidance:
@@ -71,7 +71,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: false,
     displayOrder: 203,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -90,7 +90,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 300,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_06",
@@ -104,7 +104,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 301,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_07",
@@ -118,7 +118,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: false,
     displayOrder: 302,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_08",
@@ -145,7 +145,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 303,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -164,7 +164,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 400,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_10",
@@ -178,7 +178,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 401,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_11",
@@ -192,7 +192,7 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: true,
     displayOrder: 402,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
     id: "SYS_12",
@@ -206,6 +206,6 @@ export const newSystemQuestions: QuestionDefinition[] = [
     fieldType: FieldType.LONG_TEXT,
     required: false,
     displayOrder: 403,
-    appliesTo: [TrainingType.NEW_SYSTEM],
+    appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
 ];

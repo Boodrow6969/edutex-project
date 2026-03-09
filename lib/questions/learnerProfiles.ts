@@ -3,7 +3,7 @@ import { QuestionDefinition } from "../types/questionDefinition";
 
 /**
  * Learner Profile questions — type-specific audience sections that replace
- * the system-centric SHARED_06–11 for non-NEW_SYSTEM training types.
+ * the system-centric SHARED_06–11 for non-TOOL_AND_PROCESS training types.
  *
  * Sections covered:
  *   "Who's Affected" (PERFORMANCE_PROBLEM) — LP_PERF_01–06B (displayOrder 500–507)

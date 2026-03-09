@@ -307,12 +307,12 @@ function AudienceCard({
 
 // Question IDs relevant to audience profiling
 const AUDIENCE_QUESTION_IDS = new Set([
-  'SHARED_06',    // Audience by Role (table) — NEW_SYSTEM
-  'SHARED_07',    // Role-Based Differences — NEW_SYSTEM
-  'SHARED_07B',   // Role-Based Differences (detail) — NEW_SYSTEM
-  'SHARED_08',    // Technology Comfort Level — NEW_SYSTEM
-  'SHARED_09',    // Prior System Experience — NEW_SYSTEM
-  'SHARED_09B',   // Prior System Duration — NEW_SYSTEM
+  'SHARED_06',    // Audience by Role (table) — TOOL_AND_PROCESS
+  'SHARED_07',    // Role-Based Differences — TOOL_AND_PROCESS
+  'SHARED_07B',   // Role-Based Differences (detail) — TOOL_AND_PROCESS
+  'SHARED_08',    // Technology Comfort Level — TOOL_AND_PROCESS
+  'SHARED_09',    // Prior System Experience — TOOL_AND_PROCESS
+  'SHARED_09B',   // Prior System Duration — TOOL_AND_PROCESS
   'SHARED_15',    // Delivery Format Preference
   'LP_PERF_01',   // Learner Roles and Headcount — PERFORMANCE_PROBLEM
   'LP_PERF_02',   // Learner Differences — PERFORMANCE_PROBLEM

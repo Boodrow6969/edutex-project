@@ -12,7 +12,7 @@ export interface SlideOverTab {
   sourceSections: string[];
 }
 
-const NEW_SYSTEM_TABS: SlideOverTab[] = [
+const TOOL_AND_PROCESS_TABS: SlideOverTab[] = [
   {
     key: 'tasks',
     title: 'What They Need to Do',
@@ -80,8 +80,8 @@ const GENERIC_TABS: SlideOverTab[] = [
 
 export function getTabsForTrainingType(trainingType: string): SlideOverTab[] {
   switch (trainingType) {
-    case 'NEW_SYSTEM':
-      return NEW_SYSTEM_TABS;
+    case 'TOOL_AND_PROCESS':
+      return TOOL_AND_PROCESS_TABS;
     default:
       return GENERIC_TABS;
   }

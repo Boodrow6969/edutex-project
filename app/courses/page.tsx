@@ -108,7 +108,7 @@ export default async function CoursesPage() {
             >
               <option value="">Select type (optional)</option>
               <option value={CourseType.PERFORMANCE_PROBLEM}>Performance Problem</option>
-              <option value={CourseType.NEW_SYSTEM}>New System</option>
+              <option value={CourseType.TOOL_AND_PROCESS}>Tool & Process Training</option>
               <option value={CourseType.COMPLIANCE}>Compliance</option>
               <option value={CourseType.ROLE_CHANGE}>Role Change</option>
               <option value={CourseType.ONBOARDING}>Onboarding</option>
