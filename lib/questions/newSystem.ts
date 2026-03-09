@@ -19,35 +19,21 @@ export const newSystemQuestions: QuestionDefinition[] = [
 
   {
     id: "SYS_01",
-    section: "About the System",
+    section: "Tool & Process Overview",
     questionText:
       "In one sentence, what system, software, or tool is being introduced and what is its main purpose?",
     idNotes:
-      "Get the exact product name and version. This determines whether vendor training exists, what documentation is available, and whether you can get sandbox/demo access for your own analysis. Also ask about the deployment model (cloud vs. on-prem, SaaS vs. custom) during review — it affects how quickly the interface might change after training goes live.",
+      "Get the exact name of what's being introduced — product name and version for software, or a clear descriptive name for a process or procedure. For software: this determines whether vendor training exists, what documentation is available, and whether you can get sandbox or demo access for your own analysis. Also ask about the deployment model (cloud vs. on-prem, SaaS vs. custom) during review — it affects how quickly the interface might change after training goes live. For processes: ask for any existing SOPs, flowcharts, or policy documents that define the current or future state.",
     stakeholderGuidance:
-      "Provide the name of the system being deployed, including version if known. If it's custom-built, describe what it does.\n\n*Examples: \"Salesforce Lightning — migrating from Classic,\" \"Workday HCM — new implementation,\" \"Custom warehouse management app built by our internal dev team\"*",
+      "Provide the name of what's being introduced, including version if known. For software, include the product name and any relevant version or edition. For a process or procedure, give it a clear descriptive name.\n\n*Examples: \"Salesforce Lightning — migrating from Classic,\" \"Workday HCM — new implementation,\" \"Custom warehouse management app built by our internal dev team,\" \"New onboarding procedure for field technicians — replacing informal OJT\"*",
     fieldType: FieldType.SHORT_TEXT,
     required: true,
     displayOrder: 200,
     appliesTo: [TrainingType.TOOL_AND_PROCESS],
   },
   {
-    id: "SYS_02",
-    section: "About the System",
-    questionText:
-      "What are the system's main functions or capabilities? List the key things people can do in it.",
-    idNotes:
-      "This establishes the system's overall capability set *before* narrowing to specific tasks. The distinction matters: capabilities are what the system can do; tasks (Section 4) are what specific people *must* do. A system might have 50 capabilities but only 15 are relevant to training. This list becomes your universe — Section 4 narrows it to what matters for each role.\n\nThe reference analysis captured a rich capability list (self-service payments, autopay enrollment, document retrieval, etc.) that informed every downstream design decision. Push for specifics — not feature names but actions.",
-    stakeholderGuidance:
-      "Think about what the system lets users accomplish — not feature names, but actions. List as many as you can.\n\n*Examples: \"Create and assign support tickets, run weekly performance reports, update customer records after calls\"*",
-    fieldType: FieldType.LONG_TEXT,
-    required: true,
-    displayOrder: 201,
-    appliesTo: [TrainingType.TOOL_AND_PROCESS],
-  },
-  {
     id: "SYS_03",
-    section: "About the System",
+    section: "Tool & Process Overview",
     questionText:
       "What existing tools, systems, or processes does this replace? If it's entirely new functionality, describe what people do today without it.",
     idNotes:
@@ -61,13 +47,13 @@ export const newSystemQuestions: QuestionDefinition[] = [
   },
   {
     id: "SYS_04",
-    section: "About the System",
+    section: "Tool & Process Overview",
     questionText:
       "What other systems, software, tools, or processes does this connect to or interact with?",
     idNotes:
-      "Integration points create training scope boundaries and potential error zones. The reference analysis captured critical integration points (defi Servicing, Repay, EDW, EDMS) that directly shaped training scope — the Repay integration alone became a separate training track. Each connected system is a potential handoff point where errors can occur, and those handoffs often need to be taught explicitly.",
+      "Integration points and handoffs create training scope boundaries and potential error zones. For software: each connected system is a potential handoff point where errors can occur, and those handoffs often need to be taught explicitly. For processes: identify upstream inputs (what triggers this process) and downstream outputs (what this process feeds into). Either way, the handoffs between this tool or process and adjacent ones are where learners most commonly make mistakes — and where training coverage is most often missing.",
     stakeholderGuidance:
-      "List any systems that send data to or receive data from the new system. This helps us understand the broader workflow and identify where handoffs or errors might occur.\n\n*Examples: \"Salesforce connects to our ERP for order data and to Marketo for marketing automation,\" \"The portal pulls from the servicing system and sends payments through a third-party processor\"*",
+      "List anything this tool or process connects to, feeds into, or receives input from. For software, include systems that exchange data. For processes, describe what triggers this process and what it hands off to next.\n\n*Examples: \"Salesforce connects to our ERP for order data and to Marketo for marketing automation,\" \"The portal pulls from the servicing system and sends payments through a third-party processor,\" \"This approval process is triggered by a request from HR and hands off to Finance for budget coding\"*",
     fieldType: FieldType.LONG_TEXT,
     required: false,
     displayOrder: 203,

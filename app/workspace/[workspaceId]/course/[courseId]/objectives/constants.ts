@@ -21,9 +21,9 @@ const TOOL_AND_PROCESS_TABS: SlideOverTab[] = [
   },
   {
     key: 'system',
-    title: 'The System / Change',
+    title: 'What the Tool or Process Does',
     color: '#10b981',
-    sourceSections: ['About the System', 'Business Justification'],
+    sourceSections: ['Tool & Process Overview', 'Business Justification'],
   },
   {
     key: 'audience',
@@ -45,18 +45,84 @@ const TOOL_AND_PROCESS_TABS: SlideOverTab[] = [
   },
 ];
 
-const GENERIC_TABS: SlideOverTab[] = [
+const PERFORMANCE_PROBLEM_TABS: SlideOverTab[] = [
   {
     key: 'tasks',
     title: 'What They Need to Do',
     color: '#03428e',
-    sourceSections: [],
+    sourceSections: ['Performance & Impact'],
   },
   {
     key: 'system',
-    title: 'The Change',
+    title: 'The Performance Gap',
     color: '#10b981',
-    sourceSections: [],
+    sourceSections: ['Performance & Impact', 'Success Criteria'],
+  },
+  {
+    key: 'audience',
+    title: "Who's Learning",
+    color: '#f59e0b',
+    sourceSections: ['Who Will Use This System'],
+  },
+  {
+    key: 'constraints',
+    title: 'Constraints & Environment',
+    color: '#ef4444',
+    sourceSections: ['Training Constraints and Resources', 'Rollout Plan'],
+  },
+  {
+    key: 'project',
+    title: 'Project & Stakeholders',
+    color: '#3b82f6',
+    sourceSections: ['Project Context', 'SMEs and Stakeholders', 'Concerns and Final Thoughts'],
+  },
+];
+
+const COMPLIANCE_TABS: SlideOverTab[] = [
+  {
+    key: 'tasks',
+    title: 'What They Need to Do',
+    color: '#03428e',
+    sourceSections: ['Regulation or Policy'],
+  },
+  {
+    key: 'system',
+    title: 'The Compliance Requirement',
+    color: '#10b981',
+    sourceSections: ['Regulation or Policy'],
+  },
+  {
+    key: 'audience',
+    title: "Who's Learning",
+    color: '#f59e0b',
+    sourceSections: ['Who Will Use This System'],
+  },
+  {
+    key: 'constraints',
+    title: 'Constraints & Environment',
+    color: '#ef4444',
+    sourceSections: ['Training Constraints and Resources', 'Rollout Plan'],
+  },
+  {
+    key: 'project',
+    title: 'Project & Stakeholders',
+    color: '#3b82f6',
+    sourceSections: ['Project Context', 'SMEs and Stakeholders', 'Concerns and Final Thoughts'],
+  },
+];
+
+const ROLE_CHANGE_TABS: SlideOverTab[] = [
+  {
+    key: 'tasks',
+    title: 'What They Need to Do',
+    color: '#03428e',
+    sourceSections: ['New Role & Responsibilities'],
+  },
+  {
+    key: 'system',
+    title: 'The Role Change',
+    color: '#10b981',
+    sourceSections: ['New Role & Responsibilities'],
   },
   {
     key: 'audience',
@@ -82,8 +148,14 @@ export function getTabsForTrainingType(trainingType: string): SlideOverTab[] {
   switch (trainingType) {
     case 'TOOL_AND_PROCESS':
       return TOOL_AND_PROCESS_TABS;
+    case 'PERFORMANCE_PROBLEM':
+      return PERFORMANCE_PROBLEM_TABS;
+    case 'COMPLIANCE':
+      return COMPLIANCE_TABS;
+    case 'ROLE_CHANGE':
+      return ROLE_CHANGE_TABS;
     default:
-      return GENERIC_TABS;
+      return TOOL_AND_PROCESS_TABS;
   }
 }
 

@@ -9,6 +9,7 @@ import { getTabsForTrainingType } from './constants';
 import { QUESTION_MAP } from '@/lib/questions';
 import { shouldShow } from '@/components/stakeholder/ResponseValue';
 import type { StakeholderSubmissionDisplay, CourseAnalysisFormData, AnalysisTaskData } from '@/lib/types/courseAnalysis';
+import { TrainingType, TRAINING_TYPE_LABELS } from '@/lib/types/stakeholderAnalysis';
 
 interface WizardData {
   objectives: WizardObjective[];
@@ -308,9 +309,7 @@ function buildNASummary(
   const labels = getSummaryLabels(trainingType);
 
   // Format training type for display
-  const trainingTypeDisplay = trainingType
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+  const trainingTypeDisplay = TRAINING_TYPE_LABELS[trainingType as TrainingType] ?? trainingType.replace(/_/g, ' ');
 
   // Build audience string
   const audiences = ca?.audiences || [];
@@ -318,7 +317,23 @@ function buildNASummary(
   if (audiences.length > 0) {
     audienceStr = audiences.map(a => a.role).join(', ');
   } else {
-    audienceStr = getSubmissionResponse(submissions, 'SHARED_06');
+    // SHARED_06 is a REPEATING_TABLE — parse and extract role names
+    const rawAudience = getSubmissionResponse(submissions, 'SHARED_06');
+    if (rawAudience) {
+      try {
+        const rows = JSON.parse(rawAudience);
+        if (Array.isArray(rows) && rows.length > 0) {
+          audienceStr = rows
+            .map((r: Record<string, string>) => r.role || r.Role || Object.values(r)[0] || '')
+            .filter(Boolean)
+            .join(', ');
+        } else {
+          audienceStr = rawAudience;
+        }
+      } catch {
+        audienceStr = rawAudience;
+      }
+    }
   }
   if (!audienceStr) {
     audienceStr = (ca?.learnerPersonas || []).join(', ');
