@@ -20,12 +20,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  workspaces    WorkspaceMember[]
-  createdPages  Page[]
-  createdTasks  Task[]
-  assignedTasks Task[]    @relation("TaskAssignee")
+  accounts            Account[]
+  sessions            Session[]
+  workspaces          WorkspaceMember[]
+  createdPages        Page[]
+  createdTasks        Task[]
+  assignedTasks       Task[]                   @relation("TaskAssignee")
   createdTokens       StakeholderAccessToken[] @relation("TokenCreator")
   reviewedSubmissions StakeholderSubmission[]  @relation("SubmissionReviewer")
   contentAssets       ContentAsset[]           @relation("UserAssets")
@@ -74,17 +74,17 @@ model VerificationToken {
 
 // Core EduTex Models
 model Workspace {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  stakeholders Json?   @default("[]")
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  stakeholders Json?     @default("[]")
   archivedAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  members   WorkspaceMember[]
-  courses   Course[]
-  curricula Curriculum[]
+  members                WorkspaceMember[]
+  courses                Course[]
+  curricula              Curriculum[]
   stakeholderTokens      StakeholderAccessToken[]
   stakeholderSubmissions StakeholderSubmission[]
   contentAssets          ContentAsset[]
@@ -133,7 +133,7 @@ enum CoursePhase {
 
 enum CourseType {
   PERFORMANCE_PROBLEM
-  TOOL_AND_PROCESS   // was NEW_SYSTEM
+  TOOL_AND_PROCESS // was NEW_SYSTEM
   COMPLIANCE
   ROLE_CHANGE
   ONBOARDING
@@ -231,115 +231,145 @@ enum AssessmentType {
 }
 
 model LearningTask {
-  id              String            @id @default(cuid())
-  courseId         String
+  id       String @id @default(cuid())
+  courseId String
 
   // Core identification
-  title           String
-  description     String?           @db.Text
+  title       String
+  description String? @db.Text
 
   // Task analysis attributes (all enum-typed)
-  frequency       TaskFrequency     @default(WEEKLY)
-  criticality     TaskCriticality   @default(IMPORTANT)
-  complexity      TaskComplexity    @default(MODERATE)
-  knowledgeType   KnowledgeType     @default(PROCEDURAL)
+  frequency     TaskFrequency   @default(WEEKLY)
+  criticality   TaskCriticality @default(IMPORTANT)
+  complexity    TaskComplexity  @default(MODERATE)
+  knowledgeType KnowledgeType   @default(PROCEDURAL)
 
   // Standardization
-  isStandardized  Boolean           @default(true)
-  variationNotes  String?           @db.Text
-  isFeasibleToTrain Boolean         @default(true)
-  feasibilityNotes  String?         @db.Text
+  isStandardized    Boolean @default(true)
+  variationNotes    String? @db.Text
+  isFeasibleToTrain Boolean @default(true)
+  feasibilityNotes  String? @db.Text
 
   // Gap analysis — why aren't they doing it?
-  gapType           GapType?
+  gapType GapType?
 
   // Recommended intervention
   intervention      InterventionType?
   interventionNotes String?           @db.Text
 
   // Impact documentation for non-training findings
-  impactNote        String?           @db.Text
+  impactNote String? @db.Text
 
   // External taxonomy mapping
-  externalId      String?
-  externalSource  String?
+  externalId     String?
+  externalSource String?
 
   // Hierarchical task analysis
-  parentTaskId    String?
-  order           Int               @default(0)
+  parentTaskId String?
+  order        Int     @default(0)
 
   // Design decision capture
-  rationale       String?           @db.Text
-  aiGenerated     Boolean           @default(false)
-  aiReasoning     String?           @db.Text
+  rationale   String? @db.Text
+  aiGenerated Boolean @default(false)
+  aiReasoning String? @db.Text
 
   // (Legacy link removed — TaskAnalysis no longer holds LearningTask[])
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  parentTask      LearningTask?     @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
-  childTasks      LearningTask[]    @relation("TaskHierarchy")
-  objectives      ObjectiveTaskLink[]
+  course     Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  parentTask LearningTask?       @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
+  childTasks LearningTask[]      @relation("TaskHierarchy")
+  objectives ObjectiveTaskLink[]
 
   @@index([courseId])
   @@index([externalId])
   @@map("learning_tasks")
 }
 
+model JobAid {
+  id          String       @id @default(cuid())
+  courseId    String
+  title       String
+  type        JobAidType   @default(CHECKLIST)
+  status      JobAidStatus @default(DRAFT)
+  description String?      @db.Text
+  notes       String?      @db.Text
+
+  // Optional links to upstream design artifacts
+  linkedObjectiveId String?
+  linkedTaskId      String?
+
+  // Content Asset attachments (stored as asset IDs)
+  assetIds String[] @default([])
+
+  // Design decision capture
+  rationale String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course          Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  linkedObjective Objective? @relation(fields: [linkedObjectiveId], references: [id], onDelete: SetNull)
+
+  @@index([courseId])
+  @@map("job_aids")
+}
+
 model Course {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  status      CourseStatus  @default(DRAFT)
-  clientName  String?
-  courseType   CourseType?    // was projectType
-  phase       CoursePhase   @default(INTAKE)
-  priority    Priority      @default(MEDIUM)
-  targetGoLive DateTime?
-  workspaceId String?
-  archivedAt   DateTime?
-  dashboardStatuses Json?    // Stores card status overrides as JSON
+  id                String       @id @default(cuid())
+  name              String
+  description       String?
+  status            CourseStatus @default(DRAFT)
+  clientName        String?
+  courseType        CourseType? // was projectType
+  phase             CoursePhase  @default(INTAKE)
+  priority          Priority     @default(MEDIUM)
+  targetGoLive      DateTime?
+  workspaceId       String?
+  archivedAt        DateTime?
+  dashboardStatuses Json? // Stores card status overrides as JSON
 
   // Gap classification (Learning Objectives wizard)
   gapKnowledge Boolean @default(false)
   gapSkill     Boolean @default(false)
 
   // External mapping
-  externalId      String?
-  externalSource  String?
+  externalId     String?
+  externalSource String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  workspace    Workspace?         @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  pages        Page[]
-  tasks        Task[]
-  objectives   Objective[]
-  deliverables Deliverable[]
-  blueprints   LearningBlueprint[]
-  curricula    CurriculumCourse[]
-  learningTasks  LearningTask[]
+  workspace       Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  pages           Page[]
+  tasks           Task[]
+  objectives      Objective[]
+  deliverables    Deliverable[]
+  blueprints      LearningBlueprint[]
+  curricula       CurriculumCourse[]
+  learningTasks   LearningTask[]
   assessmentItems AssessmentItem[]
-  triageItems    TriageItem[]
+  triageItems     TriageItem[]
   designStrategy  DesignStrategy?
+  jobAids         JobAid[]
 
   @@index([externalId])
   @@map("courses")
 }
 
 model Curriculum {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  description String?  @db.Text
+  description String? @db.Text
 
   // Program metadata
-  status              CurriculumStatus  @default(DRAFT)
+  status              CurriculumStatus @default(DRAFT)
   programDuration     String? // e.g., "12 weeks", "6 months"
   totalHours          Int?
   certificationName   String?
-  audienceProgression String? @db.Text // e.g., "Beginner → Intermediate → Advanced"
+  audienceProgression String?          @db.Text // e.g., "Beginner → Intermediate → Advanced"
 
   // Workspace relationship
   workspaceId String
@@ -349,12 +379,12 @@ model Curriculum {
   pages Page[]
 
   // Many-to-many with Courses via join table
-  courses CurriculumCourse[]
+  courses    CurriculumCourse[]
   archivedAt DateTime?
 
   // External mapping
-  externalId      String?
-  externalSource  String?
+  externalId     String?
+  externalSource String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -367,8 +397,8 @@ model CurriculumCourse {
   id           String     @id @default(cuid())
   curriculumId String
   curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  courseId      String
-  course        Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId     String
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   order Int @default(0) // Sequence within curriculum
 
@@ -379,32 +409,32 @@ model CurriculumCourse {
 }
 
 model Page {
-  id          String   @id @default(cuid())
-  title       String
-  type        PageType @default(CUSTOM)
-  courseId     String?  // Optional: page belongs to either Course OR Curriculum
+  id           String   @id @default(cuid())
+  title        String
+  type         PageType @default(CUSTOM)
+  courseId     String? // Optional: page belongs to either Course OR Curriculum
   curriculumId String? // Optional: page belongs to either Course OR Curriculum
-  createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  order       Int      @default(0)
+  createdById  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  order        Int      @default(0)
 
-  course        Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  curriculum    Curriculum?    @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  createdBy     User           @relation(fields: [createdById], references: [id])
-  blocks        Block[]
-  needsAnalysis NeedsAnalysis?
+  course         Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  curriculum     Curriculum?     @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  blocks         Block[]
+  needsAnalysis  NeedsAnalysis?
   courseAnalysis CourseAnalysis?
-  taskAnalysis  TaskAnalysis?
-  storyboard    Storyboard?
+  taskAnalysis   TaskAnalysis?
+  storyboard     Storyboard?
 
   @@map("pages")
 }
 
 model NeedsAnalysis {
-  id        String @id @default(cuid())
-  pageId    String @unique
-  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  pageId String @unique
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   // Problem tab
   problemStatement String   @default("")
@@ -429,13 +459,13 @@ model NeedsAnalysis {
   level4Results  String @default("")
 
   // Training-as-solution decision
-  isTrainingSolution    Boolean?
-  nonTrainingFactors    String?    @db.Text
-  solutionRationale     String?    @db.Text
+  isTrainingSolution Boolean?
+  nonTrainingFactors String?  @db.Text
+  solutionRationale  String?  @db.Text
 
   // AI analysis capture
-  aiAnalysis            String?    @db.Text
-  aiRecommendations     String[]   @default([])
+  aiAnalysis        String?  @db.Text
+  aiRecommendations String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -444,26 +474,26 @@ model NeedsAnalysis {
 }
 
 model CourseAnalysis {
-  id        String @id @default(cuid())
-  pageId    String @unique
-  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  pageId String @unique
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   // ID-authored analysis fields
-  problemSummary       String   @default("")
-  currentStateSummary  String   @default("")
-  desiredStateSummary  String   @default("")
-  constraints          String[] @default([])
-  assumptions          String[] @default([])
+  problemSummary      String   @default("")
+  currentStateSummary String   @default("")
+  desiredStateSummary String   @default("")
+  constraints         String[] @default([])
+  assumptions         String[] @default([])
 
   // Course-specific stakeholders
-  learnerPersonas  String[] @default([])
-  stakeholders     String[] @default([])
-  smes             String[] @default([])
+  learnerPersonas String[] @default([])
+  stakeholders    String[] @default([])
+  smes            String[] @default([])
 
   // Training decision
-  isTrainingSolution    Boolean?
-  nonTrainingFactors    String?    @db.Text
-  solutionRationale     String?    @db.Text
+  isTrainingSolution Boolean?
+  nonTrainingFactors String?  @db.Text
+  solutionRationale  String?  @db.Text
 
   // Success Metrics (Kirkpatrick)
   level1Reaction String @default("")
@@ -472,16 +502,16 @@ model CourseAnalysis {
   level4Results  String @default("")
 
   // Delivery & materials (v2)
-  deliveryNotes      String   @default("") @db.Text
-  existingMaterials  String   @default("") @db.Text
+  deliveryNotes     String @default("") @db.Text
+  existingMaterials String @default("") @db.Text
 
   // AI analysis capture
-  aiAnalysis            String?    @db.Text
-  aiRecommendations     String[]   @default([])
+  aiAnalysis        String?  @db.Text
+  aiRecommendations String[] @default([])
 
   // Relations (v2)
-  audiences  AudienceProfile[]
-  tasks      AnalysisTask[]
+  audiences AudienceProfile[]
+  tasks     AnalysisTask[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -490,17 +520,17 @@ model CourseAnalysis {
 }
 
 model AudienceProfile {
-  id              String   @id @default(cuid())
+  id               String         @id @default(cuid())
   courseAnalysisId String
   courseAnalysis   CourseAnalysis @relation(fields: [courseAnalysisId], references: [id], onDelete: Cascade)
 
-  role            String
-  headcount       String   @default("")
-  frequency       String   @default("Daily")
-  techComfort     String   @default("Moderate")
-  trainingFormat  String   @default("")
-  notes           String   @default("") @db.Text
-  order           Int      @default(0)
+  role           String
+  headcount      String @default("")
+  frequency      String @default("Daily")
+  techComfort    String @default("Moderate")
+  trainingFormat String @default("")
+  notes          String @default("") @db.Text
+  order          Int    @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -509,18 +539,18 @@ model AudienceProfile {
 }
 
 model AnalysisTask {
-  id              String   @id @default(cuid())
+  id               String         @id @default(cuid())
   courseAnalysisId String
   courseAnalysis   CourseAnalysis @relation(fields: [courseAnalysisId], references: [id], onDelete: Cascade)
 
-  task            String   @db.Text
-  audience        String   @default("")
-  source          String   @default("ID-added")
-  complexity      String   @default("Medium")
-  intervention    String   @default("training")
-  priority        String   @default("Medium")
-  notes           String   @default("") @db.Text
-  order           Int      @default(0)
+  task         String @db.Text
+  audience     String @default("")
+  source       String @default("ID-added")
+  complexity   String @default("Medium")
+  intervention String @default("training")
+  priority     String @default("Medium")
+  notes        String @default("") @db.Text
+  order        Int    @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -529,21 +559,21 @@ model AnalysisTask {
 }
 
 model TaskAnalysis {
-  id        String @id @default(cuid())
-  pageId    String @unique
-  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  pageId String @unique
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   // Optional upstream links
-  objectiveId    String?
-  objective      Objective? @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
-  sourceTaskId   String?
+  objectiveId  String?
+  objective    Objective? @relation(fields: [objectiveId], references: [id], onDelete: SetNull)
+  sourceTaskId String?
 
   // Mode
-  analysisType   TaskAnalysisType @default(PROCEDURAL)
+  analysisType TaskAnalysisType @default(PROCEDURAL)
 
   // Task identity
-  taskName       String @default("")
-  taskGoal       String @default("") @db.Text
+  taskName String @default("")
+  taskGoal String @default("") @db.Text
 
   // Learner context (standalone or pre-populated from NA)
   audienceRole           String @default("")
@@ -554,11 +584,11 @@ model TaskAnalysis {
   dataSource             Json   @default("{}")
 
   // Priority scoring (1-3)
-  criticalityScore   Int?
-  frequencyScore     Int?
-  difficultyScore    Int?
-  universalityScore  Int?
-  feasibilityScore   Int?
+  criticalityScore  Int?
+  frequencyScore    Int?
+  difficultyScore   Int?
+  universalityScore Int?
+  feasibilityScore  Int?
 
   // Steps
   steps ProceduralStep[]
@@ -573,19 +603,19 @@ model TaskAnalysis {
 }
 
 model ProceduralStep {
-  id               String @id @default(cuid())
-  taskAnalysisId   String
-  taskAnalysis     TaskAnalysis @relation(fields: [taskAnalysisId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  taskAnalysisId String
+  taskAnalysis   TaskAnalysis @relation(fields: [taskAnalysisId], references: [id], onDelete: Cascade)
 
-  stepNumber       Int
-  description      String @db.Text
-  isDecisionPoint  Boolean @default(false)
-  branchCondition  String? @db.Text
-  commonErrors     String? @db.Text
-  cues             String? @db.Text
-  toolsRequired    String?
+  stepNumber         Int
+  description        String              @db.Text
+  isDecisionPoint    Boolean             @default(false)
+  branchCondition    String?             @db.Text
+  commonErrors       String?             @db.Text
+  cues               String?             @db.Text
+  toolsRequired      String?
   instructionalEvent InstructionalEvent?
-  notes            String? @db.Text
+  notes              String?             @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -615,19 +645,19 @@ model Storyboard {
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   // Page-level metadata
-  targetAudience     String   @default("")
+  targetAudience     String           @default("")
   status             StoryboardStatus @default(DRAFT)
-  linkedObjectiveIds String[] @default([])
-  version            Int      @default(1)
+  linkedObjectiveIds String[]         @default([])
+  version            Int              @default(1)
 
   // Course information header fields
-  title           String @default("")
-  duration        String @default("")
-  deliveryMethod  String @default("eLearning")
+  title          String @default("")
+  duration       String @default("")
+  deliveryMethod String @default("eLearning")
 
   // Design rationale
-  designApproach        String?    @db.Text
-  mediaSelectionNotes   String?    @db.Text
+  designApproach      String? @db.Text
+  mediaSelectionNotes String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -697,7 +727,7 @@ model Task {
   description   String?
   status        TaskStatus @default(TODO)
   priority      Priority   @default(MEDIUM)
-  courseId       String
+  courseId      String
   createdById   String
   assignedToId  String?
   dueDate       DateTime?
@@ -705,10 +735,10 @@ model Task {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  course       Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdBy    User         @relation(fields: [createdById], references: [id])
-  assignedTo   User?        @relation("TaskAssignee", fields: [assignedToId], references: [id])
-  deliverable  Deliverable? @relation(fields: [deliverableId], references: [id])
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  assignedTo  User?        @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  deliverable Deliverable? @relation(fields: [deliverableId], references: [id])
 
   @@map("tasks")
 }
@@ -732,77 +762,78 @@ model Objective {
   title       String
   description String     @db.Text
   bloomLevel  BloomLevel
-  courseId     String
+  courseId    String
   tags        String[]
 
   // Mager's ABCD components
-  condition      String?    @db.Text
-  criteria       String?    @db.Text
+  condition String? @db.Text
+  criteria  String? @db.Text
 
   // Wizard ABCD extensions
-  audience           String?    @db.Text
+  audience           String?             @db.Text
   verb               String?
   bloomKnowledge     BloomKnowledgeType?
-  freeformText       String?    @db.Text
+  freeformText       String?             @db.Text
   objectivePriority  ObjectivePriority?
-  requiresAssessment Boolean    @default(false)
-  wiifm              String?    @db.Text
+  requiresAssessment Boolean             @default(false)
+  wiifm              String?             @db.Text
   linkedTriageItemId String?
-  sortOrder          Int        @default(0)
+  sortOrder          Int                 @default(0)
 
   // External taxonomy mapping
   externalId     String?
   externalSource String?
 
   // Design decision capture
-  rationale      String?    @db.Text
-  aiGenerated    Boolean    @default(false)
-  aiReasoning    String?    @db.Text
+  rationale   String? @db.Text
+  aiGenerated Boolean @default(false)
+  aiReasoning String? @db.Text
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  course         Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course           Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
   linkedTriageItem TriageItem? @relation(fields: [linkedTriageItemId], references: [id], onDelete: SetNull)
 
   // Explicit relationships for adaptive engine consumption
   taskAnalyses    TaskAnalysis[]
   taskLinks       ObjectiveTaskLink[]
   assessmentLinks ObjectiveAssessmentLink[]
+  jobAids         JobAid[]
 
   @@index([externalId])
   @@map("objectives")
 }
 
 model AssessmentItem {
-  id            String          @id @default(cuid())
-  courseId       String
-  type          AssessmentType
+  id       String         @id @default(cuid())
+  courseId String
+  type     AssessmentType
 
   // Content
-  stem          String          @db.Text
+  stem          String @db.Text
   options       Json?
   correctAnswer Json?
   feedback      Json?
 
   // Classification
-  bloomLevel    BloomLevel
-  difficulty    Int             @default(2)
+  bloomLevel BloomLevel
+  difficulty Int        @default(2)
 
   // External mapping
-  externalId    String?
+  externalId String?
 
   // Design decisions
-  rationale     String?         @db.Text
-  aiGenerated   Boolean         @default(false)
-  aiReasoning   String?         @db.Text
+  rationale   String? @db.Text
+  aiGenerated Boolean @default(false)
+  aiReasoning String? @db.Text
 
-  order         Int             @default(0)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  course        Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  objectives    ObjectiveAssessmentLink[]
+  course     Course                    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  objectives ObjectiveAssessmentLink[]
 
   @@index([courseId])
   @@index([courseId, bloomLevel])
@@ -810,28 +841,28 @@ model AssessmentItem {
 }
 
 model ObjectiveTaskLink {
-  id             String       @id @default(cuid())
+  id             String  @id @default(cuid())
   objectiveId    String
   learningTaskId String
   relationship   String?
 
-  objective      Objective    @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
-  learningTask   LearningTask @relation(fields: [learningTaskId], references: [id], onDelete: Cascade)
+  objective    Objective    @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  learningTask LearningTask @relation(fields: [learningTaskId], references: [id], onDelete: Cascade)
 
   @@unique([objectiveId, learningTaskId])
   @@map("objective_task_links")
 }
 
 model ObjectiveAssessmentLink {
-  id                 String         @id @default(cuid())
+  id                 String     @id @default(cuid())
   objectiveId        String
   assessmentItemId   String
   bloomLevelAssessed BloomLevel
-  isAligned          Boolean        @default(true)
+  isAligned          Boolean    @default(true)
   alignmentNotes     String?
 
-  objective          Objective          @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
-  assessmentItem     AssessmentItem     @relation(fields: [assessmentItemId], references: [id], onDelete: Cascade)
+  objective      Objective      @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  assessmentItem AssessmentItem @relation(fields: [assessmentItemId], references: [id], onDelete: Cascade)
 
   @@unique([objectiveId, assessmentItemId])
   @@map("objective_assessment_links")
@@ -853,35 +884,35 @@ enum DesignStrategyStatus {
 }
 
 model DesignStrategy {
-  id        String                @id @default(cuid())
-  courseId   String                @unique  // One design strategy per course
+  id       String @id @default(cuid())
+  courseId String @unique // One design strategy per course
 
   // Business Alignment (populated from Needs Analysis if available)
-  businessChallenge   String?     @db.Text
-  businessGoal        String?     @db.Text
+  businessChallenge String? @db.Text
+  businessGoal      String? @db.Text
 
   // Solution Breakdown
-  trainingPercent     Int?        // e.g. 60 means training is 60% of solution
-  solutionComponents  Json?       // Array of { component: string, percentage: number, description?: string }
+  trainingPercent    Int? // e.g. 60 means training is 60% of solution
+  solutionComponents Json? // Array of { component: string, percentage: number, description?: string }
 
   // Evaluation Strategy (Kirkpatrick)
-  evaluationPlan      Json?       // { level1?: string, level2?: string, level3?: string, level4?: string }
+  evaluationPlan Json? // { level1?: string, level2?: string, level3?: string, level4?: string }
 
   // Objectives snapshot (denormalized at generation time)
-  objectivesSnapshot  Json?       // Array of objective summaries at time of generation
+  objectivesSnapshot Json? // Array of objective summaries at time of generation
 
   // Lessons / curriculum structure stubs
-  lessonStubs         Json?       // Array of { title: string, objectiveIds: string[], duration?: string, format?: string }
+  lessonStubs Json? // Array of { title: string, objectiveIds: string[], duration?: string, format?: string }
 
   // Communication plan stubs
-  communicationPlan   Json?       // Array of { audience: string, message: string, timing?: string, channel?: string }
+  communicationPlan Json? // Array of { audience: string, message: string, timing?: string, channel?: string }
 
-  status              DesignStrategyStatus @default(DRAFT)
+  status DesignStrategyStatus @default(DRAFT)
 
-  generatedAt         DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  generatedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  course              Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@map("design_strategies")
 }
@@ -900,18 +931,18 @@ enum ObjectivePriority {
 }
 
 model Deliverable {
-  id          String             @id @default(cuid())
+  id          String            @id @default(cuid())
   title       String
   description String?
   type        DeliverableType
-  status      DeliverableStatus  @default(PLANNED)
-  courseId     String
+  status      DeliverableStatus @default(PLANNED)
+  courseId    String
   dueDate     DateTime?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
-  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  tasks   Task[]
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tasks  Task[]
 
   @@map("deliverables")
 }
@@ -939,33 +970,33 @@ enum DeliverableStatus {
 
 // LearningBlueprint Models
 model LearningBlueprint {
-  id              String   @id @default(uuid())
-  courseId         String
-  title           String
-  audience        String
-  deliveryMode    String
+  id                String   @id @default(uuid())
+  courseId          String
+  title             String
+  audience          String
+  deliveryMode      String
   timeBudgetMinutes Int
-  status          String   @default("draft")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  status            String   @default("draft")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  performanceNeeds PerformanceNeed[]
-  objectives       BlueprintObjective[]
-  constraints      Constraint[]
+  course            Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  performanceNeeds  PerformanceNeed[]
+  objectives        BlueprintObjective[]
+  constraints       Constraint[]
   activityInstances ActivityInstance[]
 
   @@map("learning_blueprints")
 }
 
 model PerformanceNeed {
-  id              String   @id @default(uuid())
-  blueprintId     String
-  problemStatement String  @db.Text
-  desiredBehavior String   @db.Text
-  consequences    String   @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(uuid())
+  blueprintId      String
+  problemStatement String   @db.Text
+  desiredBehavior  String   @db.Text
+  consequences     String   @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   blueprint LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
 
@@ -974,29 +1005,29 @@ model PerformanceNeed {
 
 // Blueprint-level Objective (separate from Course-level Objective)
 model BlueprintObjective {
-  id                String   @id @default(uuid())
-  blueprintId       String
-  text              String   @db.Text
-  bloomLevel        BloomLevel
-  priority          BlueprintPriority
+  id                 String            @id @default(uuid())
+  blueprintId        String
+  text               String            @db.Text
+  bloomLevel         BloomLevel
+  priority           BlueprintPriority
   requiresAssessment Boolean
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
-  blueprint         LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  blueprint         LearningBlueprint  @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
   activityInstances ActivityInstance[]
 
   @@map("blueprint_objectives")
 }
 
 model Constraint {
-  id          String   @id @default(uuid())
+  id          String         @id @default(uuid())
   blueprintId String
   type        ConstraintType
-  description String   @db.Text
+  description String         @db.Text
   value       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   blueprint LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
 
@@ -1004,14 +1035,14 @@ model Constraint {
 }
 
 model ActivityPattern {
-  id                   String   @id @default(uuid())
-  name                 String
-  description          String   @db.Text
-  bestForBloomLevels   String
-  references           String?  @db.Text
+  id                     String   @id @default(uuid())
+  name                   String
+  description            String   @db.Text
+  bestForBloomLevels     String
+  references             String?  @db.Text
   typicalDurationMinutes Int?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   activityInstances ActivityInstance[]
 
@@ -1019,19 +1050,19 @@ model ActivityPattern {
 }
 
 model ActivityInstance {
-  id            String   @id @default(uuid())
-  blueprintId   String
-  objectiveId   String
-  patternId     String
-  positionIndex Int
-  notes         String?  @db.Text
-  learnerDeliverable String? @db.Text
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  blueprintId        String
+  objectiveId        String
+  patternId          String
+  positionIndex      Int
+  notes              String?  @db.Text
+  learnerDeliverable String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  blueprint LearningBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  blueprint LearningBlueprint  @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
   objective BlueprintObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
-  pattern   ActivityPattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  pattern   ActivityPattern    @relation(fields: [patternId], references: [id], onDelete: Cascade)
 
   @@map("activity_instances")
 }
@@ -1039,7 +1070,7 @@ model ActivityInstance {
 // Stakeholder Needs Analysis Models
 enum TrainingType {
   PERFORMANCE_PROBLEM
-  TOOL_AND_PROCESS   // was NEW_SYSTEM
+  TOOL_AND_PROCESS // was NEW_SYSTEM
   COMPLIANCE
   ROLE_CHANGE
 }
@@ -1052,21 +1083,35 @@ enum SubmissionStatus {
   REVISION_REQUESTED
 }
 
+enum JobAidType {
+  CHECKLIST
+  REFERENCE_CARD
+  STEP_GUIDE
+  DECISION_TREE
+  OTHER
+}
+
+enum JobAidStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+}
+
 model StakeholderAccessToken {
-  id               String    @id @default(cuid())
-  token            String    @unique
+  id               String                 @id @default(cuid())
+  token            String                 @unique
   workspaceId      String
-  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace        Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   trainingType     TrainingType
   createdById      String
-  createdBy        User      @relation("TokenCreator", fields: [createdById], references: [id])
-  isActive         Boolean   @default(true)
+  createdBy        User                   @relation("TokenCreator", fields: [createdById], references: [id])
+  isActive         Boolean                @default(true)
   expiresAt        DateTime?
   stakeholderName  String?
   stakeholderEmail String?
   submission       StakeholderSubmission?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 
   @@index([token])
   @@index([workspaceId])
@@ -1074,22 +1119,22 @@ model StakeholderAccessToken {
 }
 
 model StakeholderSubmission {
-  id             String           @id @default(cuid())
-  tokenId        String           @unique
-  token          StakeholderAccessToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
-  workspaceId    String
-  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  trainingType   TrainingType
-  status         SubmissionStatus @default(DRAFT)
-  submittedAt    DateTime?
-  reviewedAt     DateTime?
-  reviewedById   String?
-  reviewedBy     User?            @relation("SubmissionReviewer", fields: [reviewedById], references: [id])
-  revisionNotes  String?          @db.Text
-  responses      StakeholderResponse[]
-  changeLogs     StakeholderChangeLog[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id            String                 @id @default(cuid())
+  tokenId       String                 @unique
+  token         StakeholderAccessToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  workspaceId   String
+  workspace     Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  trainingType  TrainingType
+  status        SubmissionStatus       @default(DRAFT)
+  submittedAt   DateTime?
+  reviewedAt    DateTime?
+  reviewedById  String?
+  reviewedBy    User?                  @relation("SubmissionReviewer", fields: [reviewedById], references: [id])
+  revisionNotes String?                @db.Text
+  responses     StakeholderResponse[]
+  changeLogs    StakeholderChangeLog[]
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
 
   @@index([workspaceId])
   @@index([status])
@@ -1097,14 +1142,14 @@ model StakeholderSubmission {
 }
 
 model StakeholderResponse {
-  id           String    @id @default(cuid())
+  id           String                @id @default(cuid())
   submissionId String
   submission   StakeholderSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   questionId   String
-  value        String    @db.Text
+  value        String                @db.Text
   updatedBy    String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
 
   @@unique([submissionId, questionId])
   @@index([submissionId])
@@ -1112,14 +1157,14 @@ model StakeholderResponse {
 }
 
 model StakeholderChangeLog {
-  id            String    @id @default(cuid())
+  id            String                @id @default(cuid())
   submissionId  String
   submission    StakeholderSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   questionId    String
   changedBy     String
-  previousValue String?   @db.Text
-  newValue      String    @db.Text
-  changedAt     DateTime  @default(now())
+  previousValue String?               @db.Text
+  newValue      String                @db.Text
+  changedAt     DateTime              @default(now())
 
   @@index([submissionId])
   @@index([submissionId, questionId])
@@ -1128,21 +1173,21 @@ model StakeholderChangeLog {
 
 // Content Assets (workspace-scoped file storage for images)
 model ContentAsset {
-  id             String   @id @default(cuid())
-  workspaceId    String
-  uploadedById   String
-  filename       String
-  storageKey     String
-  mimeType       String
-  fileSizeBytes  Int
-  alt            String?
-  tags           String[] @default([])
-  sourceContext  String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  workspaceId   String
+  uploadedById  String
+  filename      String
+  storageKey    String
+  mimeType      String
+  fileSizeBytes Int
+  alt           String?
+  tags          String[] @default([])
+  sourceContext String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  uploadedBy     User      @relation("UserAssets", fields: [uploadedById], references: [id])
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploadedBy User      @relation("UserAssets", fields: [uploadedById], references: [id])
 
   @@index([workspaceId])
   @@index([workspaceId, mimeType])
@@ -1151,17 +1196,17 @@ model ContentAsset {
 
 // Learning Objectives Wizard — Triage + Subtask models
 model TriageItem {
-  id         String   @id @default(cuid())
-  courseId    String
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id         String      @id @default(cuid())
+  courseId   String
+  course     Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
   text       String
-  column     String   @default("must")
-  source     String   @default("NA")
-  sortOrder  Int      @default(0)
+  column     String      @default("must")
+  source     String      @default("NA")
+  sortOrder  Int         @default(0)
   subTasks   SubTask[]
   objectives Objective[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@index([courseId])
   @@map("triage_items")

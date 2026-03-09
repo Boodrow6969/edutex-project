@@ -1,5 +1,49 @@
 # EDUTex Changelog
 
+## [0.16.0] - 2026-03-09
+
+### Added
+- JobAid model: JobAidType enum (CHECKLIST, REFERENCE_CARD, STEP_GUIDE, DECISION_TREE, OTHER), JobAidStatus enum (DRAFT, REVIEW, APPROVED)
+- CRUD API: /api/courses/[courseId]/job-aids (GET, POST) and /api/courses/[courseId]/job-aids/[jobAidId] (GET, PUT, DELETE)
+- JobAidsView component: list/detail split panel, type and status badge toggles, autosave, asset attachment, objective and task linking
+- Content Asset attachment support (up to 5 assets, reuses existing AssetAttachment component)
+- Linked Objective dropdown (FK to Objective model)
+- Linked Task dropdown (plain string reference to TaskAnalysis — no FK, consistent with sourceTaskId pattern)
+
+### Fixed
+- Objective autosave confirmed working (STATUS.md entry was stale — implemented in ObjectivesWizard.tsx lines 131–236)
+- ENH-027 confirmed resolved (NA panels already pull from stakeholder submissions via StakeholderReference toggle)
+
+### Changed
+- JobAid linkedTaskId stored as plain String? with no FK constraint — migration 20260309205548_remove_job_aid_task_fk drops the original FK
+
+---
+
+## [0.15.0] - 2026-03-08
+
+### Added
+- Shared ResponseValue renderer (components/stakeholder/ResponseValue.tsx) — single source of truth for rendering all field types (REPEATING_TABLE, MULTI_SELECT, SCALE, SHORT_TEXT, LONG_TEXT, DATE_WITH_TEXT) across all NA display surfaces
+- Three new training type tab configs in objectives/constants.ts — PERFORMANCE_PROBLEM_TABS, COMPLIANCE_TABS, ROLE_CHANGE_TABS with correct sourceSections
+
+### Changed
+- Renamed training type NEW_SYSTEM → TOOL_AND_PROCESS throughout codebase (schema, migration, 11 source files)
+- Display label updated: "New System" → "Tool & Process Training"
+- SYS_02 deleted — capabilities question removed as redundant with task analysis questions
+- SYS_01 and SYS_04 idNotes and stakeholderGuidance rewritten to cover tools, software, systems, and processes
+- Section name "About the System" → "Tool & Process Overview" in newSystem.ts
+- Slide-over system tab title → "What the Tool or Process Does"
+- buildNASummary() now uses TRAINING_TYPE_LABELS for display (not string transformation)
+- Audience JSON in Context & Gap Check now parses REPEATING_TABLE data and extracts role names
+
+### Fixed
+- BUG-016: REPEATING_TABLE fields now render as formatted tables in SubmissionDetailPanel
+- BUG-017: Conditional questions now filter correctly in SubmissionDetailPanel
+- Training type label in Context & Gap Check showed raw enum value
+- Target audience showed raw JSON in Context & Gap Check
+- AudienceProfiles.tsx and NASlideOver.tsx now use shared ResponseValue renderer
+
+---
+
 ## v0.14.0 — February 28, 2026: Learning Objectives Wizard + Task Analysis UI
 
 ### Learning Objectives Wizard — New Feature
